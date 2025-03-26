@@ -176,7 +176,7 @@ class GetCredentialActivity : FragmentActivity() {
                         Json.decodeFromString<DigitalCredentialRequestOptions>(it.requestJson)
                     if (entryId == "ISSUANCE") {
                         val openId4VPRequest = OpenId4VP(
-                            digitalCredentialRequestOptions.providers[0].request,
+                            digitalCredentialRequestOptions.requests[0].data,
                             computeClientId(request.callingAppInfo)
                         )
                         startActivityForResult(
@@ -314,13 +314,13 @@ class GetCredentialActivity : FragmentActivity() {
 
     @Serializable
     data class DigitalCredentialRequestOptions(
-        val providers: List<DigitalCredentialRequest>
+        val requests: List<DigitalCredentialRequest>
     )
 
     @Serializable
     data class DigitalCredentialRequest(
         val protocol: String,
-        val request: String
+        val data: String
     )
 
     private fun processDigitalCredentialOption(
@@ -337,7 +337,7 @@ class GetCredentialActivity : FragmentActivity() {
             "digitalCredentialRequestOptions $digitalCredentialRequestOptions"
         )
 
-        val provider = digitalCredentialRequestOptions.providers[providerIdx]
+        val provider = digitalCredentialRequestOptions.requests[providerIdx]
 
         Log.i(
             "GetCredentialActivity",
@@ -345,7 +345,7 @@ class GetCredentialActivity : FragmentActivity() {
         )
         when (provider.protocol) {
             "openid4vp" -> {
-                val openId4VPRequest = OpenId4VP(provider.request, computeClientId(request!!.callingAppInfo))
+                val openId4VPRequest = OpenId4VP(provider.data, computeClientId(request!!.callingAppInfo))
                 Log.i("GetCredentialActivity", "nonce ${openId4VPRequest.nonce}")
                 val matchedCredential =
                     openId4VPRequest.performQueryOnCredential(selectedCredential)

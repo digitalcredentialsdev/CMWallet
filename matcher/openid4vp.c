@@ -47,7 +47,7 @@ int main() {
     printf("Request JSON %s\n", cJSON_Print(dc_request));
 
     // Parse each top level request looking for OpenID4VP requests
-    cJSON* requests = cJSON_GetObjectItem(dc_request, "providers"); // TODO: This has changed in the latest spec
+    cJSON* requests = cJSON_GetObjectItem(dc_request, "requests");
     int requests_size = cJSON_GetArraySize(requests);
 
     int matched = 0;
@@ -61,7 +61,7 @@ int main() {
         char* protocol = cJSON_GetStringValue(cJSON_GetObjectItem(request, "protocol"));
         if (strcmp(protocol, PROTOCOL_OPENID4VP_1_0) == 0) {
             // We have an OpenID4VP request
-            cJSON* data = cJSON_GetObjectItem(request, "request"); // TODO: This has changed in the latest spec
+            cJSON* data = cJSON_GetObjectItem(request, "data");
 
             // TODO: Won't need to do this conversion in the latest spec.
             char* data_json_string = cJSON_GetStringValue(data);
