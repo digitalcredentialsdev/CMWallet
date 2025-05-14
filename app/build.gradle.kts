@@ -13,8 +13,8 @@ android {
     defaultConfig {
         applicationId = "com.credman.cmwallet"
         minSdk = 28
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 20250514
+        versionName = "2025.05.14"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
