@@ -90,7 +90,7 @@ data class PnvTokenRegistry(
     companion object {
         const val VCT_GET_PHONE_NUMBER = "number-verification/device-phone-number/ts43"
         const val VCT_VERIFY_PHONE_NUMBER = "number-verification/verify/ts43"
-        const val PNV_CRED_FORMAT = "dc+sd-jwt-pnv"
+        const val PNV_CRED_FORMAT = "dc-authorization+sd-jwt"
 
         internal const val CREDENTIALS = "credentials"
         internal const val ID = "id"
@@ -334,7 +334,7 @@ fun maybeHandlePnv(
     val deviceTelModuleJwt = createJWTES256(
         header = buildJsonObject {
             put("alg", "ES256")
-            put("typ", "dc+sd-jwt-pnv")
+            put("typ", "dc-authorization+sd-jwt")
             put("x5c", buildJsonArray {
                 add("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE+TdTS2XLm+GzoFnwcBfDBzxpHyfA5t9NHIqGravV6L2i4BttORRF1DrjTBDELi265/KIjgtJ05zSFZ/jrUpkmw==")
             })

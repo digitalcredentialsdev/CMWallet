@@ -39,7 +39,7 @@ cJSON* MatchCredential(cJSON* credential, cJSON* credential_store) {
     cJSON* aggregator_policy_url = NULL;
     cJSON* aggregator_policy_text = NULL;
     if (meta != NULL) {
-        if (strcmp(format, "dc+sd-jwt-pnv") == 0) {
+        if (strcmp(format, "dc-authorization+sd-jwt") == 0) {
             cJSON* vct_values_obj = cJSON_GetObjectItemCaseSensitive(meta, "vct_values");
             cJSON* cred_candidates = candidates;
             candidates = cJSON_CreateArray();

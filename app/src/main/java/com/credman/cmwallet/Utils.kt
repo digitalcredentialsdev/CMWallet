@@ -214,6 +214,7 @@ fun jweSerialization(recipientKeyJwk: JSONObject, plainText: String): String {
     header.put("apu", partyUInfo.toBase64UrlNoPadding())
     header.put("apv", partyVInfo.toBase64UrlNoPadding())
     header.put("alg", "ECDH-ES")
+    header.put("kid", kid)
     header.put("enc", "A128GCM")
     header.put("epk", JSONObject(kp.public.toJWK().toString()))
     val headerEncoded = header.toString().toByteArray().toBase64UrlNoPadding()
