@@ -387,7 +387,7 @@ fun maybeHandlePnv(
     val tempTokenDcSdJwt = "${deviceTelModuleJwt}~${kbJwt}"
 
     val vpToken = JSONObject().apply {
-        put(dcqlCredId, tempTokenDcSdJwt)
+        put(dcqlCredId, JSONArray().put(tempTokenDcSdJwt))
     }
     val response = openId4VPRequest.generateResponse(vpToken)
     Log.d(PNV_TAG, "Returning $response")
