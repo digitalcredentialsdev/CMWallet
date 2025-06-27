@@ -169,9 +169,9 @@ data class PnvTokenRegistry(
                 val credJson = JSONObject()
                 credJson.put(SHARED_ATTRIBUTE_DISPLAY_NAME, item.phoneNumberAttributeDisplayName)
                 if (item.supportedAggregatorIssNames != null) {
-                    val issAllowlist = JSONObject()
+                    val issAllowlist = JSONArray()
                     for (issName in item.supportedAggregatorIssNames) {
-                        issAllowlist.put(issName, JSONObject())
+                        issAllowlist.put(issName)
                     }
                     credJson.put(ISS_ALLOWLIST, issAllowlist)
                 }

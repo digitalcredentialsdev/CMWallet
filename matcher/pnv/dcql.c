@@ -66,7 +66,7 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
             {
                 return matched_credentials;
             }
-            char *iss_value = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(cred_auth_json, "iss"));
+            cJSON *iss_value = cJSON_GetObjectItemCaseSensitive(cred_auth_json, "iss");
 
             cJSON *vct_values_obj = cJSON_GetObjectItemCaseSensitive(meta, "vct_values");
             cJSON *cred_candidates = candidates;
@@ -83,9 +83,15 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
                     {
                         cJSON_AddItemReferenceToArray(candidates, curr_candidate);
                     }
-                    else if (cJSON_GetObjectItemCaseSensitive(iss_allowlist, iss_value) != NULL)
-                    {
-                        cJSON_AddItemReferenceToArray(candidates, curr_candidate);
+                    else
+                    {   
+                        cJSON *allowed_iss;
+                        cJSON_ArrayForEach(allowed_iss, iss_allowlist) {
+                                if (cJSON_Compare(allowed_iss, iss_value, cJSON_True)) {
+                                    cJSON_AddItemReferenceToArray(candidates, curr_candidate);
+                                    break;
+                                }
+                        }
                     }
                 }
             }
