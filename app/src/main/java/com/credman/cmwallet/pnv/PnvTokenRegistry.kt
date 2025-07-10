@@ -337,9 +337,10 @@ fun maybeHandlePnv(
     val encryptedTempTokenJwe = jweSerialization(aggregatorEncKey, tempTokenJson.toString())
 
     val tmpDeviceTelModuleKey =
-        "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg6ef4-enmfQHRWUW40-Soj3aFB0rsEOp3tYMW-HJPBvChRANCAAT5N1NLZcub4bOgWfBwF8MHPGkfJ8Dm300cioatq9XovaLgG205FEXUOuNMEMQuLbrn8oiOC0nTnNIVn-OtSmSb"
+        "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgDjyeClEmdOMYvM4Z_Na6LMFBBCQVccbvFY8viKrKe3ihRANCAATsIpdWwRMyeKgnO0dpDqkuuiwXCsS4Hall8XapYdfjbZbjda1XEmoTkAh7VUFocfUGUSTXfct5-YtspHSI-b5Q"
     val deviceTelModulePrivateKey =
         loadECPrivateKey(Base64.decode(tmpDeviceTelModuleKey, Base64.URL_SAFE)) as ECPrivateKey
+
     val deviceKp = getDeviceKey()
 
     val deviceTelModuleJwt = createJWTES256(
@@ -347,7 +348,21 @@ fun maybeHandlePnv(
             put("alg", "ES256")
             put("typ", "dc-authorization+sd-jwt")
             put("x5c", buildJsonArray {
-                add("MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE+TdTS2XLm+GzoFnwcBfDBzxpHyfA5t9NHIqGravV6L2i4BttORRF1DrjTBDELi265/KIjgtJ05zSFZ/jrUpkmw==")
+                add("MIICpTCCAkugAwIBAgIUBe8Q81IQCydA1wJopRPS0mV3qSEwCgYIKoZIzj0EAwIw" +
+                        "eDELMAkGA1UEBhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExFjAUBgNVBAcMDU1v" +
+                        "dW50YWluIFZpZXcxGzAZBgNVBAoMEkV4YW1wbGUgQWdncmVnYXRvcjEfMB0GA1UE" +
+                        "AwwWZXhhbXBsZS1hZ2dyZWdhdG9yLmRldjAeFw0yNTA3MTAyMzA5MjdaFw0zNTA2" +
+                        "MjgyMzA5MjdaMHgxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYw" +
+                        "FAYDVQQHDA1Nb3VudGFpbiBWaWV3MRswGQYDVQQKDBJFeGFtcGxlIEFnZ3JlZ2F0" +
+                        "b3IxHzAdBgNVBAMMFmV4YW1wbGUtYWdncmVnYXRvci5kZXYwWTATBgcqhkjOPQIB" +
+                        "BggqhkjOPQMBBwNCAATsIpdWwRMyeKgnO0dpDqkuuiwXCsS4Hall8XapYdfjbZbj" +
+                        "da1XEmoTkAh7VUFocfUGUSTXfct5+YtspHSI+b5Qo4GyMIGvMB0GA1UdDgQWBBQr" +
+                        "uSyYfuqtU1z+WuBc0/oLWzQjdTAfBgNVHSMEGDAWgBQruSyYfuqtU1z+WuBc0/oL" +
+                        "WzQjdTAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIHgDApBgNVHRIEIjAg" +
+                        "hh5odHRwczovL2V4YW1wbGUtYWdncmVnYXRvci5jb20wIQYDVR0RBBowGIIWZXhh" +
+                        "bXBsZS1hZ2dyZWdhdG9yLmNvbTAKBggqhkjOPQQDAgNIADBFAiAgyzgtUeHlK8Y0" +
+                        "57U96T6vDf8GC5lqVAsiw2WeCuzpAAIhAOiBuSccsgYNTqBVsVo6O0rAqXmemMBi" +
+                        "a1C7vhJEvtaX")
             })
         },
         payload = buildJsonObject {
