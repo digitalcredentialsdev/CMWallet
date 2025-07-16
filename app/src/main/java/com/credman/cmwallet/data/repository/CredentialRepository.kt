@@ -119,7 +119,7 @@ class CredentialRepository {
         val icon: ByteArray, // Entry icon for display
         val title: String, // Entry subtitle for display
         val subtitle: String?, // Entry subtitle for display
-        val issuerAllowlist: List<String>,
+        val issuerAllowlist: List<String>?,
     ) {
         fun toRegistryDatabase(): ByteArray {
             val out = ByteArrayOutputStream()
@@ -144,11 +144,13 @@ class CredentialRepository {
                     } // Hardcoded for now
                     put(ICON, iconJson)
                 })
-                val capabilities = JSONObject()
-                for (iss in issuerAllowlist) {
-                    capabilities.put(iss, JSONObject())
+                if (issuerAllowlist != null) {
+                    val capabilities = JSONObject()
+                    for (iss in issuerAllowlist) {
+                        capabilities.put(iss, JSONObject())
+                    }
+                    put("capabilities", capabilities)
                 }
-                put("capabilities", capabilities)
             }
             out.write(json.toString().toByteArray())
             return out.toByteArray()

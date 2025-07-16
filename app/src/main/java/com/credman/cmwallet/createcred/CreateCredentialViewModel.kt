@@ -208,7 +208,7 @@ class CreateCredentialViewModel : ViewModel() {
                 require(digitalCredentialCreateRequest.has("protocol")) { "request json missing required field protocol" }
                 require(digitalCredentialCreateRequest.has("data")) { "request json missing required field data" }
 
-                if (setOf("openid4vci1.0", "openid4vci").contains(digitalCredentialCreateRequest.getString("protocol"))) {
+                if (setOf("openid4vci1.0", "openid4vci", "openid4vci-v1").contains(digitalCredentialCreateRequest.getString("protocol"))) {
                     openId4VCI =
                         OpenId4VCI(digitalCredentialCreateRequest.getJSONObject("data").toString())
                     // Figure out auth server

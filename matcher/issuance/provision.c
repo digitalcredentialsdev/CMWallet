@@ -10,6 +10,7 @@
 #include "launcher_icon.h"
 
 #define PROTOCOL_OPENID4VCI "openid4vci1.0"
+#define PROTOCOL_OPENID4VCI_V1 "openid4vci-v1"
 
 cJSON* GetDCRequestJson() {
     uint32_t request_size;
@@ -60,13 +61,13 @@ int main() {uint32_t credentials_size;
     for(int i=0; i<requests_size; i++) {
         cJSON* request = cJSON_GetArrayItem(requests, i);
         char* protocol = cJSON_GetStringValue(cJSON_GetObjectItem(request, "protocol"));
-        if (strcmp(protocol, PROTOCOL_OPENID4VCI) == 0) {
+        if (strcmp(protocol, PROTOCOL_OPENID4VCI) == 0 || strcmp(protocol, PROTOCOL_OPENID4VCI_V1) == 0) {
             // We have an OpenID4VCI request
             cJSON* cred_offer = cJSON_GetObjectItem(request, "data");
             cJSON* credential_issuer = cJSON_GetObjectItem(cred_offer, "credential_issuer");
         
             cJSON* capabilities = cJSON_GetObjectItem(creds, "capabilities");
-            if(cJSON_HasObjectItem(capabilities, cJSON_GetStringValue(credential_issuer))) {
+            if(capabilities == NULL || cJSON_HasObjectItem(capabilities, cJSON_GetStringValue(credential_issuer))) {
                 cJSON* display = cJSON_GetObjectItem(creds, "display");
                 cJSON* icon = cJSON_GetObjectItem(display, "icon");
                 int icon_start_int = 0;

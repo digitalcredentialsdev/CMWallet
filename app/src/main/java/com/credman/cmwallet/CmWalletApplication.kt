@@ -179,7 +179,7 @@ class CmWalletApplication : Application() {
             icon = iconBuffer.toByteArray(),
             title = resources.getString(R.string.app_name),
             subtitle = "Save your document to CMWallet",
-            issuerAllowlist = listOf("https://digital-credentials.dev", "http://localhost:8080")
+            issuerAllowlist = null
         )
 
         return data.toRegistryDatabase()

@@ -177,6 +177,6 @@ data class CredentialOffer(
     @SerialName("credential_issuer") val credentialIssuer: String,
     @SerialName("credential_configuration_ids") val credentialConfigurationIds: List<String>,
     @SerialName("grants") val grants: Grants?,
-    @SerialName("issuer_metadata") val issuerMetadata: CredentialIssuerMetadata,
+    @SerialName("credential_issuer_metadata") val issuerMetadata: CredentialIssuerMetadata,
     @SerialName("authorization_server_metadata") val authorizationServerMetadata: OauthAuthorizationServer?
 )
