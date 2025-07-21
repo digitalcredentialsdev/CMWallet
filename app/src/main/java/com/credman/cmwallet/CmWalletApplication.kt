@@ -85,17 +85,6 @@ class CmWalletApplication : Application() {
         applicationScope.launch {
             credentialRepo.credentialRegistryDatabase.collect { credentialDatabase ->
                 Log.i(TAG, "Credentials changed $credentialDatabase")
-                // Oid4vp draft 24
-                // For backward compatibility with Chrome
-                registryManager.registerCredentials(
-                    request = object : RegisterCredentialsRequest(
-                        "com.credman.IdentityCredential",
-                        "openid4vp",
-                        credentialDatabase,
-                        openId4VPDraft24Matcher
-                    ) {}
-                )
-                // In the future, should only register this type
                 registryManager.registerCredentials(
                     request = object : RegisterCredentialsRequest(
                         DigitalCredential.TYPE_DIGITAL_CREDENTIAL,
@@ -104,18 +93,6 @@ class CmWalletApplication : Application() {
                         openId4VPDraft24Matcher
                     ) {}
                 )
-
-                // Oid4vp 1.0 Candidate
-                // For backward compatibility with Chrome
-                registryManager.registerCredentials(
-                    request = object : RegisterCredentialsRequest(
-                        "com.credman.IdentityCredential",
-                        "openid4vp1.0",
-                        credentialDatabase,
-                        openId4VP1_0Matcher
-                    ) {}
-                )
-                // In the future, should only register this type
                 registryManager.registerCredentials(
                     request = object : RegisterCredentialsRequest(
                         DigitalCredential.TYPE_DIGITAL_CREDENTIAL,

@@ -27,7 +27,6 @@ import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.VCT_GET_PHONE_NUMBER
 import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.VCT_VERIFY_PHONE_NUMBER
 import com.credman.cmwallet.toBase64UrlNoPadding
 import com.credman.cmwallet.toJWK
-import io.ktor.util.encodeBase64
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
@@ -43,7 +42,6 @@ import java.security.KeyStore
 import java.security.MessageDigest
 import java.security.interfaces.ECPrivateKey
 import java.time.Instant
-import java.util.Enumeration
 
 /**
  * A phone number verification entry to be registered with the Credential Manager.
@@ -408,10 +406,9 @@ fun maybeHandlePnv(
     Log.d(PNV_TAG, "Returning $response")
 
     return DigitalCredentialResult(
-        responseJsonLegacy = "",
         authenticationTitle = "",
         authenticationSubtitle = null,
-        responseJsonModern = JSONObject().apply {
+        responseJson = JSONObject().apply {
             put("protocol", openId4VPRequest.protocolIdentifier)
             put("data", JSONObject(response))
         }.toString()

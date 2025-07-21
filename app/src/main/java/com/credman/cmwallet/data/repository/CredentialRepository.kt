@@ -90,16 +90,6 @@ class CredentialRepository {
             PnvTokenRegistry.TEST_PNV_2_VERIFY_PHONE_NUMBER
         )
 
-        // For chrome < 138. Should be removed soon
-        registryManager.registerCredentials(
-            request = object : RegisterCredentialsRequest(
-                "com.credman.IdentityCredential",
-                "openid4vp1.0-pnv",
-                PnvTokenRegistry.buildRegistryDatabase(testPhoneNumberTokens),
-                pnvMatcher
-            ) {}
-        )
-        // For native apps and chrome 138+
         registryManager.registerCredentials(
             request = object : RegisterCredentialsRequest(
                 DigitalCredential.TYPE_DIGITAL_CREDENTIAL,
