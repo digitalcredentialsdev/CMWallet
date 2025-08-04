@@ -16,13 +16,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.credman.cmwallet.CmWalletApplication
 import com.credman.cmwallet.CmWalletApplication.Companion.TAG
+import com.credman.cmwallet.CmWalletApplication.Companion.TEST_VCI_CLIENT_ID
 import com.credman.cmwallet.CmWalletApplication.Companion.computeClientId
 import com.credman.cmwallet.data.model.Credential
 import com.credman.cmwallet.data.model.CredentialDisplayData
 import com.credman.cmwallet.data.model.CredentialItem
 import com.credman.cmwallet.data.model.CredentialKeySoftware
 import com.credman.cmwallet.data.room.CredentialDatabaseItem
-import com.credman.cmwallet.getcred.GetCredentialActivity
 import com.credman.cmwallet.getcred.createOpenID4VPResponse
 import com.credman.cmwallet.loadECPrivateKey
 import com.credman.cmwallet.openid4vci.OpenId4VCI
@@ -89,7 +89,7 @@ class CreateCredentialViewModel : ViewModel() {
         Log.d(TAG, "Done")
     }
 
-    fun onCode(code: String) {
+    fun onCode(code: String, redirectUrl: String?) {
         uiState = uiState.copy(authServer = null)
         viewModelScope.launch {
             // Figure out auth server
@@ -102,7 +102,10 @@ class CreateCredentialViewModel : ViewModel() {
             val tokenResponse = openId4VCI.requestTokenFromEndpoint(
                 authServer, TokenRequest(
                     grantType = "authorization_code",
-                    code  =  code
+                    code  =  code,
+                    redirectUri = redirectUrl,
+                    scope = openId4VCI.credentialOffer.credentialConfigurationIds.first(),
+                    codeVerifier = openId4VCI.codeVerifier
                 )
             )
             Log.i(TAG, "tokenResponse $tokenResponse")
@@ -112,17 +115,49 @@ class CreateCredentialViewModel : ViewModel() {
 
     @OptIn(ExperimentalUuidApi::class)
     private suspend fun processToken(tokenResponse: TokenResponse) {
+        val newCredentials = mutableListOf<CredentialItem>()
+        tokenResponse.scopes?.split(" ")?.forEach { scope ->
+            val credentialResponse = openId4VCI.requestCredentialFromEndpoint(
+                accessToken = tokenResponse.accessToken,
+                credentialRequest = CredentialRequest(
+                    credentialConfigurationId = scope,
+                    proof = openId4VCI.createProofJwt(publicKey, privateKey)
+                )
+            )
+            Log.i(TAG, "credentialResponse $credentialResponse")
+            val config = openId4VCI.credentialOffer.issuerMetadata.credentialConfigurationsSupported[scope]!!
+            val display = credentialResponse.display?.firstOrNull()
+            val configDisplay = config.credentialMetadata?.display?.firstOrNull()
+            val newCredentialItem = CredentialItem(
+                id = Uuid.random().toHexString(),
+                config = config,
+                displayData = CredentialDisplayData(
+                    title = display?.name ?: configDisplay?.name ?: "Unknown",
+                    subtitle = display?.description ?: configDisplay?.description,
+                    icon = display?.logo?.uri.imageUriToImageB64()
+                ),
+                credentials = credentialResponse.credentials!!.map {
+                    Credential(
+                        key = CredentialKeySoftware(
+                            publicKey = tmpPublicKey,
+                            privateKey = tmpKey
+                        ),
+                        credential = it.credential
+                    )
+                }
+            )
+            newCredentials.add(newCredentialItem)
+        }
         tokenResponse.authorizationDetails?.forEach { authDetail ->
             when (authDetail) {
                 is AuthorizationDetailResponseOpenIdCredential -> {
-                    val newCredentials = mutableListOf<CredentialItem>()
                     authDetail.credentialIdentifiers.forEach { credentialId ->
                         val credentialResponse = openId4VCI.requestCredentialFromEndpoint(
                             accessToken = tokenResponse.accessToken,
                             credentialRequest = CredentialRequest(
                                 credentialIdentifier = credentialId,
                                 proof = openId4VCI.createProofJwt(publicKey, privateKey)
-                            )
+                            ),
                         )
                         Log.i(TAG, "credentialResponse $credentialResponse")
                         val config = openId4VCI.credentialOffer.issuerMetadata.credentialConfigurationsSupported[authDetail.credentialConfigurationId]!!
@@ -147,10 +182,10 @@ class CreateCredentialViewModel : ViewModel() {
                         )
                         newCredentials.add(newCredentialItem)
                     }
-                    uiState = uiState.copy(credentialsToSave = newCredentials, authServer = null)
                 }
             }
         }
+        uiState = uiState.copy(credentialsToSave = newCredentials, authServer = null)
     }
 
     @OptIn(ExperimentalUuidApi::class)
@@ -226,7 +261,10 @@ class CreateCredentialViewModel : ViewModel() {
                         val tokenResponse = openId4VCI.requestTokenFromEndpoint(
                             authServer, TokenRequest(
                                 grantType = "urn:ietf:params:oauth:grant-type:pre-authorized_code",
-                                preAuthorizedCode = grant?.preAuthorizedCode
+                                preAuthorizedCode = grant?.preAuthorizedCode,
+                                txCode = "123456",
+                                clientId = TEST_VCI_CLIENT_ID,
+                                scope = openId4VCI.credentialOffer.credentialConfigurationIds.first()
                             )
                         )
                         Log.i(TAG, "tokenResponse $tokenResponse")
@@ -253,13 +291,25 @@ class CreateCredentialViewModel : ViewModel() {
                             uiState = uiState.copy(vpResponse = selectedCredential, tmpCode = grant)
 
                         } else {
-                            val authServerUrl = Uri.parse(openId4VCI.authEndpoint(authServer))
-                                .buildUpon()
-                                .appendQueryParameter("response_type", "code")
-                                .appendQueryParameter("state", Uuid.random().toString())
-                                .appendQueryParameter("redirect_uri", "http://localhost")
-                                .appendQueryParameter("issuer_state", grant?.issuerState ?: "")
-                                .build()
+                            val parResponse = openId4VCI.requestParEndpoint(TEST_VCI_CLIENT_ID)
+                            val authServerUrl = if (parResponse == null) {
+                                Uri.parse(openId4VCI.authEndpoint(authServer))
+                                    .buildUpon()
+                                    .appendQueryParameter("response_type", "code")
+                                    .appendQueryParameter("state", Uuid.random().toString())
+                                    .appendQueryParameter("redirect_uri", "http://localhost")
+                                    .appendQueryParameter("issuer_state", grant?.issuerState ?: "")
+                                    .appendQueryParameter("scope",
+                                        openId4VCI.credentialOffer.credentialConfigurationIds.first()
+                                    )
+                                    .build()
+                            } else {
+                                Uri.parse(openId4VCI.authEndpoint(authServer))
+                                    .buildUpon()
+                                    .appendQueryParameter("client_id", TEST_VCI_CLIENT_ID)
+                                    .appendQueryParameter("request_uri", parResponse.requestUri)
+                                    .build()
+                            }
 
                             Log.d(TAG, "authServerUrl: $authServerUrl")
                             uiState = uiState.copy(authServer = AuthServerUiState(

@@ -184,7 +184,7 @@ class CredentialRepository {
                     JSONObject().apply {
                         val displayName = displayConfig?.claims?.firstOrNull{
                             JSONArray(it.path) == currPath
-                        }?.display?.first()?.name
+                        }?.display?.first()?.name ?: key
                         putOpt(DISPLAY, displayName)
                         putOpt(VALUE, v)
                     }

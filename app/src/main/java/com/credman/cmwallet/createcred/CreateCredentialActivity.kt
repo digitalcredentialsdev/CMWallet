@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -126,7 +127,7 @@ class CreateCredentialActivity : ComponentActivity() {
                             url = uiState.authServer.url,
                             redirectUrl = uiState.authServer.redirectUrl,
                             onDone = { code ->
-                                viewModel.onCode(code)
+                                viewModel.onCode(code, uiState.authServer.redirectUrl)
                             }
                         )
                     }
@@ -348,34 +349,39 @@ class CreateCredentialActivity : ComponentActivity() {
         redirectUrl: String,
         onDone: (String) -> Unit
     ) {
-        AndroidView(factory = {
-            WebView(it).apply {
-                settings.javaScriptEnabled = true
-                this.layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                this.webViewClient = object : WebViewClient() {
-                    override fun shouldOverrideUrlLoading(
-                        view: WebView?,
-                        request: WebResourceRequest?
-                    ): Boolean {
+        LazyColumn {
+            item {
+                AndroidView(factory = {
+                    WebView(it).apply {
+                        clearCache(true)
+                        settings.javaScriptEnabled = true
+                        this.layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
+                        this.webViewClient = object : WebViewClient() {
+                            override fun shouldOverrideUrlLoading(
+                                view: WebView?,
+                                request: WebResourceRequest?
+                            ): Boolean {
 
-                        request?.let {
+                                request?.let {
 
-                            if (request.url.toString().startsWith("$redirectUrl/")) {
-                                request.url.getQueryParameter("code")?.let { code ->
-                                    onDone(code)
+                                    if (request.url.toString().startsWith("$redirectUrl/")) {
+                                        request.url.getQueryParameter("code")?.let { code ->
+                                            onDone(code)
+                                        }
+                                    }
                                 }
+                                return super.shouldOverrideUrlLoading(view, request)
                             }
                         }
-                        return super.shouldOverrideUrlLoading(view, request)
                     }
-                }
+                }, update = {
+                    it.loadUrl(url)
+                })
             }
-        }, update = {
-            it.loadUrl(url)
-        })
+        }
     }
 }
 

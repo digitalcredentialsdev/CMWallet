@@ -49,6 +49,8 @@ class CmWalletApplication : Application() {
         }
 
         const val TAG = "CmWalletApplication"
+
+        const val TEST_VCI_CLIENT_ID = "52480754053"
     }
 
     private val registryManager = RegistryManager.create(this)

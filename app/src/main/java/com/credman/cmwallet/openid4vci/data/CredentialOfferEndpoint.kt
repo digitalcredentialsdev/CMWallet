@@ -56,7 +56,7 @@ data class BackgroundImage(
 )
 
 @Serializable
-data class CredentialConfigurationDisplay(
+data class CredentialConfigurationMetadataDisplay(
     @SerialName("name") val name: String,
     @SerialName("locale") val locale: String?,
     @SerialName("logo") val logo: Logo?,
@@ -85,7 +85,7 @@ sealed class CredentialConfiguration {
     abstract val cryptographicBindingMethodsSupported: List<String>?
     abstract val credentialSigningAlgValuesSupported: List<String>?
     abstract val proofTypesSupported: Map<String, CredentialConfigurationProofType>?
-    abstract val display: List<CredentialConfigurationDisplay>?
+    abstract val credentialMetadata: CredentialMetadata?
 }
 
 @Serializable
@@ -108,7 +108,7 @@ data class CredentialConfigurationMDoc(
     @SerialName("cryptographic_binding_methods_supported") override val cryptographicBindingMethodsSupported: List<String>?,
     @SerialName("credential_signing_alg_values_supported") override val credentialSigningAlgValuesSupported: List<String>?,
     @SerialName("proof_types_supported") override val proofTypesSupported: Map<String, CredentialConfigurationProofType>?,
-    @SerialName("display") override val display: List<CredentialConfigurationDisplay>?,
+    @SerialName("credential_metadata") override val credentialMetadata: CredentialMetadata?,
     @SerialName("doctype") val doctype: String,
     @SerialName("claims") val claims: List<Claim>?,
 ) : CredentialConfiguration()
@@ -133,7 +133,7 @@ data class CredentialConfigurationSdJwtVc(
     @SerialName("cryptographic_binding_methods_supported") override val cryptographicBindingMethodsSupported: List<String>?,
     @SerialName("credential_signing_alg_values_supported") override val credentialSigningAlgValuesSupported: List<String>?,
     @SerialName("proof_types_supported") override val proofTypesSupported: Map<String, CredentialConfigurationProofType>?,
-    @SerialName("display") override val display: List<CredentialConfigurationDisplay>?,
+    @SerialName("credential_metadata") override val credentialMetadata: CredentialMetadata?,
     @SerialName("vct") val vct: String,
     @SerialName("claims") val claims: List<Claim>?,
 ) : CredentialConfiguration()
@@ -145,8 +145,13 @@ data class CredentialConfigurationUnknownFormat(
     @SerialName("cryptographic_binding_methods_supported") override val cryptographicBindingMethodsSupported: List<String>?,
     @SerialName("credential_signing_alg_values_supported") override val credentialSigningAlgValuesSupported: List<String>?,
     @SerialName("proof_types_supported") override val proofTypesSupported: Map<String, CredentialConfigurationProofType>?,
-    @SerialName("display") override val display: List<CredentialConfigurationDisplay>?
+    @SerialName("credential_metadata") override val credentialMetadata: CredentialMetadata?
 ) : CredentialConfiguration()
+
+@Serializable
+data class CredentialMetadata(
+    @SerialName("display") val display: List<CredentialConfigurationMetadataDisplay>?,
+)
 
 object CredentialConfigurationSerializer :
     JsonContentPolymorphicSerializer<CredentialConfiguration>(CredentialConfiguration::class) {
