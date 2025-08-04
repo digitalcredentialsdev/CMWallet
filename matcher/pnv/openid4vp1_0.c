@@ -128,7 +128,7 @@ int main() {
                 cJSON* doc_id = cJSON_GetObjectItem(matched_doc, "id");
                 cJSON* c;
                 cJSON_ArrayForEach(c, matched_cred) {
-    //                printf("cred %s\n", cJSON_Print(c));
+                    printf("Attempting to add cred %s\n", cJSON_Print(c));
                     cJSON* id_obj = cJSON_CreateObject();
                     cJSON* matched_id = cJSON_GetObjectItem(c, "id");
 
@@ -179,11 +179,13 @@ int main() {
                             }
                         }
                         matched = 1;
+                        printf("AddStringIdEntry %s\n", id);
                         AddStringIdEntry(id, creds_blob + icon_start_int, icon_len, title, subtitle, disclaimer, NULL);
                         SetAdditionalDisclaimerAndUrlForVerificationEntry(id, aggregator_consent, aggregator_policy_text, aggregator_policy_url);
                         cJSON *matched_claim_names = cJSON_GetObjectItem(c, "matched_claim_names");
                         cJSON *claim;
                         cJSON_ArrayForEach(claim, matched_claim_names) {
+                            printf("AddFieldForStringIdEntry %s, claim value: %s\n", id, cJSON_Print(claim));
                             AddFieldForStringIdEntry(id, cJSON_GetStringValue(claim), NULL);
                         }
                     }

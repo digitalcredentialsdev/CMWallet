@@ -64,6 +64,7 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
             cJSON *cred_auth_json = cJSON_Parse(decoded_cred_auth_json);
             if (!cJSON_HasObjectItem(cred_auth_json, "iss"))
             {
+                printf("The dcql request has no iss value. No match. \n");
                 return matched_credentials;
             }
             cJSON *iss_value = cJSON_GetObjectItemCaseSensitive(cred_auth_json, "iss");
@@ -81,6 +82,7 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
                     cJSON *iss_allowlist = cJSON_GetObjectItemCaseSensitive(curr_candidate, "iss_allowlist");
                     if (iss_allowlist == NULL)
                     {
+                        printf("A candidate credential of type %s passed null iss allowlist check.\n", cJSON_GetStringValue(vct_value));
                         cJSON_AddItemReferenceToArray(candidates, curr_candidate);
                     }
                     else
@@ -88,6 +90,7 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
                         cJSON *allowed_iss;
                         cJSON_ArrayForEach(allowed_iss, iss_allowlist) {
                                 if (cJSON_Compare(allowed_iss, iss_value, cJSON_True)) {
+                                    printf("A candidate credential of type %s passed iss allowlist check.\n", cJSON_GetStringValue(vct_value));
                                     cJSON_AddItemReferenceToArray(candidates, curr_candidate);
                                     break;
                                 }
@@ -97,13 +100,17 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
             }
             if (cJSON_HasObjectItem(cred_auth_json, "consent_data"))
             {
+                printf("Request has consent data\n");
                 char *consent_data = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(cred_auth_json, "consent_data"));
                 char *decoded_consent_data_json;
                 int decoded_consent_data_json_len = B64DecodeURL(consent_data, &decoded_consent_data_json);
                 cJSON *consent_data_json = cJSON_Parse(decoded_consent_data_json);
                 aggregator_consent = cJSON_GetObjectItemCaseSensitive(consent_data_json, "consent_text");
+                printf("aggregator_consent %s\n", cJSON_Print(aggregator_consent));
                 aggregator_policy_url = cJSON_GetObjectItemCaseSensitive(consent_data_json, "policy_link");
+                printf("aggregator_policy_url %s\n", cJSON_Print(aggregator_policy_url));
                 aggregator_policy_text = cJSON_GetObjectItemCaseSensitive(consent_data_json, "policy_text");
+                printf("aggregator_policy_text %s\n", cJSON_Print(aggregator_policy_text));
             }
         }
         else
@@ -124,6 +131,7 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
     // Match on the claims
     if (claims == NULL)
     {
+        printf("No claims provided, matching on the whole credential.\n");
         // Match every candidate
         cJSON *candidate;
         cJSON_ArrayForEach(candidate, candidates)
@@ -148,6 +156,7 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
     {
         if (claim_sets == NULL)
         {
+            printf("Matching based on provided claims\n");
             cJSON *candidate;
             cJSON_ArrayForEach(candidate, candidates)
             {
@@ -173,15 +182,19 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
                     cJSON *curr_path;
                     cJSON *curr_claim = candidate_claims;
                     int matched = 1;
+                    printf("Credential claim: %s ", cJSON_Print(curr_claim));
                     cJSON_ArrayForEach(curr_path, paths)
                     {
+                        printf("- requested path %s ", cJSON_Print(curr_path));
                         char *path_value = cJSON_GetStringValue(curr_path);
                         if (cJSON_HasObjectItem(curr_claim, path_value))
                         {
+                            printf("- path found ");
                             curr_claim = cJSON_GetObjectItemCaseSensitive(curr_claim, path_value);
                         }
                         else
                         {
+                            printf("- path not found ");
                             matched = 0;
                             break;
                         }
@@ -195,6 +208,7 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
                             {
                                 if (cJSON_Compare(v, cJSON_GetObjectItemCaseSensitive(curr_claim, "value"), cJSON_True))
                                 {
+                                    printf("- claim value matched.\n");
                                     ++matched_claim_count;
                                     break;
                                 }
@@ -202,19 +216,26 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
                         }
                         else
                         {
+                            printf("- claim matched.\n");
                             ++matched_claim_count;
                         }
+                    } else {
+                        printf("- claim did not match\n.");
                     }
                 }
                 cJSON_AddItemReferenceToObject(matched_credential, "matched_claim_names", matched_claim_names);
                 if (matched_claim_count == cJSON_GetArraySize(claims))
                 {
+                    printf("Cred matched.\n");
                     cJSON_AddItemReferenceToArray(matched_credentials, matched_credential);
+                } else {
+                    printf("Cred did not match. Matched claim count: %d, Expected match count: %d\n.", matched_claim_count, cJSON_GetArraySize(claims));
                 }
             }
         }
         else
         {
+            printf("Matching based on provided claims and claim_sets\n");
             cJSON *candidate;
             cJSON_ArrayForEach(candidate, candidates)
             {
@@ -325,5 +346,7 @@ cJSON *dcql_query(cJSON *query, cJSON *credential_store)
             matched_credentials = candidate_matched_credentials;
         }
     }
+
+    printf("dcql_query return: %s\n", cJSON_Print(matched_credentials));
     return matched_credentials;
 }
