@@ -69,6 +69,7 @@ data class PnvTokenRegistry(
     val icon: String? = null,
     val phoneNumberAttributeDisplayName: String, // Should be localized
     val supportedAggregatorIssNames: Set<String>?, // If null, allow all and do not perform filtering
+    val verifierTermsPrefix: String?,
 ) {
     /** Converts this TS43 entry to the more generic SD-JWT registry item(s). */
     private fun toSdJwtRegistryItems(): SdJwtRegistryItem {
@@ -82,7 +83,7 @@ data class PnvTokenRegistry(
                         RegistryClaim("android_carrier_hint", null, androidCarrierHint),
                         RegistryClaim("phone_number_hint", null, phoneNumberHint),
                     ),
-                displayData = ItemDisplayData(title = title, subtitle = subtitle, description = providerConsent),
+                displayData = ItemDisplayData(title = title, subtitle = subtitle, description = providerConsent, verifierTermsPrefix = verifierTermsPrefix),
             )
     }
 
@@ -96,6 +97,7 @@ data class PnvTokenRegistry(
         internal const val TITLE = "title"
         internal const val SUBTITLE = "subtitle"
         internal const val DISCLAIMER = "disclaimer"
+        internal const val VERIFIER_TERMS_PREFIX = "verifier_terms_prefix"
         internal const val PATHS = "paths"
         internal const val VALUE = "value"
         internal const val DISPLAY = "display"
@@ -107,7 +109,7 @@ data class PnvTokenRegistry(
             vct = VCT_GET_PHONE_NUMBER,
             title = "Terrific Telecom",
             subtitle = "+1 (650) 215-4321",
-            providerConsent = "CMWallet will enable your carrier (Terrific Telecom) to share your phone number",
+            providerConsent = "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with \${CALLER_DISPLAY_NAME}",
             subscriptionHint = 1,
             carrierHint = "310250",
             androidCarrierHint = 3,
@@ -115,7 +117,9 @@ data class PnvTokenRegistry(
             iss = "https://example.terrific-telecom.dev",
             icon = "iVBORw0KGgoAAAANSUhEUgAAAA4AAAAWCAYAAADwza0nAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAACBSURBVHgB7ZTBDUVQEEXvff8VoITfC0YZatABHWiH6IUOaICHBCuReXbEWd1kcmZmMRmGIinhSpABFBDoJpqccSKtA/7wY7C71FQ1NUaUyKIg4Ba8MbiJ3YPnqvcnfuI7xAfdqr0qXjU9FTXTGUnca//NIYGdoflla1BbDsPIqZgBHcEomi+uUHMAAAAASUVORK5CYII=",
             phoneNumberAttributeDisplayName = "Phone number",
-            supportedAggregatorIssNames = null
+            supportedAggregatorIssNames = null,
+            verifierTermsPrefix = "Provider Terms:\n",
+//            verifierTermsPrefix = null,
         )
         val TEST_PNV_1_VERIFY_PHONE_NUMBER = TEST_PNV_1_GET_PHONE_NUMBER.copy(
             vct = VCT_VERIFY_PHONE_NUMBER,
@@ -125,7 +129,7 @@ data class PnvTokenRegistry(
             vct = VCT_VERIFY_PHONE_NUMBER,
             title = "Work Number",
             subtitle = "Timely Telecom",
-            providerConsent = "CMWallet will enable your carrier (Timely Telecom) to share your phone number",
+            providerConsent = "CMWallet will enable your carrier (Timely Telecom) to share your phone number with \${CALLER_DISPLAY_NAME}",
             subscriptionHint = 2,
             carrierHint = "380250",
             androidCarrierHint = 3,
@@ -133,7 +137,8 @@ data class PnvTokenRegistry(
             iss = "https://example.timely-telecom.dev",
             icon = "iVBORw0KGgoAAAANSUhEUgAAAA4AAAAWCAYAAADwza0nAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAACBSURBVHgB7ZTBDUVQEEXvff8VoITfC0YZatABHWiH6IUOaICHBCuReXbEWd1kcmZmMRmGIinhSpABFBDoJpqccSKtA/7wY7C71FQ1NUaUyKIg4Ba8MbiJ3YPnqvcnfuI7xAfdqr0qXjU9FTXTGUnca//NIYGdoflla1BbDsPIqZgBHcEomi+uUHMAAAAASUVORK5CYII=",
             phoneNumberAttributeDisplayName = "Phone number",
-            supportedAggregatorIssNames = null
+            supportedAggregatorIssNames = null,
+            verifierTermsPrefix = "Provider Terms:\n"
         )
 
         fun buildRegistryDatabase(items: List<PnvTokenRegistry>): ByteArray {
@@ -177,6 +182,7 @@ data class PnvTokenRegistry(
                 credJson.put(TITLE, sdJwtRegistryItem.displayData.title)
                 credJson.putOpt(SUBTITLE, sdJwtRegistryItem.displayData.subtitle)
                 credJson.putOpt(DISCLAIMER, sdJwtRegistryItem.displayData.description)
+                credJson.putOpt(VERIFIER_TERMS_PREFIX, sdJwtRegistryItem.displayData.verifierTermsPrefix)
                 val iconJson = JSONObject().apply {
                     put(START, iconMap[sdJwtRegistryItem.id]!!.iconOffset)
                     put(LENGTH, iconMap[sdJwtRegistryItem.id]!!.iconValue.size)
@@ -215,6 +221,7 @@ private class ItemDisplayData(
     val title: String,
     val subtitle: String?,
     val description: String?,
+    val verifierTermsPrefix: String?,
     )
 
 private class SdJwtRegistryItem(

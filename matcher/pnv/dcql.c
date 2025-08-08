@@ -140,6 +140,7 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
             cJSON_AddItemReferenceToObject(matched_credential, "id", cJSON_GetObjectItemCaseSensitive(candidate, "id"));
             cJSON_AddItemReferenceToObject(matched_credential, "title", cJSON_GetObjectItemCaseSensitive(candidate, "title"));
             cJSON_AddItemReferenceToObject(matched_credential, "subtitle", cJSON_GetObjectItemCaseSensitive(candidate, "subtitle"));
+            cJSON_AddItemReferenceToObject(matched_credential, "verifier_terms_prefix", cJSON_GetObjectItemCaseSensitive(candidate, "verifier_terms_prefix"));
             cJSON_AddItemReferenceToObject(matched_credential, "disclaimer", cJSON_GetObjectItemCaseSensitive(candidate, "disclaimer"));
             cJSON_AddItemReferenceToObject(matched_credential, "icon", cJSON_GetObjectItemCaseSensitive(candidate, "icon"));
             cJSON_AddItemReferenceToObject(matched_credential, "aggregator_consent", aggregator_consent);
@@ -164,6 +165,7 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
                 cJSON_AddItemReferenceToObject(matched_credential, "id", cJSON_GetObjectItemCaseSensitive(candidate, "id"));
                 cJSON_AddItemReferenceToObject(matched_credential, "title", cJSON_GetObjectItemCaseSensitive(candidate, "title"));
                 cJSON_AddItemReferenceToObject(matched_credential, "subtitle", cJSON_GetObjectItemCaseSensitive(candidate, "subtitle"));
+                cJSON_AddItemReferenceToObject(matched_credential, "verifier_terms_prefix", cJSON_GetObjectItemCaseSensitive(candidate, "verifier_terms_prefix"));
                 cJSON_AddItemReferenceToObject(matched_credential, "disclaimer", cJSON_GetObjectItemCaseSensitive(candidate, "disclaimer"));
                 cJSON_AddItemReferenceToObject(matched_credential, "icon", cJSON_GetObjectItemCaseSensitive(candidate, "icon"));
                 cJSON_AddItemReferenceToObject(matched_credential, "aggregator_consent", aggregator_consent);
@@ -243,6 +245,7 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
                 cJSON_AddItemReferenceToObject(matched_credential, "id", cJSON_GetObjectItemCaseSensitive(candidate, "id"));
                 cJSON_AddItemReferenceToObject(matched_credential, "title", cJSON_GetObjectItemCaseSensitive(candidate, "title"));
                 cJSON_AddItemReferenceToObject(matched_credential, "subtitle", cJSON_GetObjectItemCaseSensitive(candidate, "subtitle"));
+                cJSON_AddItemReferenceToObject(matched_credential, "verifier_terms_prefix", cJSON_GetObjectItemCaseSensitive(candidate, "verifier_terms_prefix"));
                 cJSON_AddItemReferenceToObject(matched_credential, "disclaimer", cJSON_GetObjectItemCaseSensitive(candidate, "disclaimer"));
                 cJSON_AddItemReferenceToObject(matched_credential, "icon", cJSON_GetObjectItemCaseSensitive(candidate, "icon"));
                 cJSON_AddItemReferenceToObject(matched_credential, "aggregator_consent", aggregator_consent);
