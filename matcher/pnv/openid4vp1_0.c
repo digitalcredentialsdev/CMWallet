@@ -132,7 +132,7 @@ int main()
                 }
             }
 
-            cJSON *matched_docs = dcql_query(query, credential_store);
+            cJSON *matched_docs = dcql_query(i, query, credential_store);
             // printf("matched_creds %d\n", cJSON_GetArraySize(matched_creds));
             //            printf("matched_creds %s\n", cJSON_Print(cJSON_GetArrayItem(matched_creds,0)));
 

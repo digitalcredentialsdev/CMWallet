@@ -285,8 +285,10 @@ class CreateCredentialViewModel : ViewModel() {
                             val vpResponse = createOpenID4VPResponse(
                                 openId4VPRequest,
                                 "wallet",
-                                selectedCredential,
-                                matchedCredential
+                                listOf(com.credman.cmwallet.getcred.MatchedCredential(
+                                    selectedCredential,
+                                    matchedCredential
+                                ))
                             )
                             uiState = uiState.copy(vpResponse = selectedCredential, tmpCode = grant)
 

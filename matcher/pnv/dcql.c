@@ -324,7 +324,7 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
     return matched_credentials;
 }
 
-cJSON *dcql_query(cJSON *query, cJSON *credential_store)
+cJSON *dcql_query(const int request_id, cJSON *query, cJSON *credential_store)
 {
     cJSON *matched_credentials = cJSON_CreateObject();
     cJSON *candidate_matched_credentials = cJSON_CreateObject();
