@@ -270,7 +270,7 @@ cJSON* dcql_query(const int request_id, cJSON* query, cJSON* credential_store) {
                 }
                 ++option_idx;
             }
-            if (credential_set_matched == 0) {
+            if (cJSON_GetArraySize(matched_credential_sets) == 0) {
                 matched = 0;
                 break;
             }
