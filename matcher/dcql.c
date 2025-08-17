@@ -173,7 +173,10 @@ cJSON* MatchCredential(cJSON* credential, cJSON* credential_store) {
                                 }
                             }
                         } else {
-                            cJSON_AddItemReferenceToObject(matched_claim_ids, claim_id, cJSON_GetObjectItem(curr_claim, "display"));
+                            cJSON* matched_claim_info = cJSON_CreateObject();
+                            cJSON_AddItemReferenceToObject(matched_claim_info, "claim_display", cJSON_GetObjectItem(curr_claim, "display"));
+                            cJSON_AddItemReferenceToObject(matched_claim_info, "claim_path", paths);
+                            cJSON_AddItemReferenceToObject(matched_claim_ids, claim_id, matched_claim_info);
                         }
                     }
                 }
