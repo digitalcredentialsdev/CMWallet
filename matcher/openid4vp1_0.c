@@ -70,6 +70,7 @@ int main()
     int should_offer_issuance = 0;
     char *merchant_name = NULL;
     char *transaction_amount = NULL;
+    char *additional_info = NULL;
     for (int i = 0; i < requests_size; i++)
     {
         cJSON *request = cJSON_GetArrayItem(requests, i);
@@ -133,6 +134,7 @@ int main()
                     transaction_credential_ids = cJSON_GetObjectItem(transaction_data, "credential_ids");
                     merchant_name = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "merchant_name"));
                     transaction_amount = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "amount"));
+                    additional_info = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "additional_info"));
                 }
             }
 
@@ -194,7 +196,11 @@ int main()
                                     printf("icon_start int %d, double %f\n", icon_start_int, icon_start);
                                     int icon_len = (int)(cJSON_GetNumberValue(cJSON_GetObjectItem(icon, "length")));
 
-                                    if (wasm_version > 1)
+                                    if (wasm_version >= 3)
+                                    {
+                                        AddPaymentEntryToSetV2(matched_id, merchant_name, title, subtitle, creds_blob + icon_start_int, icon_len, transaction_amount, NULL, 0, NULL, 0, additional_info, metadata, set_id, doc_idx);
+                                    }
+                                    else if (wasm_version == 2)
                                     {
                                         AddPaymentEntryToSet(matched_id, merchant_name, title, subtitle, creds_blob + icon_start_int, icon_len, transaction_amount, NULL, 0, NULL, 0, metadata, set_id, doc_idx);
                                     }
