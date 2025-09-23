@@ -16,12 +16,16 @@ registryDigitalcredentialsMdoc = "1.0.0-SNAPSHOT"
 lifecycleRuntimeComposeAndroid = "2.8.7"
 roomRuntime = "2.6.1"
 fragment = "1.8.5"
+credentials = "1.6.0-SNAPSHOT"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-androidx-credentials = { module = "androidx.credentials:credentials" }
+androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
+androidx-credentials-play = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose" }
 androidx-registry-digitalcredentials-mdoc = { module = "androidx.credentials.registry:registry-digitalcredentials-mdoc", version.ref = "registryDigitalcredentialsMdoc" }
+androidx-registry-digitalcredentials-sdjwt = { module = "androidx.credentials.registry:registry-digitalcredentials-sdjwtvc", version.ref = "registryDigitalcredentialsMdoc" }
+androidx-registry-digitalcredentials-openid = { module = "androidx.credentials.registry:registry-digitalcredentials-openid", version.ref = "registryDigitalcredentialsMdoc" }
 androidx-registry-provider = { module = "androidx.credentials.registry:registry-provider", version.ref = "registryDigitalcredentialsMdoc" }
 androidx-registry-provider-play-services = { module = "androidx.credentials.registry:registry-provider-play-services", version.ref = "registryDigitalcredentialsMdoc" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }

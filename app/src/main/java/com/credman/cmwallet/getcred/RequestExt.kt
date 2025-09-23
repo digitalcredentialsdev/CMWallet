@@ -1,9 +1,6 @@
 package com.credman.cmwallet.getcred
 
-import androidx.annotation.VisibleForTesting
-import androidx.credentials.provider.ProviderGetCredentialRequest
-import androidx.credentials.registry.provider.digitalcredentials.DigitalCredentialEntry
-import com.credman.cmwallet.getcred.SelectionInfo.SelectedCredential
+import androidx.credentials.registry.provider.SelectedCredentialSet
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -22,11 +19,11 @@ data class InternalSelectionInfo(
     val creds: List<SelectedCred>
 ) {
     companion object {
-        fun fromSelectionInfo(selectionInfo: SelectionInfo): InternalSelectionInfo {
-            val requestId = selectionInfo.setId.substringBefore(";").substringAfter("req:").toInt()
+        fun fromSelectedSet(selectionInfo: SelectedCredentialSet): InternalSelectionInfo {
+            val requestId = selectionInfo.credentialSetId.substringBefore(";").substringAfter("req:").toInt()
             val credList = mutableListOf<SelectedCred>()
             for (credential in selectionInfo.credentials) {
-                val entryId = credential.credId
+                val entryId = credential.credentialId
                 val metadata = JSONObject(credential.metadata!!)
 
                 val claims = metadata.getJSONArray("claims")
@@ -54,37 +51,3 @@ data class InternalSelectionInfo(
         }
     }
 }
-
-/** Classes below belong to Jetpack */
-data class SelectionInfo(
-    val setId: String,
-    val credentials: List<SelectedCredential>,
-) {
-    data class SelectedCredential(
-        val credId: String,
-        val metadata: String?,
-    )
-}
-
-public val ProviderGetCredentialRequest.selectionInfo: SelectionInfo?
-    get() = this.sourceBundle?.let {
-        val setId = it.getString(EXTRA_CREDENTIAL_SET_ID) ?: return null
-        val credentials = mutableListOf<SelectedCredential>()
-        val setLength = it.getInt(EXTRA_CREDENTIAL_SET_ELEMENT_LENGTH, 0)
-        for (i in 0 until setLength) {
-            val credId = it.getString("${EXTRA_CREDENTIAL_SET_ELEMENT_ID_PREFIX}$i") ?: return null
-            val metadata = it.getString("${EXTRA_CREDENTIAL_SET_ELEMENT_METADATA_PREFIX}$i")
-            credentials.add(SelectedCredential(credId, metadata))
-        }
-        SelectionInfo(setId, credentials)
-    }
-
-
-private const val EXTRA_CREDENTIAL_SET_ID =
-    "androidx.credentials.registry.provider.extra.CREDENTIAL_SET_ID"
-private const val EXTRA_CREDENTIAL_SET_ELEMENT_LENGTH =
-    "androidx.credentials.registry.provider.extra.CREDENTIAL_SET_ELEMENT_LENGTH"
-private const val EXTRA_CREDENTIAL_SET_ELEMENT_ID_PREFIX =
-    "androidx.credentials.registry.provider.extra.CREDENTIAL_SET_ELEMENT_ID_"
-private const val EXTRA_CREDENTIAL_SET_ELEMENT_METADATA_PREFIX =
-    "androidx.credentials.registry.provider.extra.CREDENTIAL_SET_ELEMENT_METADATA_"

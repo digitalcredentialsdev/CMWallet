@@ -185,10 +185,10 @@ int main()
                                 printf("comparing cred id %s with transaction cred id %s.\n", cJSON_Print(matched_credential_id), cJSON_Print(transaction_credential_id));
                                 if (cJSON_Compare(transaction_credential_id, matched_credential_id, cJSON_True))
                                 {
-
-                                    char *title = cJSON_GetStringValue(cJSON_GetObjectItem(c, "title"));
-                                    char *subtitle = cJSON_GetStringValue(cJSON_GetObjectItem(c, "subtitle"));
-                                    cJSON *icon = cJSON_GetObjectItem(c, "icon");
+                                    cJSON* c_display = cJSON_GetObjectItem(cJSON_GetObjectItem(c, "display"), "verification");
+                                    char *title = cJSON_GetStringValue(cJSON_GetObjectItem(c_display, "title"));
+                                    char *subtitle = cJSON_GetStringValue(cJSON_GetObjectItem(c_display, "subtitle"));
+                                    cJSON *icon = cJSON_GetObjectItem(c_display, "icon");
                                     printf("transaction cred ids %s\n", cJSON_Print(transaction_credential_ids));
 
                                     double icon_start = (cJSON_GetNumberValue(cJSON_GetObjectItem(icon, "start")));
@@ -220,9 +220,10 @@ int main()
                         }
                         else
                         {
-                            char *title = cJSON_GetStringValue(cJSON_GetObjectItem(c, "title"));
-                            char *subtitle = cJSON_GetStringValue(cJSON_GetObjectItem(c, "subtitle"));
-                            cJSON *icon = cJSON_GetObjectItem(c, "icon");
+                            cJSON* c_display = cJSON_GetObjectItem(cJSON_GetObjectItem(c, "display"), "verification");
+                            char *title = cJSON_GetStringValue(cJSON_GetObjectItem(c_display, "title"));
+                            char *subtitle = cJSON_GetStringValue(cJSON_GetObjectItem(c_display, "subtitle"));
+                            cJSON *icon = cJSON_GetObjectItem(c_display, "icon");
                             int icon_start_int = 0;
                             int icon_len = 0;
                             if (icon != NULL)
@@ -255,10 +256,11 @@ int main()
                             cJSON *claim;
                             cJSON_ArrayForEach(claim, matched_claim_names)
                             {
+                                char *claim_value = cJSON_GetStringValue(cJSON_GetObjectItem(cJSON_GetObjectItem(claim, "verification"), "display"));
                                 if (wasm_version > 1)
                                 {
                                     printf("AddFieldToEntrySet %s\n", matched_id);
-                                    AddFieldToEntrySet(matched_id, cJSON_GetStringValue(claim), NULL, set_id, doc_idx);
+                                    AddFieldToEntrySet(matched_id, claim_value, NULL, set_id, doc_idx);
                                 }
                                 else
                                 { // TODO: remove
@@ -267,12 +269,28 @@ int main()
                                     cJSON_AddItemReferenceToObject(id_obj, "dcql_cred_id", cJSON_GetObjectItem(matched_doc, "id"));
                                     cJSON_AddItemReferenceToObject(id_obj, "provider_idx", cJSON_CreateNumber(i));
                                     char *id = cJSON_PrintUnformatted(id_obj);
-                                    AddFieldForStringIdEntry(id, cJSON_GetStringValue(claim), NULL);
+                                    AddFieldForStringIdEntry(id, claim_value, NULL);
                                 }
                             }
                         }
                     }
                     ++doc_idx;
+                }
+            }
+
+            cJSON *inline_issuance = cJSON_GetObjectItemCaseSensitive(matched_result, "inline_issuance");
+            if (inline_issuance != NULL) {
+                char *cred_id = cJSON_GetStringValue(cJSON_GetObjectItem(inline_issuance, "id"));
+                char *title = cJSON_GetStringValue(cJSON_GetObjectItem(inline_issuance, "title"));
+                char *subtitle = cJSON_GetStringValue(cJSON_GetObjectItem(inline_issuance, "subtitle"));
+                cJSON *icon = cJSON_GetObjectItem(inline_issuance, "icon");
+                if (icon == NULL) {
+                    AddInlineIssuanceEntry(cred_id, 0, 0, title, subtitle);
+                } else {
+                    double icon_start = cJSON_GetNumberValue(cJSON_GetObjectItem(icon, "start"));
+                    int icon_start_int = icon_start;
+                    int icon_len = (int)(cJSON_GetNumberValue(cJSON_GetObjectItem(icon, "length")));
+                    AddInlineIssuanceEntry(cred_id, creds_blob + icon_start_int, icon_len, title, subtitle);
                 }
             }
         }

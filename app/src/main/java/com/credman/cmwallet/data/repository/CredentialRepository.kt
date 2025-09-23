@@ -1,14 +1,23 @@
 package com.credman.cmwallet.data.repository
 
-import android.graphics.Bitmap
-import android.os.Build
+import android.graphics.BitmapFactory
 import android.util.Log
-import androidx.core.graphics.drawable.toBitmap
 import androidx.credentials.DigitalCredential
 import androidx.credentials.ExperimentalDigitalCredentialApi
+import androidx.credentials.registry.digitalcredentials.mdoc.MdocEntry
+import androidx.credentials.registry.digitalcredentials.mdoc.MdocField
+import androidx.credentials.registry.digitalcredentials.mdoc.MdocInlineIssuanceEntry
+import androidx.credentials.registry.digitalcredentials.openid4vp.OpenId4VpRegistry
+import androidx.credentials.registry.digitalcredentials.sdjwt.SdJwtClaim
+import androidx.credentials.registry.digitalcredentials.sdjwt.SdJwtEntry
+import androidx.credentials.registry.digitalcredentials.sdjwt.SdJwtInlineIssuanceEntry
 import androidx.credentials.registry.provider.RegisterCredentialsRequest
 import androidx.credentials.registry.provider.RegistryManager
-import com.credman.cmwallet.R
+import androidx.credentials.registry.provider.digitalcredentials.DigitalCredentialEntry
+import androidx.credentials.registry.provider.digitalcredentials.InlineIssuanceEntry
+import androidx.credentials.registry.provider.digitalcredentials.VerificationEntryDisplayProperties
+import androidx.credentials.registry.provider.digitalcredentials.VerificationFieldDisplayProperties
+import com.credman.cmwallet.CmWalletApplication
 import com.credman.cmwallet.data.model.CredentialDisplayData
 import com.credman.cmwallet.data.model.CredentialItem
 import com.credman.cmwallet.data.model.CredentialKeySoftware
@@ -58,10 +67,10 @@ class CredentialRepository {
 
     val credentials: Flow<List<CredentialItem>> = combinedCredentials()
 
-    val credentialRegistryDatabase: Flow<ByteArray> = flow {
+    val credentialRegistryDatabase: Flow<OpenId4VpRegistry> = flow {
         emitAll(combinedCredentials().map { credentials ->
             Log.i("CredentialRepository", "Updating flow with ${credentials.size}")
-            createRegistryDatabase(credentials)
+            createRegistry(credentials)
         })
     }
 
@@ -163,151 +172,137 @@ class CredentialRepository {
         put(ICON, iconJson)
     }
 
-    private fun constructJwtForRegistry(
+    private fun constructJwtClaims(
         rawJwt: JSONObject,
         displayConfig: CredentialConfigurationSdJwtVc?,
-        path: JSONArray,
-    ): JSONObject {
-        val result = JSONObject()
+        claims: MutableList<SdJwtClaim>,
+        path: List<String>
+    ) {
         for (key in rawJwt.keys()) {
             val v = rawJwt[key]
-            val currPath = JSONArray(path.toString()) // Make a copy
-            currPath.put(key)
+            val currPath = path.toMutableList() // Make a copy
+            currPath.add(key)
             if (v is JSONObject) {
-                result.put(
-                    key,
-                    constructJwtForRegistry(v, displayConfig, currPath)
+                constructJwtClaims(
+                    v,
+                    displayConfig,
+                    claims,
+                    currPath
                 )
             } else {
-                result.put(
-                    key,
-                    JSONObject().apply {
-                        val displayName = displayConfig?.claims?.firstOrNull{
-                            JSONArray(it.path) == currPath
-                        }?.display?.first()?.name ?: key
-                        putOpt(DISPLAY, displayName)
-                        putOpt(VALUE, v)
-                    }
+                val displayName = displayConfig?.claims?.firstOrNull{
+                    JSONArray(it.path) == currPath
+                }?.display?.first()?.name ?: currPath.joinToString(separator = ".")
+                claims.add(
+                    SdJwtClaim(
+                        path = currPath,
+                        value = v,
+                        fieldDisplayPropertySet = setOf(VerificationFieldDisplayProperties(
+                            displayName = displayName,
+                        )),
+//                        isSelectivelyDisclosable = TODO()
+                    )
                 )
             }
         }
-        return result
     }
 
-    /**
-     * Credential Registry has the following format:
-     *
-     * |---------------------------------------|
-     * |--- (Int) offset of credential json ---|
-     * |--------- (Byte Array) Icon 1 ---------|
-     * |--------- (Byte Array) Icon 2 ---------|
-     * |------------- More Icons... -----------|
-     * |----------- Credential Json -----------|  // See assets/paymentcreds.json as an example
-     * |---------------------------------------|
-     */
     @OptIn(ExperimentalEncodingApi::class)
-    private fun createRegistryDatabase(items: List<CredentialItem>): ByteArray {
-        val out = ByteArrayOutputStream()
+    private fun createRegistry(items: List<CredentialItem>): OpenId4VpRegistry {
+        val credentialEntries: MutableList<DigitalCredentialEntry> = mutableListOf()
 
-        val iconMap: Map<String, RegistryIcon> = items.associate {
-            Pair(
-                it.id,
-                RegistryIcon(it.displayData.icon?.decodeBase64() ?: ByteArray(0))
-            )
-        }
-        // Write the offset to the json
-        val jsonOffset = 4 + iconMap.values.sumOf { it.iconValue.size }
-        val buffer = ByteBuffer.allocate(4)
-        buffer.order(ByteOrder.LITTLE_ENDIAN)
-        buffer.putInt(jsonOffset)
-        out.write(buffer.array())
-
-        // Write the icons
-        var currIconOffset = 4
-        iconMap.values.forEach {
-            it.iconOffset = currIconOffset
-            out.write(it.iconValue)
-            currIconOffset += it.iconValue.size
-        }
-
-        val mdocCredentials = JSONObject()
-        val sdJwtCredentials = JSONObject()
         items.forEach { item ->
             when (item.config) {
                 is CredentialConfigurationSdJwtVc -> {
-                    val credJson = JSONObject()
-                    credJson.putCommon(item.id, item.displayData, iconMap)
                     val sdJwtVc = SdJwt(item.credentials.first().credential, (item.credentials.first().key as CredentialKeySoftware).privateKey)
                     val rawJwt = sdJwtVc.verifiedResult.processedJwt
-                    val jwtWithDisplay = constructJwtForRegistry(rawJwt, item.config, JSONArray())
-                    // TODO: what do we do with non-user-friendly claims such as iss, aud?
-                    credJson.put(PATHS, jwtWithDisplay)
-                    val vctType = rawJwt["vct"] as String
-                    when (val current = sdJwtCredentials.opt(vctType) ?: JSONArray()) {
-                        is JSONArray -> sdJwtCredentials.put(vctType, current.put(credJson))
-                        else -> throw IllegalStateException("Unexpected type ${current::class.java}")
-                    }
-
+                    val claims = mutableListOf<SdJwtClaim>()
+                    constructJwtClaims(rawJwt, item.config, claims, emptyList())
+                    credentialEntries.add(SdJwtEntry(
+                        verifiableCredentialType = rawJwt["vct"] as String,
+                        claims = claims,
+                        entryDisplayPropertySet = setOf(VerificationEntryDisplayProperties(
+                            title = item.displayData.title,
+                            subtitle = item.displayData.subtitle,
+                            icon = item.displayData.icon?.decodeBase64()?.let {
+                                BitmapFactory.decodeByteArray(it, 0, it.size)
+                            } ?: CmWalletApplication.walletIcon
+                        )),
+                        id = item.id,
+                    ))
                 }
                 is CredentialConfigurationMDoc -> {
-                    val credJson = JSONObject()
-                    credJson.putCommon(item.id, item.displayData, iconMap)
                     val mdoc = MDoc(item.credentials.first().credential.decodeBase64UrlNoPadding())
+                    val mdocFields = mutableListOf<MdocField>()
                     if (mdoc.issuerSignedNamespaces.isNotEmpty()) {
-                        val pathJson = JSONObject()
                         mdoc.issuerSignedNamespaces.forEach { (namespace, elements) ->
-                            val namespaceJson = JSONObject()
                             elements.forEach { (element, value) ->
-                                val namespaceDataJson = JSONObject()
-                                namespaceDataJson.putOpt(VALUE, value)
                                 val displayName = item.config.claims?.firstOrNull{
                                     it.path[0] == namespace && it.path[1] == element
                                 }?.display?.first()?.name!!
-                                namespaceDataJson.put(DISPLAY, displayName)
-//                                namespaceDataJson.putOpt(
-//                                    DISPLAY_VALUE,
-//                                    namespaceData.value.displayValue
-//                                )
-                                namespaceJson.put(element, namespaceDataJson)
-                            }
-                            pathJson.put(namespace, namespaceJson)
-                        }
-                        credJson.put(PATHS, pathJson)
-                    }
-                    if (Build.VERSION.SDK_INT >= 33) {
-                        mdocCredentials.append(item.config.doctype, credJson)
-                    } else {
-                        when (val current = mdocCredentials.opt(item.config.doctype)) {
-                            is JSONArray -> {
-                                mdocCredentials.put(item.config.doctype, current.put(credJson))
-                            }
-
-                            null -> {
-                                mdocCredentials.put(
-                                    item.config.doctype,
-                                    JSONArray().put(credJson)
+                                mdocFields.add(
+                                    MdocField(
+                                        namespace = namespace,
+                                        identifier = element,
+                                        fieldValue = value,
+                                        fieldDisplayPropertySet = setOf(
+                                            VerificationFieldDisplayProperties(
+                                                displayName = displayName,
+//                                                displayValue = namespaceData.value.displayValue
+                                            )
+                                        )
+                                    )
                                 )
                             }
-
-                            else -> throw IllegalStateException(
-                                "Unexpected namespaced data that's" +
-                                        " not a JSONArray. Instead it is ${current::class.java}"
-                            )
                         }
                     }
+                    credentialEntries.add(MdocEntry(
+                        docType = item.config.doctype,
+                        fields = mdocFields,
+                        entryDisplayPropertySet = setOf(VerificationEntryDisplayProperties(
+                            title = item.displayData.title,
+                            subtitle = item.displayData.subtitle,
+                            icon = item.displayData.icon?.decodeBase64()?.let {
+                                BitmapFactory.decodeByteArray(it, 0, it.size)
+                            } ?: CmWalletApplication.walletIcon
+                        )),
+                        id = item.id,
+                    ))
                 }
 
                 is CredentialConfigurationUnknownFormat -> TODO()
             }
         }
-        val registryCredentials = JSONObject()
-        registryCredentials.put("mso_mdoc", mdocCredentials)
-        registryCredentials.put("dc+sd-jwt", sdJwtCredentials)
-        val registryJson = JSONObject()
-        registryJson.put(CREDENTIALS, registryCredentials)
-        Log.d(TAG, "Credential to be registered: ${registryJson.toString(2)}")
-        out.write(registryJson.toString().toByteArray())
-        return out.toByteArray()
+        return OpenId4VpRegistry(
+            credentialEntries = credentialEntries,
+            inlineIssuanceEntries = emptyList(),
+//                listOf(
+//                MdocInlineIssuanceEntry(
+//                    id = "Issuance",
+//                    display = InlineIssuanceEntry.InlineIssuanceDisplayProperties(
+//                        subtitle = "Mobile Drivers License, State Id, and Others",
+//                    ),
+//                    supportedMdocs = setOf(
+//                        MdocInlineIssuanceEntry.SupportedMdoc(
+//                        "eu.europa.ec.eudi.pid.1"
+//                        ),
+//                        MdocInlineIssuanceEntry.SupportedMdoc(
+//                        "org.iso.18013.5.1.mDL1"
+//                        ),
+//                    )
+//                ),
+//                SdJwtInlineIssuanceEntry(
+//                    id = "sd-jwt-issuance",
+//                    display = InlineIssuanceEntry.InlineIssuanceDisplayProperties(
+//                        subtitle = "Mobile Drivers License, State Id, and Others",
+//                    ),
+//                    supportedSdJwts = setOf(
+//                        SdJwtInlineIssuanceEntry.SupportedSdJwt("urn:openid:interop:id:1")
+//                    )
+//                )
+//            ),
+            id = "openid4vp1.0",
+        )
     }
 
     companion object {

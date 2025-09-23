@@ -17,6 +17,8 @@ import androidx.credentials.exceptions.GetCredentialUnknownException
 import androidx.credentials.provider.PendingIntentHandler
 import androidx.credentials.provider.ProviderCreateCredentialRequest
 import androidx.credentials.provider.ProviderGetCredentialRequest
+import androidx.credentials.registry.provider.SelectedCredentialSet
+import androidx.credentials.registry.provider.selectedCredentialSet
 import androidx.credentials.registry.provider.selectedEntryId
 import androidx.fragment.app.FragmentActivity
 import com.credman.cmwallet.CmWalletApplication
@@ -161,7 +163,7 @@ class GetCredentialActivity : FragmentActivity() {
         val newEntryId = data?.getStringExtra("newEntryId")!!
         handleRequest(
             JSONObject().put("provider_idx", 0).put("id", newEntryId).toString(),
-            selectionInfo = null,
+            selectedSet = null,
             request!!
         )
     }
@@ -172,15 +174,15 @@ class GetCredentialActivity : FragmentActivity() {
         this.request = request
         if (request != null) {
             Log.i(TAG, "selectedEntryId ${request.selectedEntryId}")
-            Log.i(TAG, "selectionInfo ${request.selectionInfo}")
-            handleRequest(request.selectedEntryId, selectionInfo = request.selectionInfo, request)
+            Log.i(TAG, "selectedCredentialSet ${request.selectedCredentialSet}")
+            handleRequest(request.selectedEntryId, selectedSet = request.selectedCredentialSet, request)
         }
     }
 
     @OptIn(ExperimentalDigitalCredentialApi::class)
     fun handleRequest(
         entryId: String?, // TODO: deprecate this usage
-        selectionInfo: SelectionInfo?,
+        selectedSet: SelectedCredentialSet?,
         request: ProviderGetCredentialRequest
     ) {
         var origin = request.callingAppInfo.getOrigin(
@@ -260,7 +262,7 @@ class GetCredentialActivity : FragmentActivity() {
                     val selectedEntryInfo = if (entryId != null) {
                         InternalSelectionInfo.fromEntryIdJson(entryId)
                     } else {
-                        InternalSelectionInfo.fromSelectionInfo(selectionInfo!!)
+                        InternalSelectionInfo.fromSelectedSet(selectedSet!!)
                     }
                     Log.d(TAG, "Selected Entry Info:${selectedEntryInfo}")
 
