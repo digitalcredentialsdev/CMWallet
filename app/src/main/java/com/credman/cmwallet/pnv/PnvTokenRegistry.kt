@@ -311,7 +311,10 @@ fun maybeHandlePnv(
     val aggregatorCertChain = credAuthJwtHeader.getJSONArray("x5c") // See the x5c cert chain defined at https://datatracker.ietf.org/doc/html/rfc7515#section-4.1.6
     // TODO: validate the aggregator cert is allowed to request phone number verification for the given carrier
 
+    val state = credAuthJwtpayload.optString("state")
+
     val consentData = credAuthJwtpayload.optString("consent_data")
+
     val md = MessageDigest.getInstance("SHA-256")
     val consentDataHash: String? =
         if (consentData.isEmpty()) { null }
@@ -396,6 +399,7 @@ fun maybeHandlePnv(
             put("nonce", openId4VPRequest.nonce)
             put("encrypted_credential", encryptedTempTokenJwe)
             put("consent_data_hash", consentDataHash)
+            put("state", state)
             put("sd_hash", digest)
             put("subscription_hint", selectedCred.subscriptionHint)
             put("carrier_hint", selectedCred.carrierHint)
