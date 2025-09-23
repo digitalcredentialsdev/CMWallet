@@ -454,7 +454,7 @@
                 "display_value": "Jon Smith"
             },
             "card_number": {
-                "value": 5466000055552312,
+                "value": "5466000055552312",
                 "display": "Card Number",
                 "display_value": "**** **** **** 2312"
             },
@@ -477,6 +477,11 @@
                 "value": "Tribank",
                 "display": "Card issuer",
                 "display_value": "Tribank"
+            },
+            "par": {
+                "value": "00011",
+                "display": "Card Number",
+                "display_value": "Card Number"
             }
         }
       },
@@ -628,6 +633,11 @@
                 "value": "Tribank",
                 "display": "Card issuer",
                 "display_value": "Tribank"
+            },
+            "par": {
+                "value": "00012",
+                "display": "Card Number",
+                "display_value": "Card Number"
             }
         }
       },
