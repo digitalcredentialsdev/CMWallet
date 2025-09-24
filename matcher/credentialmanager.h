@@ -102,3 +102,9 @@ __attribute__((import_module("credman"), import_name("GetCallingAppInfo")))
 void GetCallingAppInfo(CallingAppInfo* info);
 
 #endif 
+
+// Only works for system applications
+#if defined(__wasm__)
+__attribute__((import_module("credman_v4"), import_name("SelfDeclarePackageInfo")))
+#endif
+void SelfDeclarePackageInfo(char *package_display_name, char* package_icon, size_t package_icon_len);
