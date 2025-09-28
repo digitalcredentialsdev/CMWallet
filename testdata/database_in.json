@@ -1002,7 +1002,7 @@
         },
         "given_name": {
             "value": "Erika",
-            "display": "Family Name",
+            "display": "Given Name",
             "display_value": "Erika",
             "_sd": true
         },
@@ -1106,7 +1106,7 @@
         },
         "given_name": {
             "value": "Erika",
-            "display": "Family Name",
+            "display": "Given Name",
             "display_value": "Erika",
             "_sd": true
         },
@@ -1239,6 +1239,156 @@
         }
       ]
     },
+  {
+    "id": "pid_sdjwt_jan",
+    "paths": {
+      "family_name": {
+        "value": "Smit",
+        "display": "Family Name",
+        "display_value": "Smit",
+        "_sd": true
+      },
+      "given_name": {
+        "value": "Jan",
+        "display": "Given Name",
+        "display_value": "Jan",
+        "_sd": true
+      },
+      "sex": {
+        "value": 1,
+        "display": "Sex",
+        "display_value": "Male",
+        "_sd": true
+      },
+      "birthdate": {
+        "value": "1974-01-17",
+        "display": "Birthday",
+        "display_value": "17 Jan 1974",
+        "_sd": true
+      },
+      "age_equal_or_over": {
+        "18": {
+          "value": true,
+          "display": "Age over 18",
+          "display_value": "Age over 18: Yes",
+          "_sd": true
+        },
+        "_sd": false
+      },
+      "portrait": {
+        "value": "TODO",
+        "display": "Portrait",
+        "display_value": "TODO",
+        "_sd": true
+      },
+      "address": {
+        "street_address": {
+          "value": "Schenkkade 9000",
+          "display": "Street Address",
+          "display_value": "Schenkkade 9000",
+          "_sd": true
+        },
+        "postal_code": {
+          "value": "3011AA",
+          "display": "Postal Code",
+          "display_value": "3011AA",
+          "_sd": true
+        },
+        "locality": {
+          "value": "Rotterdam",
+          "display": "Resident City",
+          "display_value": "Rotterdam",
+          "_sd": true
+        },
+        "country": {
+          "value": "NL",
+          "display": "Country",
+          "display_value": "Netherlands",
+          "_sd": true
+        },
+        "_sd": false
+      },
+      "iss": {
+        "value": "https://digital-credentials.dev",
+        "_sd": false
+      },
+      "iat": {
+        "value": 1683000000,
+        "_sd": false
+      },
+      "exp": {
+        "value": 1883000000,
+        "_sd": false
+      }
+    },
+    "config": {
+      "format": "dc+sd-jwt",
+      "vct": "urn:eudi:pid:1",
+      "cryptographic_binding_methods_supported": [
+        "jwk"
+      ],
+      "credential_signing_alg_values_supported": [
+        "ES256"
+      ],
+      "display": [
+        {
+          "name": "PID",
+          "locale": "en-US",
+          "description": "PID"
+        }
+      ],
+      "claims": [
+        {
+          "path": [
+            "family_name"
+          ],
+          "display": [
+            {
+              "locale": "en-US",
+              "name": "Family Name"
+            }
+          ]
+        },
+        {
+          "path": [
+            "given_name"
+          ],
+          "display": [
+            {
+              "locale": "en-US",
+              "name": "Family Name"
+            }
+          ]
+        },
+        {
+          "path": [
+            "age_equal_or_over",
+            "18"
+          ],
+          "display": [
+            {
+              "locale": "en-US",
+              "name": "Age over 18"
+            }
+          ]
+        }
+      ]
+    },
+    "displayData": {
+      "title": "Jan's PID",
+      "subtitle": "Utopia Government"
+    },
+    "credentials": [
+      {
+        "key": {
+          "type": "SOFTWARE",
+          "publicKey": "123",
+          "privateKey": "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg1LytCs1pW8c_LYGNKJXCuyX2cl6CjmZfZh5kwSgnctKhRANCAAR0Wpf3MyDWOqZMPXy-dzK0swr-E15qwjeKWI8rvTq5O1kq6LYIRgPiO4vCbhQc_5rSA2Z9SU40f56q4qSiGKbS"
+        },
+        "credential": "eyJhbGciOiAiRVMyNTYiLCAidHlwIjogImRjK3NkLWp3dCIsICJ4NWMiOiBbIk1JSUM1akNDQW8yZ0F3SUJBZ0lVRVJjNEQzRVpQY25MdXg2N1ZWZDU4d2lrWGRjd0NnWUlLb1pJemowRUF3SXdlakVMTUFrR0ExVUVCaE1DVlZNeEV6QVJCZ05WQkFnTUNrTmhiR2xtYjNKdWFXRXhGakFVQmdOVkJBY01EVTF2ZFc1MFlXbHVJRlpwWlhjeEhEQWFCZ05WQkFvTUUwUnBaMmwwWVd3Z1EzSmxaR1Z1ZEdsaGJITXhJREFlQmdOVkJBTU1GMlJwWjJsMFlXd3RZM0psWkdWdWRHbGhiSE11WkdWMk1CNFhEVEkxTURReU5URTBNVEl5TmxvWERUSTJNRFF5TlRFME1USXlObG93ZWpFTE1Ba0dBMVVFQmhNQ1ZWTXhFekFSQmdOVkJBZ01Da05oYkdsbWIzSnVhV0V4RmpBVUJnTlZCQWNNRFUxdmRXNTBZV2x1SUZacFpYY3hIREFhQmdOVkJBb01FMFJwWjJsMFlXd2dRM0psWkdWdWRHbGhiSE14SURBZUJnTlZCQU1NRjJScFoybDBZV3d0WTNKbFpHVnVkR2xoYkhNdVpHVjJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUV1TGQ1aUhPK05UNlJzNDZwQkFrQWM4RW1mb3gvOGtqSXJFclF2UGFBSjMxemRWWEV2a1pPZFFqV0wydy9xblJKZ2c4c2hETnp5RUZ0UENqMTg0WExGcU9COERDQjdUQWZCZ05WSFNNRUdEQVdnQlQ2aVpRaFo4NG83Mi9lWGZyZHpxMXBUSTdQQ2pBZEJnTlZIUTRFRmdRVWc3ZE1LSjViaElVTnBsS2RmWFlhUkdQQ2dOVXdJZ1lEVlIwUkJCc3dHWUlYWkdsbmFYUmhiQzFqY21Wa1pXNTBhV0ZzY3k1a1pYWXdOQVlEVlIwZkJDMHdLekFwb0NlZ0pZWWphSFIwY0hNNkx5OWthV2RwZEdGc0xXTnlaV1JsYm5ScFlXeHpMbVJsZGk5amNtd3dLZ1lEVlIwU0JDTXdJWVlmYUhSMGNITTZMeTlrYVdkcGRHRnNMV055WldSbGJuUnBZV3h6TG1SbGRqQU9CZ05WSFE4QkFmOEVCQU1DQjRBd0ZRWURWUjBsQVFIL0JBc3dDUVlIS0lHTVhRVUJBakFLQmdncWhrak9QUVFEQWdOSEFEQkVBaUFnR3VXekxpdnJGbTRWOU45SEN5Z1ErbHU2am9zN2FlZ0d1N2xaOEs1WFFRSWdLM1N0Rm5nL2YwTTdhcUZGWGs1S0VUUTN1UUZtY3JUcVE3eHJwWWF3dTFNPSIsICJNSUlDdVRDQ0FsK2dBd0lCQWdJVVE3aG5TbTNrSWRGdUFOYW5GcGs0ekVkeW4xc3dDZ1lJS29aSXpqMEVBd0l3ZWpFTE1Ba0dBMVVFQmhNQ1ZWTXhFekFSQmdOVkJBZ01Da05oYkdsbWIzSnVhV0V4RmpBVUJnTlZCQWNNRFUxdmRXNTBZV2x1SUZacFpYY3hIREFhQmdOVkJBb01FMFJwWjJsMFlXd2dRM0psWkdWdWRHbGhiSE14SURBZUJnTlZCQU1NRjJScFoybDBZV3d0WTNKbFpHVnVkR2xoYkhNdVpHVjJNQjRYRFRJMU1EUXlOVEUwTVRJeU5sb1hEVE0xTURReE16RTBNVEl5Tmxvd2VqRUxNQWtHQTFVRUJoTUNWVk14RXpBUkJnTlZCQWdNQ2tOaGJHbG1iM0p1YVdFeEZqQVVCZ05WQkFjTURVMXZkVzUwWVdsdUlGWnBaWGN4SERBYUJnTlZCQW9NRTBScFoybDBZV3dnUTNKbFpHVnVkR2xoYkhNeElEQWVCZ05WQkFNTUYyUnBaMmwwWVd3dFkzSmxaR1Z1ZEdsaGJITXVaR1YyTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFcUlEL0lLV21UMGVlYmQzaEd5OEIwQ2R6VDlxclliOG5IYVFSNGJFNG5YUVFCSEF3ZFd5bTJqakxmYjVXbzJzSCtSdkZrRkFwUG5tdjBhcFA3SXkwaTZPQndqQ0J2ekFpQmdOVkhSRUVHekFaZ2hka2FXZHBkR0ZzTFdOeVpXUmxiblJwWVd4ekxtUmxkakFkQmdOVkhRNEVGZ1FVK29tVUlXZk9LTzl2M2wzNjNjNnRhVXlPendvd0h3WURWUjBqQkJnd0ZvQVUrb21VSVdmT0tPOXYzbDM2M2M2dGFVeU96d293RWdZRFZSMFRBUUgvQkFnd0JnRUIvd0lCQURBT0JnTlZIUThCQWY4RUJBTUNBUVl3S2dZRFZSMFNCQ013SVlZZmFIUjBjSE02THk5a2FXZHBkR0ZzTFdOeVpXUmxiblJwWVd4ekxtUmxkakFKQmdOVkhSOEVBakFBTUFvR0NDcUdTTTQ5QkFNQ0EwZ0FNRVVDSUEwdFc0ayt1SEFsOXRmNFdOa3NxRVIwT1JLK2pHd1NoV2Z2RjJtVzZKenZBaUVBaGhjQUxxNm1sSmd2MThwZnpjZ1B6N3lPMTc1bmxFWTF0ZVlpYVBmWWlucz0iXX0.eyJfc2QiOiBbIk5wTzB5QXpudHkybEFuY2x5NWlERmZYcWhhZ1U3WjgyZlpvRFNUMFZLN0EiLCAiYWczc05pRGNnWWdtTF8zVXRidkgxMkNEZzhwTy04TVJqdWMtWVNyR0M2NCJdLCAiYWdlX2VxdWFsX29yX292ZXIiOiB7Il9zZCI6IFsib3FrNS1Mc1JRQ0JTa01xVHphSUpKYjVGRjNPX2J2QXRhUGJjSVN2T1RXayJdfSwgImlzcyI6ICJodHRwczovL2RpZ2l0YWwtY3JlZGVudGlhbHMuZGV2IiwgImlhdCI6IDE2ODMwMDAwMDAsICJleHAiOiAxODgzMDAwMDAwLCAidmN0IjogInVybjpldWRpOnBpZDoxIiwgIl9zZF9hbGciOiAic2hhLTI1NiIsICJjbmYiOiB7Imp3ayI6IHsia3R5IjogIkVDIiwgImNydiI6ICJQLTI1NiIsICJ4IjogImRGcVg5ek1nMWpxbVREMTh2bmN5dExNS19oTmVhc0kzaWxpUEs3MDZ1VHMiLCAieSI6ICJXU3JvdGdoR0EtSTdpOEp1RkJ6X210SURabjFKVGpSX25xcmlwS0lZcHRJIn19fQ.vgIUKFvMdyhp8gNXVLu0Mh4ajQ6Ck2mW481_ULxxc3Rd_f7GT60oGDzzU3qNDlCrioUpymNkmzSAiOgwrELpMw~WyJZaG8wTF9WdlZNNmxCVEVXZHhaVzZnIiwgImZhbWlseV9uYW1lIiwgIk11c3Rlcm1hbm4iXQ~WyJPZHRIaUdIaXJBaE1JOExfeHk3bW1BIiwgImdpdmVuX25hbWUiLCAiRXJpa2EiXQ~WyI4QjRqRkV1MjdQaHdJY2pBTmVOZF93IiwgIjE4IiwgdHJ1ZV0~"
+      }
+    ]
+  },
     {
       "id": "photo_id",
       "nameSpaces": {
