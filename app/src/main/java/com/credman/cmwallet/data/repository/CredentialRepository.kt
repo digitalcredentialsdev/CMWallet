@@ -183,6 +183,19 @@ class CredentialRepository {
             val currPath = path.toMutableList() // Make a copy
             currPath.add(key)
             if (v is JSONObject) {
+                val displayName = displayConfig?.claims?.firstOrNull{
+                    JSONArray(it.path) == currPath
+                }?.display?.first()?.name ?: currPath.joinToString(separator = ".")
+                claims.add(
+                    SdJwtClaim(
+                        path = currPath,
+                        value = null,
+                        fieldDisplayPropertySet = setOf(VerificationFieldDisplayProperties(
+                            displayName = displayName,
+                        )),
+//                        isSelectivelyDisclosable = TODO()
+                    )
+                )
                 constructJwtClaims(
                     v,
                     displayConfig,

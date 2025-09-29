@@ -9,13 +9,17 @@ import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.security.MessageDigest
 import android.util.Base64
+import android.util.Log
 import com.credman.cmwallet.createJWTES256
 import com.credman.cmwallet.jwsDeserialization
 import com.credman.cmwallet.loadECPrivateKey
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import java.lang.IllegalStateException
 import java.security.PrivateKey
 import java.time.Instant
+import kotlin.collections.iterator
+import kotlin.collections.mutableListOf
 
 class SdJwt(
     credential: String,
@@ -35,6 +39,23 @@ class SdJwt(
 
     val verifiedResult: VerificationResult by lazy {
         verify(issuerJwt, disclosures)
+    }
+
+    private fun addDisclosuresToPresentation(sd: JSONObject, ret: MutableList<String>) {
+        for (key in sd.keys()) {
+            if ("_sd" == key) {
+                val digest = sd.getString("_sd")
+                val disclosure = verifiedResult.digestDisclosureMap[digest]!!
+                ret.add(disclosure)
+            } else {
+                val recursiveSd = sd.get(key)
+                if (recursiveSd is JSONObject) {
+                    addDisclosuresToPresentation(recursiveSd, ret)
+                } else {
+                    throw IllegalStateException("Unexpected type ${recursiveSd::class.java}")
+                }
+            }
+        }
     }
 
     fun present(
@@ -67,8 +88,7 @@ class SdJwt(
                         }
                     }
                     if (claimSetMatched) {
-                        val digest = sd.getString("_sd")
-                        ret.add(verifiedResult.digestDisclosureMap[digest]!!)
+                        addDisclosuresToPresentation(sd, ret)
                     } else {
                         break
                     }

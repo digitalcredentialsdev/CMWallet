@@ -1156,7 +1156,7 @@
                 "display_value": "Italy",
                 "_sd": true
             },
-            "_sd": false
+            "_sd": true
         },
         "iss": {
             "value": "https://digital-credentials.dev",
@@ -1306,7 +1306,7 @@
           "display_value": "Netherlands",
           "_sd": true
         },
-        "_sd": false
+        "_sd": true
       },
       "iss": {
         "value": "https://digital-credentials.dev",
