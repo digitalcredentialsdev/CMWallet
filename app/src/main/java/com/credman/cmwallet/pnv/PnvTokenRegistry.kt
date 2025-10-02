@@ -17,7 +17,6 @@ import com.credman.cmwallet.getcred.GetCredentialActivity.DigitalCredentialReque
 import com.credman.cmwallet.getcred.GetCredentialActivity.DigitalCredentialResult
 import com.credman.cmwallet.jweSerialization
 import com.credman.cmwallet.jwsDeserialization
-import com.credman.cmwallet.loadECPrivateKey
 import com.credman.cmwallet.openid4vp.OpenId4VP
 import com.credman.cmwallet.openid4vp.OpenId4VP.Companion.IDENTIFIERS_1_0
 import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.TEST_PNV_1_GET_PHONE_NUMBER
@@ -40,7 +39,8 @@ import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.KeyStore
 import java.security.MessageDigest
-import java.security.interfaces.ECPrivateKey
+import java.security.SecureRandom
+import java.security.cert.Certificate
 import java.time.Instant
 
 /**
@@ -231,36 +231,49 @@ private class SdJwtRegistryItem(
     val displayData: ItemDisplayData,
 )
 
-private fun getDeviceKey(): KeyPair {
+private fun getDeviceKey(): Pair<KeyPair, Array<out Certificate>?> {
     val alias = "pnv"
     val ks: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
         load(null)
     }
-    if (ks.containsAlias(alias)) {
+    if (ks.containsAlias(alias) && hasAttestationChain(ks.getCertificateChain(alias))) {
         val entry = ks.getEntry(alias, null)
         if (entry !is KeyStore.PrivateKeyEntry) {
             throw IllegalStateException("Not an instance of a PrivateKeyEntry")
         }
         val private = entry.privateKey
         val public = ks.getCertificate(alias).publicKey
-        return KeyPair(public, private)
+        return KeyPair(public, private) to ks.getCertificateChain(alias)
     } else {
-        val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(
-            KeyProperties.KEY_ALGORITHM_EC,
-            "AndroidKeyStore"
-        )
-        val parameterSpec: KeyGenParameterSpec = KeyGenParameterSpec.Builder(
-            alias,
-            KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
-        ).run {
-            setDigests(KeyProperties.DIGEST_SHA256)
-            build()
-        }
-        kpg.initialize(parameterSpec)
-
-        val kp = kpg.generateKeyPair()
-        return kp
+        return generateNewDeviceKeyWithAttestation(alias, ks)
     }
+}
+
+private fun generateNewDeviceKeyWithAttestation(alias: String, ks: KeyStore): Pair<KeyPair, Array<out Certificate>?> {
+    val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(
+        KeyProperties.KEY_ALGORITHM_EC,
+        "AndroidKeyStore"
+    )
+    val parameterSpec: KeyGenParameterSpec = KeyGenParameterSpec.Builder(
+        alias,
+        KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
+    ).run {
+        setDigests(KeyProperties.DIGEST_SHA256)
+        val challenge = ByteArray(32)
+        SecureRandom().nextBytes(challenge)
+        setAttestationChallenge(challenge)
+        build()
+    }
+    kpg.initialize(parameterSpec)
+
+    return kpg.generateKeyPair() to ks.getCertificateChain(alias)
+}
+
+fun hasAttestationChain(chain: Array<Certificate>?): Boolean {
+    if (chain == null || chain.size < 2) return false // probably self-signed
+    val leaf = chain[0] as java.security.cert.X509Certificate
+    val attestationExt = leaf.getExtensionValue("1.3.6.1.4.1.11129.2.1.17")
+    return attestationExt != null
 }
 
 fun maybeHandlePnv(
@@ -344,33 +357,17 @@ fun maybeHandlePnv(
     }
     val encryptedTempTokenJwe = jweSerialization(aggregatorEncKey, tempTokenJson.toString())
 
-    val tmpDeviceTelModuleKey =
-        "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgDjyeClEmdOMYvM4Z_Na6LMFBBCQVccbvFY8viKrKe3ihRANCAATsIpdWwRMyeKgnO0dpDqkuuiwXCsS4Hall8XapYdfjbZbjda1XEmoTkAh7VUFocfUGUSTXfct5-YtspHSI-b5Q"
-    val deviceTelModulePrivateKey =
-        loadECPrivateKey(Base64.decode(tmpDeviceTelModuleKey, Base64.URL_SAFE)) as ECPrivateKey
-
-    val deviceKp = getDeviceKey()
+    val (deviceKp, certChain) = getDeviceKey()
 
     val deviceTelModuleJwt = createJWTES256(
         header = buildJsonObject {
             put("alg", "ES256")
             put("typ", "dc-authorization+sd-jwt")
             put("x5c", buildJsonArray {
-                add("MIICpTCCAkugAwIBAgIUBe8Q81IQCydA1wJopRPS0mV3qSEwCgYIKoZIzj0EAwIw" +
-                        "eDELMAkGA1UEBhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExFjAUBgNVBAcMDU1v" +
-                        "dW50YWluIFZpZXcxGzAZBgNVBAoMEkV4YW1wbGUgQWdncmVnYXRvcjEfMB0GA1UE" +
-                        "AwwWZXhhbXBsZS1hZ2dyZWdhdG9yLmRldjAeFw0yNTA3MTAyMzA5MjdaFw0zNTA2" +
-                        "MjgyMzA5MjdaMHgxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYw" +
-                        "FAYDVQQHDA1Nb3VudGFpbiBWaWV3MRswGQYDVQQKDBJFeGFtcGxlIEFnZ3JlZ2F0" +
-                        "b3IxHzAdBgNVBAMMFmV4YW1wbGUtYWdncmVnYXRvci5kZXYwWTATBgcqhkjOPQIB" +
-                        "BggqhkjOPQMBBwNCAATsIpdWwRMyeKgnO0dpDqkuuiwXCsS4Hall8XapYdfjbZbj" +
-                        "da1XEmoTkAh7VUFocfUGUSTXfct5+YtspHSI+b5Qo4GyMIGvMB0GA1UdDgQWBBQr" +
-                        "uSyYfuqtU1z+WuBc0/oLWzQjdTAfBgNVHSMEGDAWgBQruSyYfuqtU1z+WuBc0/oL" +
-                        "WzQjdTAPBgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIHgDApBgNVHRIEIjAg" +
-                        "hh5odHRwczovL2V4YW1wbGUtYWdncmVnYXRvci5jb20wIQYDVR0RBBowGIIWZXhh" +
-                        "bXBsZS1hZ2dyZWdhdG9yLmNvbTAKBggqhkjOPQQDAgNIADBFAiAgyzgtUeHlK8Y0" +
-                        "57U96T6vDf8GC5lqVAsiw2WeCuzpAAIhAOiBuSccsgYNTqBVsVo6O0rAqXmemMBi" +
-                        "a1C7vhJEvtaX")
+                certChain?.toList()?.forEach { cert ->
+                    val encoded = Base64.encodeToString(cert.encoded, Base64.NO_WRAP)
+                    add(encoded)
+                }
             })
         },
         payload = buildJsonObject {
@@ -382,7 +379,7 @@ fun maybeHandlePnv(
             put("exp", 1883000000)
             put("iat", 1683000000)
         },
-        privateKey = deviceTelModulePrivateKey
+        privateKey = deviceKp.private
     )
     val sdJwt = deviceTelModuleJwt + "~"
 
