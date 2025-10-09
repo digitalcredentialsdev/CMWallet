@@ -12,7 +12,7 @@ import com.credman.cmwallet.openid4vci.data.CredentialResponse
 import com.credman.cmwallet.openid4vci.data.NonceResponse
 import com.credman.cmwallet.openid4vci.data.OauthAuthorizationServer
 import com.credman.cmwallet.openid4vci.data.ParResponse
-import com.credman.cmwallet.openid4vci.data.Proof
+import com.credman.cmwallet.openid4vci.data.Proofs
 import com.credman.cmwallet.openid4vci.data.TokenRequest
 import com.credman.cmwallet.openid4vci.data.TokenResponse
 import com.credman.cmwallet.toBase64UrlNoPadding
@@ -21,7 +21,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -32,11 +31,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.http.headers
 import io.ktor.http.parameters
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.encodeBase64
-import io.ktor.util.reflect.TypeInfo
 import kotlinx.coroutines.delay
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -48,7 +45,6 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
-import org.json.JSONArray
 import org.json.JSONObject
 import java.security.KeyPair
 import java.security.KeyPairGenerator
@@ -270,6 +266,7 @@ class OpenId4VCI(val credentialOfferJson: String) {
         credentialRequest: CredentialRequest,
         nonce: String? = null,
     ): CredentialResponse {
+        Log.d(TAG, "Credential request: $credentialRequest")
         val endpoint = credentialOffer.issuerMetadata.credentialEndpoint
         val md = MessageDigest.getInstance("SHA256")
         val accessTokenHash = md.digest(accessToken.toByteArray()).toBase64UrlNoPadding()
@@ -327,10 +324,11 @@ class OpenId4VCI(val credentialOfferJson: String) {
         )
     }
 
-    suspend fun createProofJwt(publicKey: PublicKey, privateKey: PrivateKey): Proof {
-        return Proof(
-            proofType = "jwt",
-            jwt = createJwt(publicKey, privateKey)
+    suspend fun createProofJwt(keyPairs: List<KeyPair>): Proofs {
+        return Proofs(
+            jwt = keyPairs.map {
+                createJwt(it.public, it.private)
+            }
         )
     }
 

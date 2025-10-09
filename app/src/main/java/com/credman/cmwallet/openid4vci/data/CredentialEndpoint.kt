@@ -7,9 +7,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Proof(
-    @SerialName("proof_type") val proofType: String,
-    @SerialName("jwt") val jwt: String? = null,
+data class Proofs(
+    @SerialName("jwt") val jwt: List<String>? = null,
     @SerialName("attestation") val attestation: String? = null
 )
 
@@ -17,7 +16,7 @@ data class Proof(
 data class CredentialRequest(
     @SerialName("credential_identifier") val credentialIdentifier: String? = null,
     @SerialName("credential_configuration_id") val credentialConfigurationId: String? = null,
-    @SerialName("proof") val proof: Proof? = null
+    @SerialName("proofs") val proofs: Proofs? = null
 )
 
 @Serializable

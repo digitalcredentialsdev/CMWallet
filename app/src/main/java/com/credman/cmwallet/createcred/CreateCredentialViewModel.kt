@@ -23,21 +23,25 @@ import com.credman.cmwallet.data.model.CredentialDisplayData
 import com.credman.cmwallet.data.model.CredentialItem
 import com.credman.cmwallet.data.model.CredentialKeySoftware
 import com.credman.cmwallet.data.room.CredentialDatabaseItem
+import com.credman.cmwallet.decodeBase64UrlNoPadding
 import com.credman.cmwallet.getcred.createOpenID4VPResponse
-import com.credman.cmwallet.loadECPrivateKey
+import com.credman.cmwallet.mdoc.MDoc
 import com.credman.cmwallet.openid4vci.OpenId4VCI
 import com.credman.cmwallet.openid4vci.data.AuthorizationDetailResponseOpenIdCredential
+import com.credman.cmwallet.openid4vci.data.CredentialConfigurationMDoc
 import com.credman.cmwallet.openid4vci.data.CredentialRequest
 import com.credman.cmwallet.openid4vci.data.GrantAuthorizationCode
 import com.credman.cmwallet.openid4vci.data.TokenRequest
 import com.credman.cmwallet.openid4vci.data.TokenResponse
 import com.credman.cmwallet.openid4vci.data.imageUriToImageB64
 import com.credman.cmwallet.openid4vp.OpenId4VP
+import com.credman.cmwallet.toFixedByteArray
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import java.security.KeyFactory
-import java.security.interfaces.ECPrivateKey
-import java.security.spec.X509EncodedKeySpec
+import java.security.KeyPair
+import java.security.KeyPairGenerator
+import java.security.interfaces.ECPublicKey
+import java.security.spec.ECGenParameterSpec
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -71,16 +75,6 @@ class CreateCredentialViewModel : ViewModel() {
         private set
 
     private lateinit var openId4VCI: OpenId4VCI
-
-    val tmpKey =
-        "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg6ef4-enmfQHRWUW40-Soj3aFB0rsEOp3tYMW-HJPBvChRANCAAT5N1NLZcub4bOgWfBwF8MHPGkfJ8Dm300cioatq9XovaLgG205FEXUOuNMEMQuLbrn8oiOC0nTnNIVn-OtSmSb"
-    val tmpPublicKey =
-        "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE-TdTS2XLm-GzoFnwcBfDBzxpHyfA5t9NHIqGravV6L2i4BttORRF1DrjTBDELi265_KIjgtJ05zSFZ_jrUpkmw=="
-    val privateKey =
-        loadECPrivateKey(Base64.decode(tmpKey, Base64.URL_SAFE)) as ECPrivateKey
-    val publicKeySpec = X509EncodedKeySpec(Base64.decode(tmpPublicKey, Base64.URL_SAFE))
-    val kf = KeyFactory.getInstance("EC")
-    val publicKey = kf.generatePublic(publicKeySpec)!!
 
     fun onNewRequest(request: ProviderCreateCredentialRequest) {
         viewModelScope.launch {
@@ -117,11 +111,17 @@ class CreateCredentialViewModel : ViewModel() {
     private suspend fun processToken(tokenResponse: TokenResponse) {
         val newCredentials = mutableListOf<CredentialItem>()
         tokenResponse.scopes?.split(" ")?.forEach { scope ->
+            val deviceKeys: MutableList<KeyPair> = mutableListOf()
+            val kpg = KeyPairGenerator.getInstance("EC")
+            kpg.initialize(ECGenParameterSpec("secp256r1"))
+            for (i in 0..< (openId4VCI.credentialOffer.issuerMetadata.batchCredentialIssuance?.batchSize ?: 1)) {
+                deviceKeys.add(kpg.genKeyPair())
+            }
             val credentialResponse = openId4VCI.requestCredentialFromEndpoint(
                 accessToken = tokenResponse.accessToken,
                 credentialRequest = CredentialRequest(
                     credentialConfigurationId = scope,
-                    proof = openId4VCI.createProofJwt(publicKey, privateKey)
+                    proofs = openId4VCI.createProofJwt(deviceKeys)
                 )
             )
             Log.i(TAG, "credentialResponse $credentialResponse")
@@ -137,10 +137,23 @@ class CreateCredentialViewModel : ViewModel() {
                     icon = display?.logo?.uri.imageUriToImageB64()
                 ),
                 credentials = credentialResponse.credentials!!.map {
+                    val deviceKeyPair = when (config) {
+                        is CredentialConfigurationMDoc -> {
+                            val mdoc = MDoc(it.credential.decodeBase64UrlNoPadding())
+                            val deviceKey = mdoc.deviceKey
+                            deviceKeys.firstOrNull {
+                                val public = it.public as ECPublicKey
+                                val x = String(public.w.affineX.toFixedByteArray(32))
+                                val y = String(public.w.affineY.toFixedByteArray(32))
+                                x == deviceKey.first && y == deviceKey.second
+                            }
+                        }
+                        else -> throw UnsupportedOperationException("Unknown configuration $config")
+                    }
                     Credential(
                         key = CredentialKeySoftware(
-                            publicKey = tmpPublicKey,
-                            privateKey = tmpKey
+                            publicKey = Base64.encodeToString(deviceKeyPair!!.public.encoded, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
+                            privateKey = Base64.encodeToString(deviceKeyPair.private.encoded, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
                         ),
                         credential = it.credential
                     )
@@ -152,11 +165,17 @@ class CreateCredentialViewModel : ViewModel() {
             when (authDetail) {
                 is AuthorizationDetailResponseOpenIdCredential -> {
                     authDetail.credentialIdentifiers.forEach { credentialId ->
+                        val deviceKeys: MutableList<KeyPair> = mutableListOf()
+                        val kpg = KeyPairGenerator.getInstance("EC")
+                        kpg.initialize(ECGenParameterSpec("secp256r1"))
+                        for (i in 0..< (openId4VCI.credentialOffer.issuerMetadata.batchCredentialIssuance?.batchSize ?: 1)) {
+                            deviceKeys.add(kpg.genKeyPair())
+                        }
                         val credentialResponse = openId4VCI.requestCredentialFromEndpoint(
                             accessToken = tokenResponse.accessToken,
                             credentialRequest = CredentialRequest(
                                 credentialIdentifier = credentialId,
-                                proof = openId4VCI.createProofJwt(publicKey, privateKey)
+                                proofs = openId4VCI.createProofJwt(deviceKeys)
                             ),
                         )
                         Log.i(TAG, "credentialResponse $credentialResponse")
@@ -171,10 +190,24 @@ class CreateCredentialViewModel : ViewModel() {
                                 icon = display?.logo?.uri.imageUriToImageB64()
                             ),
                             credentials = credentialResponse.credentials!!.map {
+                                val deviceKeyPair = when (config) {
+                                    is CredentialConfigurationMDoc -> {
+                                        val mdoc = MDoc(it.credential.decodeBase64UrlNoPadding())
+                                        val deviceKey = mdoc.deviceKey
+                                        deviceKeys.firstOrNull {
+                                            val public = it.public as ECPublicKey
+                                            val x = String(public.w.affineX.toFixedByteArray(32))
+                                            val y = String(public.w.affineY.toFixedByteArray(32))
+                                            x == deviceKey.first && y == deviceKey.second
+                                        }
+                                    }
+                                    else -> throw UnsupportedOperationException("Unknown configuration $config")
+                                }
+
                                 Credential(
                                     key = CredentialKeySoftware(
-                                        publicKey = tmpPublicKey,
-                                        privateKey = tmpKey
+                                        publicKey = Base64.encodeToString(deviceKeyPair!!.public.encoded, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
+                                        privateKey = Base64.encodeToString(deviceKeyPair.private.encoded, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
                                     ),
                                     credential = it.credential
                                 )

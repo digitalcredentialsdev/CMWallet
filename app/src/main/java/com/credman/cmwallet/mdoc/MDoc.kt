@@ -1,6 +1,8 @@
 package com.credman.cmwallet.mdoc
 
 import android.util.Base64
+import android.util.Log
+import com.credman.cmwallet.CmWalletApplication.Companion.TAG
 import com.credman.cmwallet.cbor.CborTag
 import com.credman.cmwallet.cbor.cborDecode
 import com.credman.cmwallet.cbor.cborEncode
@@ -32,6 +34,19 @@ class MDoc(
 ) {
     private val issuerSignedDict: Map<*, *> by lazy {
         cborDecode(issuerSigned) as Map<*, *>
+    }
+
+    val deviceKey: Pair<String, String> by lazy {
+        val issuerAuth = issuerSignedDict["issuerAuth"] as List<*>
+        val payload = issuerAuth[2] as ByteArray
+        val decodedPayload = cborDecode(
+            (cborDecode(payload) as CborTag).item as ByteArray
+        ) as Map<String, Map<*, *>>
+        val deviceKeyInfo = decodedPayload["deviceKeyInfo"]!!
+        val deviceKey = deviceKeyInfo["deviceKey"] as Map<*, *>
+        val x = deviceKey[-2L] as ByteArray
+        val y = deviceKey[-3L] as ByteArray // Always assume EC keys for now
+        return@lazy Pair(String(x), String(y))
     }
 
     val issuerSignedNamespaces: Map<String, Map<String, Any?>> by lazy {
