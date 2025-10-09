@@ -71,21 +71,6 @@ fun HomeScreen(
         Column(
             modifier = Modifier.padding(innerPadding),
         ) {
-            Row(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                val activity = LocalActivity.current as MainActivity
-                Button(
-                    onClick = {
-                        viewModel.testIssuance(activity)
-                    }
-                ) {
-                    Text("Test Issuance")
-                }
-            }
             HorizontalDivider(thickness = 2.dp)
             CredentialList(
                 uiState.credentials,
