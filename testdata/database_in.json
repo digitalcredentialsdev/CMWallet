@@ -1719,6 +1719,11 @@
                 "display": "Arrival Airport",
                 "display_value": "SFO"
             },
+            "departure_airport_iata": {
+                "value": "SJC",
+                "display": "Departure Airport",
+                "display_value": "SJC"
+            },
             "assurance_level": {
                 "value": "SELF_ATTESTED",
                 "display": "Assurance Level",
