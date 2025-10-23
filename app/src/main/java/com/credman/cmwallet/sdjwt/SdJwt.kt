@@ -9,7 +9,6 @@ import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.security.MessageDigest
 import android.util.Base64
-import android.util.Log
 import com.credman.cmwallet.createJWTES256
 import com.credman.cmwallet.jwsDeserialization
 import com.credman.cmwallet.loadECPrivateKey
@@ -126,7 +125,7 @@ class VerificationResult(
 )
 
 fun verify(issuerJwtSerialization: String, disclosures: List<String>): VerificationResult {
-    val issuerJwt = Jwt(issuerJwtSerialization)
+    val issuerJwt = IssuerJwt(issuerJwtSerialization)
 
     if (issuerJwt.payload.has("_sd_alg")) {
         assert(issuerJwt.payload["_sd_alg"] == "sha-256") {"Only support sha-256"}
@@ -212,7 +211,7 @@ private fun verifyInternal(
     }
 }
 
-class Jwt {
+class IssuerJwt {
     var header: JSONObject = JSONObject()
     var payload: JSONObject = JSONObject()
     private lateinit var signature: ByteArray

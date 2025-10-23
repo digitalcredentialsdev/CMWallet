@@ -29,12 +29,15 @@ import com.credman.cmwallet.mdoc.MDoc
 import com.credman.cmwallet.openid4vci.OpenId4VCI
 import com.credman.cmwallet.openid4vci.data.AuthorizationDetailResponseOpenIdCredential
 import com.credman.cmwallet.openid4vci.data.CredentialConfigurationMDoc
+import com.credman.cmwallet.openid4vci.data.CredentialConfigurationSdJwtVc
 import com.credman.cmwallet.openid4vci.data.CredentialRequest
 import com.credman.cmwallet.openid4vci.data.GrantAuthorizationCode
 import com.credman.cmwallet.openid4vci.data.TokenRequest
 import com.credman.cmwallet.openid4vci.data.TokenResponse
 import com.credman.cmwallet.openid4vci.data.imageUriToImageB64
 import com.credman.cmwallet.openid4vp.OpenId4VP
+import com.credman.cmwallet.sdjwt.IssuerJwt
+import com.credman.cmwallet.toBase64UrlNoPadding
 import com.credman.cmwallet.toFixedByteArray
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -146,6 +149,16 @@ class CreateCredentialViewModel : ViewModel() {
                                 val x = String(public.w.affineX.toFixedByteArray(32))
                                 val y = String(public.w.affineY.toFixedByteArray(32))
                                 x == deviceKey.first && y == deviceKey.second
+                            }
+                        }
+                        is CredentialConfigurationSdJwtVc -> {
+                            val issuerJwtString = it.credential.split('~')[0]
+                            val cnfKey = IssuerJwt(issuerJwtString).payload.getJSONObject("cnf").getJSONObject("jwk")
+                            deviceKeys.firstOrNull {
+                                val public = it.public as ECPublicKey
+                                val x = public.w.affineX.toFixedByteArray(32).toBase64UrlNoPadding()
+                                val y = public.w.affineY.toFixedByteArray(32).toBase64UrlNoPadding()
+                                x == cnfKey.getString("x") && y == cnfKey.getString("y")
                             }
                         }
                         else -> throw UnsupportedOperationException("Unknown configuration $config")
