@@ -1836,5 +1836,127 @@
           "credential": "ompuYW1lU3BhY2VzoW9vcmcubWljb3YudnRyLjGE2BhYS6RoZGlnZXN0SUQAZnJhbmRvbVCF78duSXN0Cq1k1vEW-2w7cWVsZW1lbnRJZGVudGlmaWVyYmZubGVsZW1lbnRWYWx1ZWVTbWl0aNgYWEmkaGRpZ2VzdElEAWZyYW5kb21QgeOJmVqYIgBlP1JG1gL9aHFlbGVtZW50SWRlbnRpZmllcmJnbmxlbGVtZW50VmFsdWVjSm9u2BhYUaRoZGlnZXN0SUQCZnJhbmRvbVBQip1puiJt9bPJuJKQutKPcWVsZW1lbnRJZGVudGlmaWVyY2RvYmxlbGVtZW50VmFsdWVqMTk4OC0wOS0wMdgYWEekaGRpZ2VzdElEA2ZyYW5kb21QDkHTRidZXj71bch3RJnL8HFlbGVtZW50SWRlbnRpZmllcmNzZXhsZWxlbWVudFZhbHVlAmppc3N1ZXJBdXRohEOhASahGCFZAsQwggLAMIICZ6ADAgECAhQefxsyrU807-SwzAe3sOMzpwsYTTAKBggqhkjOPQQDAjB5MQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEcMBoGA1UECgwTRGlnaXRhbCBDcmVkZW50aWFsczEfMB0GA1UEAwwWZGlnaXRhbGNyZWRlbnRpYWxzLmRldjAeFw0yNTAyMTkyMzMwMThaFw0yNjAyMTkyMzMwMThaMHkxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1Nb3VudGFpbiBWaWV3MRwwGgYDVQQKDBNEaWdpdGFsIENyZWRlbnRpYWxzMR8wHQYDVQQDDBZkaWdpdGFsY3JlZGVudGlhbHMuZGV2MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE63k2K-LX85fDUAR9g-HjYizjVWs2D2pox1i7Ddxq-GwJr5pdXQ2ZOXYSw1onkZaYygAPyKTAAWzNiEh42AXjaaOBzDCByTAfBgNVHSMEGDAWgBSiT_SJ2XxG6G6jhtlHSM7MvtzP9TAdBgNVHQ4EFgQU3_5qWhLpwGLEvJinJdLZcPd6YCgwNAYDVR0fBC0wKzApoCegJYYjaHR0cHM6Ly9kaWdpdGFsLWNyZWRlbnRpYWxzLmRldi9jcmwwKgYDVR0SBCMwIYYfaHR0cHM6Ly9kaWdpdGFsLWNyZWRlbnRpYWxzLmRldjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lAQH_BAswCQYHKIGMXQUBAjAKBggqhkjOPQQDAgNHADBEAiBhxcv1fMHje_LgsTPaHyAxBF1wm1ohFA56aDCbywdC5wIgcK-i4cSb-6eMFcwJ5RntBH_KamMbIchPDbn8H0f1CwJZAdHYGFkBzKZndmVyc2lvbmMxLjBvZGlnZXN0QWxnb3JpdGhtZ1NIQS0yNTZnZG9jVHlwZWtvcmcubWljb3YuMWx2YWx1ZURpZ2VzdHOhb29yZy5taWNvdi52dHIuMaQAWCDiNxRvGmUP42ZwWnKlEwMFCJCCV3Ut9Yu0vm8Vlu6DoQFYIG-RMUJA9kUR6yJXPNFQwmZT3_4MQusoPnQeRtR4JA3mAlgglVZFjH1wDmolOTWSjhAbzq3_XrWfyfdy6OqS6LDblHUDWCD5habRiyDQ92eLBE1qftIOjkWl6rgwv86YbSyBD_XM1m1kZXZpY2VLZXlJbmZvoWlkZXZpY2VLZXmkAQIgASFYIGUxSuSsTKxJQvJF_vK6AvNeGrKAx836asTStlIWbeFyIlggMtkefckv_tI6axn8UKhlTg4RwkY0_pcY23oIF5TlntRsdmFsaWRpdHlJbmZvo2ZzaWduZWTAeBsyMDI1LTA0LTI1VDA3OjQxOjM3LjU4OTQwOVppdmFsaWRGcm9twHgbMjAyNS0wNC0yNVQwNzo0MTozNy41ODk0MThaanZhbGlkVW50aWzAeBsyMDM1LTA0LTEzVDA3OjQxOjM3LjU4OTQxOVpYQJa8r3UW8S4d9OPUVbV0KqWH1us9AqCK3lDOZhdTXFjmrI46EAQQYzhJTc_QGritzwA8S0sRWf1DmIqE6jN2abY"
         }
       ]
+    },
+    {
+      "id": "id_pass",
+      "nameSpaces": {
+        "org.iso.18013.5.1": {
+            "family_name": {
+                "value": "Doe",
+                "display": "Family Name",
+                "display_value": "Doe"
+            },
+            "given_name": {
+                "value": "Jane",
+                "display": "Given Name",
+                "display_value": "Jane"
+            },
+            "birth_date": {
+                "value": "1990-01-15",
+                "display": "Birthday",
+                "display_value": "1990-01-15"
+            },
+            "issue_date": {
+                "value": "2024-10-29",
+                "display": "Issue Date",
+                "display_value": "2024-10-29"
+            },
+            "expiry_date": {
+                "value": "2029-10-28",
+                "display": "Expiry Date",
+                "display_value": "2029-10-28"
+            },
+            "issuing_country": {
+                "value": "US",
+                "display": "Issuing Country",
+                "display_value": "United States"
+            },
+            "issuing_authority": {
+                "value": "Example Issuing Authority",
+                "display": "Issuing Authority",
+                "display_value": "Example Issuing Authority"
+            },
+            "document_number": {
+                "value": "IDP1234567",
+                "display": "Document Number",
+                "display_value": "IDP1234567"
+            },
+            "portrait": {
+                "value": "_9j_4AAQSkZJRgABAQAAAQABAAD_2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH_2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH_wAARCAABAAEDASIAAhEBAxEB_8QAHwAAAQUBAQEBAQEAAAAAAAAAAQIDBAUGBwgJCgv_xACMQACAQMDAgYiAgAAAAAAAABgQCAwUDBAcBAgQICQoRFRYf_xAAgEQACAQIEBgEBAAAAAAAAAAABAgMRBAAhBRIgQVFh_xAAiEQACAgIBAwQCAAAAAAAAAAABEQIDABIhMQVBUSNhcf_aAAwDAQACEQMRAD8A_cn+A_iP8OI_+v1f+gH_AD0r_9k===",
+                "display": "Portrait",
+                "display_value": "Portrait"
+            },
+            "nationality": {
+                "value": "US",
+                "display": "Nationality",
+                "display_value": "United States"
+            },
+            "age_over_21": {
+                "value": true,
+                "display": "Age Over 21",
+                "display_value": "True"
+            },
+            "age_over_18": {
+                "value": true,
+                "display": "Age Over 18",
+                "display_value": "True"
+            },
+            "sex": {
+                "value": 1,
+                "display": "Sex",
+                "display_value": "Male"
+            },
+            "resident_country": {
+                "value": "US",
+                "display": "Resident Country",
+                "display_value": "United States"
+            }
+        },
+         "com.google.wallet.idcard.1": {
+            "original_document_issue_date": {
+                "value": "2020-05-10",
+                "display": "Original Document Issue Date",
+                "display_value": "2020-05-10"
+            }
+        },
+         "org.aamva.dldv": {
+            "dhs_compliance": {
+                "value": "F",
+                "display": "DHS Compliance",
+                "display_value": "Fully Compliant"
+            }
+        }
+      },
+      "config": {
+        "format": "mso_mdoc",
+        "doctype": "com.google.wallet.idcard.1",
+        "cryptographic_binding_methods_supported": [
+          "cose_key"
+        ],
+        "credential_signing_alg_values_supported": [
+          "ES256"
+        ],
+        "display": [
+          {
+            "name": "Id Pass",
+            "locale": "en-US",
+            "description": "Id Pass"
+          }
+        ]
+      },
+      "displayData": {
+        "title": "Jane's ID Pass"
+  
+      },
+      "credentials": [
+        {
+          "key": {
+            "type": "SOFTWARE",
+            "publicKey": "123",
+            "privateKey": "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgwIsB8DIeuU5jT7To1ij60Q0zE6L64ZIoj0zOyphPVoehRANCAARlMUrkrEysSULyRf7yugLzXhqygMfN-mrE0rZSFm3hcjLZHn3JL_7SOmsZ_FCoZU4OEcJGNP6XGNt6CBeU5Z7U"
+          },
+          "credential": "ompuYW1lU3BhY2VzoW9vcmcubWljb3YudnRyLjGE2BhYS6RoZGlnZXN0SUQAZnJhbmRvbVCF78duSXN0Cq1k1vEW-2w7cWVsZW1lbnRJZGVudGlmaWVyYmZubGVsZW1lbnRWYWx1ZWVTbWl0aNgYWEmkaGRpZ2VzdElEAWZyYW5kb21QgeOJmVqYIgBlP1JG1gL9aHFlbGVtZW50SWRlbnRpZmllcmJnbmxlbGVtZW50VmFsdWVjSm9u2BhYUaRoZGlnZXN0SUQCZnJhbmRvbVBQip1puiJt9bPJuJKQutKPcWVsZW1lbnRJZGVudGlmaWVyY2RvYmxlbGVtZW50VmFsdWVqMTk4OC0wOS0wMdgYWEekaGRpZ2VzdElEA2ZyYW5kb21QDkHTRidZXj71bch3RJnL8HFlbGVtZW50SWRlbnRpZmllcmNzZXhsZWxlbWVudFZhbHVlAmppc3N1ZXJBdXRohEOhASahGCFZAsQwggLAMIICZ6ADAgECAhQefxsyrU807-SwzAe3sOMzpwsYTTAKBggqhkjOPQQDAjB5MQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEcMBoGA1UECgwTRGlnaXRhbCBDcmVkZW50aWFsczEfMB0GA1UEAwwWZGlnaXRhbGNyZWRlbnRpYWxzLmRldjAeFw0yNTAyMTkyMzMwMThaFw0yNjAyMTkyMzMwMThaMHkxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1Nb3VudGFpbiBWaWV3MRwwGgYDVQQKDBNEaWdpdGFsIENyZWRlbnRpYWxzMR8wHQYDVQQDDBZkaWdpdGFsY3JlZGVudGlhbHMuZGV2MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE63k2K-LX85fDUAR9g-HjYizjVWs2D2pox1i7Ddxq-GwJr5pdXQ2ZOXYSw1onkZaYygAPyKTAAWzNiEh42AXjaaOBzDCByTAfBgNVHSMEGDAWgBSiT_SJ2XxG6G6jhtlHSM7MvtzP9TAdBgNVHQ4EFgQU3_5qWhLpwGLEvJinJdLZcPd6YCgwNAYDVR0fBC0wKzApoCegJYYjaHR0cHM6Ly9kaWdpdGFsLWNyZWRlbnRpYWxzLmRldi9jcmwwKgYDVR0SBCMwIYYfaHR0cHM6Ly9kaWdpdGFsLWNyZWRlbnRpYWxzLmRldjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lAQH_BAswCQYHKIGMXQUBAjAKBggqhkjOPQQDAgNHADBEAiBhxcv1fMHje_LgsTPaHyAxBF1wm1ohFA56aDCbywdC5wIgcK-i4cSb-6eMFcwJ5RntBH_KamMbIchPDbn8H0f1CwJZAdHYGFkBzKZndmVyc2lvbmMxLjBvZGlnZXN0QWxnb3JpdGhtZ1NIQS0yNTZnZG9jVHlwZWtvcmcubWljb3YuMWx2YWx1ZURpZ2VzdHOhb29yZy5taWNvdi52dHIuMaQAWCDiNxRvGmUP42ZwWnKlEwMFCJCCV3Ut9Yu0vm8Vlu6DoQFYIG-RMUJA9kUR6yJXPNFQwmZT3_4MQusoPnQeRtR4JA3mAlgglVZFjH1wDmolOTWSjhAbzq3_XrWfyfdy6OqS6LDblHUDWCD5habRiyDQ92eLBE1qftIOjkWl6rgwv86YbSyBD_XM1m1kZXZpY2VLZXlJbmZvoWlkZXZpY2VLZXmkAQIgASFYIGUxSuSsTKxJQvJF_vK6AvNeGrKAx836asTStlIWbeFyIlggMtkefckv_tI6axn8UKhlTg4RwkY0_pcY23oIF5TlntRsdmFsaWRpdHlJbmZvo2ZzaWduZWTAeBsyMDI1LTA0LTI1VDA3OjQxOjM3LjU4OTQwOVppdmFsaWRGcm9twHgbMjAyNS0wNC0yNVQwNzo0MTozNy41ODk0MThaanZhbGlkVW50aWzAeBsyMDM1LTA0LTEzVDA3OjQxOjM3LjU4OTQxOVpYQJa8r3UW8S4d9OPUVbV0KqWH1us9AqCK3lDOZhdTXFjmrI46EAQQYzhJTc_QGritzwA8S0sRWf1DmIqE6jN2abY"
+        }
+      ]
     }
   ]
