@@ -9,6 +9,7 @@ import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.security.MessageDigest
 import android.util.Base64
+import android.util.Log
 import com.credman.cmwallet.createJWTES256
 import com.credman.cmwallet.jwsDeserialization
 import com.credman.cmwallet.loadECPrivateKey
@@ -41,14 +42,17 @@ class SdJwt(
     }
 
     private fun addDisclosuresToPresentation(sd: JSONObject, ret: MutableList<String>) {
+        Log.d("helenqinn", "SD to add: $sd")
         for (key in sd.keys()) {
             if ("_sd" == key) {
                 val digest = sd.getString("_sd")
                 val disclosure = verifiedResult.digestDisclosureMap[digest]!!
                 ret.add(disclosure)
+                Log.d("helenqinn", "ret: $ret")
             } else {
                 val recursiveSd = sd.get(key)
                 if (recursiveSd is JSONObject) {
+                    Log.d("helenqinn", "addDisclosuresToPresentation: $recursiveSd")
                     addDisclosuresToPresentation(recursiveSd, ret)
                 } else {
                     throw IllegalStateException("Unexpected type ${recursiveSd::class.java}")
@@ -76,11 +80,13 @@ class SdJwt(
                     val claim = claimSet.getJSONObject(claimIdx)!!
                     val path = claim.getJSONArray("path")
                     var sd = verifiedResult.sdMap
+                    val sds = mutableListOf<JSONObject>()
                     for (pathIdx in 0..<path.length()) {
                         // TODO: handle path variants (null)
                         val currPath = path.getString(pathIdx)
                         if (sd.has(currPath)) {
                             sd = sd.getJSONObject(currPath)
+                            sds.add(JSONObject(sd.toString()))
                         } else {
                             claimSetMatched = false
                             break
@@ -88,6 +94,15 @@ class SdJwt(
                     }
                     if (claimSetMatched) {
                         addDisclosuresToPresentation(sd, ret)
+                        // TODO: improve this code
+                        if (sds.size > 1) {
+                            for (k in 0..<sds.size - 1) {
+                                val currSd = sds[k]
+                                val digest = currSd.getString("_sd")
+                                val disclosure = verifiedResult.digestDisclosureMap[digest]!!
+                                ret.add(disclosure)
+                            }
+                        }
                     } else {
                         break
                     }
