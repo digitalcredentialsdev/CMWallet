@@ -1242,6 +1242,12 @@
   {
     "id": "pid_sdjwt_jan",
     "paths": {
+      "personal_administrative_number": {
+        "value": "333814836",
+        "display": "Personal Administrative Number",
+        "display_value": "333814836",
+        "_sd": true
+      },
       "family_name": {
         "value": "Smit",
         "display": "Family Name",
@@ -1281,7 +1287,52 @@
         "display_value": "TODO",
         "_sd": true
       },
+      "email": {
+        "value": "jan@email.com",
+        "display": "Email",
+        "display_value": "jan@email.com",
+        "_sd": true
+      },
+      "phone_number": {
+        "value": "+1 (310) 123-4567",
+        "display": "Phone Number",
+        "display_value": "+1 (310) 123-4567",
+        "_sd": true
+      },
+      "nationalities": {
+        "value": ["NL"],
+        "display": "Nationality",
+        "display_value": "Dutch",
+        "_sd": true
+      },
+      "place_of_birth": {
+        "locality": {
+          "value": "Rotterdam",
+          "display": "Resident City",
+          "display_value": "Rotterdam",
+          "_sd": true
+        },
+        "country": {
+          "value": "NL",
+          "display": "Country",
+          "display_value": "Netherlands",
+          "_sd": true
+        },
+        "_sd": true
+      },
       "address": {
+        "formatted": {
+          "value": "Schenkkade 9000, 3011AA",
+          "display": "Full Address",
+          "display_value": "Schenkkade 9000, 3011AA",
+          "_sd": true
+        },
+        "house_number": {
+          "value": "9000",
+          "display": "House Number",
+          "display_value": "9000",
+          "_sd": true
+        },
         "street_address": {
           "value": "Schenkkade 9000",
           "display": "Street Address",
