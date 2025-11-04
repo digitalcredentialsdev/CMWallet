@@ -194,12 +194,13 @@ class CreateCredentialViewModel : ViewModel() {
                         Log.i(TAG, "credentialResponse $credentialResponse")
                         val config = openId4VCI.credentialOffer.issuerMetadata.credentialConfigurationsSupported[authDetail.credentialConfigurationId]!!
                         val display = credentialResponse.display?.firstOrNull()
+                        val displayFromOffer = config.credentialMetadata?.display?.firstOrNull()
                         val newCredentialItem = CredentialItem(
                             id = Uuid.random().toHexString(),
                             config = config,
                             displayData = CredentialDisplayData(
-                                title = display?.name ?:"Unknown",
-                                subtitle = display?.description,
+                                title = display?.name ?: displayFromOffer?.name ?:"Unknown",
+                                subtitle = display?.description ?: displayFromOffer?.description,
                                 icon = display?.logo?.uri.imageUriToImageB64()
                             ),
                             credentials = credentialResponse.credentials!!.map {
@@ -212,6 +213,16 @@ class CreateCredentialViewModel : ViewModel() {
                                             val x = String(public.w.affineX.toFixedByteArray(32))
                                             val y = String(public.w.affineY.toFixedByteArray(32))
                                             x == deviceKey.first && y == deviceKey.second
+                                        }
+                                    }
+                                    is CredentialConfigurationSdJwtVc -> {
+                                        val issuerJwtString = it.credential.split('~')[0]
+                                        val cnfKey = IssuerJwt(issuerJwtString).payload.getJSONObject("cnf").getJSONObject("jwk")
+                                        deviceKeys.firstOrNull {
+                                            val public = it.public as ECPublicKey
+                                            val x = public.w.affineX.toFixedByteArray(32).toBase64UrlNoPadding()
+                                            val y = public.w.affineY.toFixedByteArray(32).toBase64UrlNoPadding()
+                                            x == cnfKey.getString("x") && y == cnfKey.getString("y")
                                         }
                                     }
                                     else -> throw UnsupportedOperationException("Unknown configuration $config")
