@@ -13,10 +13,19 @@ def build_claims(paths: dict):
                 user_claims[path_name] = build_claims(path_value)
         else:
             sd = path_value["_sd"]
+            val = path_value["value"]
             if sd:
-                user_claims[SDObj(path_name)] = path_value["value"]
+                if isinstance(val, list):
+                    list_claims = []
+                    for item in val:
+                        print(f'list item: {item}')
+                        # TODO: handle if item is an object
+                        list_claims.append(SDObj(item))
+                    user_claims[SDObj(path_name)] = list_claims
+                else:
+                    user_claims[SDObj(path_name)] = val
             else:
-                user_claims[path_name] = path_value["value"]
+                user_claims[path_name] = val
     return user_claims
 
 def build_claims_for_display(out: list, paths: dict, curr_path: list):
