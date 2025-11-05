@@ -9,7 +9,6 @@ import java.math.BigInteger
 import java.nio.ByteBuffer
 import java.security.MessageDigest
 import android.util.Base64
-import android.util.Log
 import com.credman.cmwallet.createJWTES256
 import com.credman.cmwallet.jwsDeserialization
 import com.credman.cmwallet.loadECPrivateKey
@@ -42,18 +41,33 @@ class SdJwt(
     }
 
     private fun addDisclosuresToPresentation(sd: JSONObject, ret: MutableList<String>) {
-        Log.d("helenqinn", "SD to add: $sd")
         for (key in sd.keys()) {
-            if ("_sd" == key) {
-                val digest = sd.getString("_sd")
+            if ("_sd" == key || "..." ==  key) {
+                val digest = sd.getString(key)
                 val disclosure = verifiedResult.digestDisclosureMap[digest]!!
                 ret.add(disclosure)
-                Log.d("helenqinn", "ret: $ret")
+                val decodedDisclosure = JSONArray(String(disclosure.decodeBase64UrlNoPadding()))
+                val disclosureValue = when (decodedDisclosure.length()) {
+                    2 -> { // Array item
+                         decodedDisclosure.get(1)
+                    }
+                    3 -> {
+                        decodedDisclosure.get(2)
+                    }
+                    else -> throw IllegalStateException("Unexpected disclosure length: ${decodedDisclosure.length()}")
+                }
+                when (disclosureValue) {
+                    is JSONArray -> {
+                        for (arrayIdx in 0..< disclosureValue.length()) {
+                            val childSd = disclosureValue.getJSONObject(arrayIdx)
+                            addDisclosuresToPresentation(childSd, ret)
+                        }
+                    }
+                    else -> {} // Pass through
+                }
             } else {
                 val recursiveSd = sd.get(key)
-                if (recursiveSd is JSONObject) {
-                    Log.d("helenqinn", "addDisclosuresToPresentation: $recursiveSd")
-                    addDisclosuresToPresentation(recursiveSd, ret)
+                if (recursiveSd is JSONObject) {addDisclosuresToPresentation(recursiveSd, ret)
                 } else {
                     throw IllegalStateException("Unexpected type ${recursiveSd::class.java}")
                 }
@@ -98,9 +112,11 @@ class SdJwt(
                         if (sds.size > 1) {
                             for (k in 0..<sds.size - 1) {
                                 val currSd = sds[k]
-                                val digest = currSd.getString("_sd")
-                                val disclosure = verifiedResult.digestDisclosureMap[digest]!!
-                                ret.add(disclosure)
+                                if (currSd.has("_sd")) {
+                                    val digest = currSd.getString("_sd")
+                                    val disclosure = verifiedResult.digestDisclosureMap[digest]!!
+                                    ret.add(disclosure)
+                                }
                             }
                         }
                     } else {
