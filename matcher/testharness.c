@@ -36,10 +36,10 @@ size_t ReadCredentialsBuffer(void* buffer, size_t offset, size_t len) {
     return bytes_read;
 }
 
-void AddStringIdEntry(char *cred_id, char* icon, size_t icon_len, char *title, char *subtitle, char *disclaimer, char *warning) {
+void AddStringIdEntry(const char* cred_id, const char* icon, size_t icon_len, const char* title, const char* subtitle, const char* disclaimer, const char* warning) {
     printf("AddStringIdEntry id:%s title:%s subtitle:%s\n", cred_id, title, subtitle);
 }
 
-void AddFieldForStringIdEntry(char *cred_id, char *field_display_name, char *field_display_value) {
+void AddFieldForStringIdEntry(const char* cred_id, const char* field_display_name, const char* field_display_value) {
     printf("AddFieldForStringIdEntry id:%s field_display_name:%s\n", cred_id, field_display_name);
 }
