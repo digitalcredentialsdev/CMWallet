@@ -1,0 +1,23 @@
+[package]
+name = "matcher-rs"
+version = "0.1.0"
+authors = ["rensiyuan"]
+edition = "2024"
+build = "build.rs"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.145"
+
+[dev-dependencies]
+
+[build-dependencies]
+bindgen = "0.72.1"
+
+[profile.release]
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"
+lto = true
