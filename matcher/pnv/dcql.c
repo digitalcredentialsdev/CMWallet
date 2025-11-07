@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "../base64.h"
 #include "../dcql.h"
@@ -24,7 +25,22 @@ int AddAllClaims(cJSON *matched_claim_names, cJSON *candidate_paths)
     return 0;
 }
 
-cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
+cJSON *CreateSingleStringArrayJson(char *string)
+{
+    cJSON *array = cJSON_CreateArray();
+    cJSON_AddItemReferenceToArray(array, cJSON_CreateString(string));
+    return array;
+}
+
+enum ClaimMatchResult
+{
+    CLAIM_MATCH_UNKNOWN = 0,
+    CLAIM_MATCH_YES = 1,
+    CLAIM_MATCH_NO = -1,
+};
+
+cJSON *
+MatchCredential(cJSON *credential, cJSON *credential_store)
 {
     cJSON *matched_credentials = cJSON_CreateArray();
     char *format = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(credential, "format"));
@@ -86,14 +102,16 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
                         cJSON_AddItemReferenceToArray(candidates, curr_candidate);
                     }
                     else
-                    {   
+                    {
                         cJSON *allowed_iss;
-                        cJSON_ArrayForEach(allowed_iss, iss_allowlist) {
-                                if (cJSON_Compare(allowed_iss, iss_value, cJSON_True)) {
-                                    printf("A candidate credential of type %s passed iss allowlist check.\n", cJSON_GetStringValue(vct_value));
-                                    cJSON_AddItemReferenceToArray(candidates, curr_candidate);
-                                    break;
-                                }
+                        cJSON_ArrayForEach(allowed_iss, iss_allowlist)
+                        {
+                            if (cJSON_Compare(allowed_iss, iss_value, cJSON_True))
+                            {
+                                printf("A candidate credential of type %s passed iss allowlist check.\n", cJSON_GetStringValue(vct_value));
+                                cJSON_AddItemReferenceToArray(candidates, curr_candidate);
+                                break;
+                            }
                         }
                     }
                 }
@@ -155,6 +173,19 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
     }
     else
     {
+        cJSON *matched_claim_paths = cJSON_CreateArray();
+
+        cJSON *phone_number_matched_candidates = cJSON_CreateArray();
+        cJSON *carrier_and_subscription_matched_candidates = cJSON_CreateArray();
+        cJSON *carrier_matched_candidates = cJSON_CreateArray();
+        cJSON *sub_matched_candidates = cJSON_CreateArray();
+        cJSON *other_candidates = cJSON_CreateArray();
+
+        cJSON *phone_number_hint_paths = CreateSingleStringArrayJson("phone_number_hint");
+        cJSON *subscription_hint_paths = CreateSingleStringArrayJson("subscription_hint");
+        cJSON *carrier_hint_paths = CreateSingleStringArrayJson("carrier_hint");
+        cJSON *android_carrier_hint_paths = CreateSingleStringArrayJson("android_carrier_hint");
+
         if (claim_sets == NULL)
         {
             printf("Matching based on provided claims\n");
@@ -176,7 +207,10 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
 
                 cJSON *claim;
                 cJSON *candidate_claims = cJSON_GetObjectItemCaseSensitive(candidate, "paths");
-                int matched_claim_count = 0;
+                enum ClaimMatchResult phone_number_matched = CLAIM_MATCH_UNKNOWN;
+                enum ClaimMatchResult carrier_matched = CLAIM_MATCH_UNKNOWN;
+                enum ClaimMatchResult android_carrier_matched = CLAIM_MATCH_UNKNOWN;
+                enum ClaimMatchResult subscription_matched = CLAIM_MATCH_UNKNOWN;
                 cJSON_ArrayForEach(claim, claims)
                 {
                     cJSON *claim_values = cJSON_GetObjectItemCaseSensitive(claim, "values");
@@ -201,6 +235,7 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
                             break;
                         }
                     }
+                    bool match_claim = 0;
                     if (matched != 0 && curr_claim != NULL)
                     {
                         if (claim_values != NULL)
@@ -211,7 +246,7 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
                                 if (cJSON_Compare(v, cJSON_GetObjectItemCaseSensitive(curr_claim, "value"), cJSON_True))
                                 {
                                     printf("- claim value matched.\n");
-                                    ++matched_claim_count;
+                                    match_claim = 1;
                                     break;
                                 }
                             }
@@ -219,19 +254,55 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
                         else
                         {
                             printf("- claim matched.\n");
-                            ++matched_claim_count;
+                            match_claim = 1;
                         }
-                    } else {
+                    }
+                    else
+                    {
                         printf("- claim did not match\n.");
                     }
+                    if (matched)
+                    {
+                        enum ClaimMatchResult result = match_claim ? CLAIM_MATCH_YES : CLAIM_MATCH_NO;
+                        if (cJSON_Compare(paths, phone_number_hint_paths, cJSON_True))
+                        {
+                            phone_number_matched = result;
+                        }
+                        else if (cJSON_Compare(paths, subscription_hint_paths, cJSON_True))
+                        {
+                            subscription_matched = result;
+                        }
+                        else if (cJSON_Compare(paths, carrier_hint_paths, cJSON_True))
+                        {
+                            carrier_matched = result;
+                        }
+                        else if (cJSON_Compare(paths, android_carrier_hint_paths, cJSON_True))
+                        {
+                            android_carrier_matched = result;
+                        }
+                    }
                 }
+                bool carrier_matched_final = carrier_matched + android_carrier_matched >= 1;
                 cJSON_AddItemReferenceToObject(matched_credential, "matched_claim_names", matched_claim_names);
-                if (matched_claim_count == cJSON_GetArraySize(claims))
+                if (phone_number_matched == CLAIM_MATCH_YES)
                 {
-                    printf("Cred matched.\n");
-                    cJSON_AddItemReferenceToArray(matched_credentials, matched_credential);
-                } else {
-                    printf("Cred did not match. Matched claim count: %d, Expected match count: %d\n.", matched_claim_count, cJSON_GetArraySize(claims));
+                    cJSON_AddItemReferenceToArray(phone_number_matched_candidates, matched_credential);
+                }
+                else if (carrier_matched_final && subscription_matched == CLAIM_MATCH_YES)
+                {
+                    cJSON_AddItemReferenceToArray(carrier_and_subscription_matched_candidates, matched_credential);
+                }
+                else if (carrier_matched_final)
+                {
+                    cJSON_AddItemReferenceToArray(carrier_matched_candidates, matched_credential);
+                }
+                else if (subscription_matched == CLAIM_MATCH_YES)
+                {
+                    cJSON_AddItemReferenceToArray(sub_matched_candidates, matched_credential);
+                }
+                else
+                {
+                    cJSON_AddItemReferenceToArray(other_candidates, matched_credential);
                 }
             }
         }
@@ -255,6 +326,10 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
 
                 cJSON *claim;
                 cJSON *candidate_claims = cJSON_GetObjectItemCaseSensitive(candidate, "paths");
+                enum ClaimMatchResult phone_number_matched = CLAIM_MATCH_UNKNOWN;
+                enum ClaimMatchResult carrier_matched = CLAIM_MATCH_UNKNOWN;
+                enum ClaimMatchResult android_carrier_matched = CLAIM_MATCH_UNKNOWN;
+                enum ClaimMatchResult subscription_matched = CLAIM_MATCH_UNKNOWN;
                 cJSON_ArrayForEach(claim, claims)
                 {
                     cJSON *claim_values = cJSON_GetObjectItemCaseSensitive(claim, "values");
@@ -276,6 +351,7 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
                             break;
                         }
                     }
+                    bool match_claim = 0;
                     if (matched != 0 && curr_claim != NULL)
                     {
                         if (claim_values != NULL)
@@ -285,17 +361,41 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
                             {
                                 if (cJSON_Compare(v, cJSON_GetObjectItemCaseSensitive(curr_claim, "value"), cJSON_True))
                                 {
-                                    cJSON_AddItemReferenceToObject(matched_claim_ids, claim_id, cJSON_CreateString("PLACEHOLDER"));
+                                    match_claim = 1;
                                     break;
                                 }
                             }
                         }
                         else
                         {
-                            cJSON_AddItemReferenceToObject(matched_claim_ids, claim_id, cJSON_CreateString("PLACEHOLDER"));
+                            match_claim = 1;
+                        }
+                    }
+                    if (matched)
+                    {
+                        enum ClaimMatchResult result = CLAIM_MATCH_YES;
+                        cJSON_AddItemReferenceToObject(matched_claim_ids, claim_id, cJSON_CreateString("PLACEHOLDER"));
+                        if (cJSON_Compare(paths, phone_number_hint_paths, cJSON_True))
+                        {
+                            phone_number_matched = result;
+                        }
+                        else if (cJSON_Compare(paths, subscription_hint_paths, cJSON_True))
+                        {
+                            subscription_matched = result;
+                        }
+                        else if (cJSON_Compare(paths, carrier_hint_paths, cJSON_True))
+                        {
+                            carrier_matched = result;
+                        }
+                        else if (cJSON_Compare(paths, android_carrier_hint_paths, cJSON_True))
+                        {
+                            android_carrier_matched = result;
                         }
                     }
                 }
+
+                bool carrier_matched_final = carrier_matched + android_carrier_matched >= 1;
+
                 cJSON *claim_set;
                 cJSON_ArrayForEach(claim_set, claim_sets)
                 {
@@ -317,7 +417,49 @@ cJSON *MatchCredential(cJSON *credential, cJSON *credential_store)
                         break;
                     }
                 }
+                if (phone_number_matched == CLAIM_MATCH_YES)
+                {
+                    cJSON_AddItemReferenceToArray(phone_number_matched_candidates, matched_credential);
+                }
+                else if (carrier_matched_final && subscription_matched == CLAIM_MATCH_YES)
+                {
+                    cJSON_AddItemReferenceToArray(carrier_and_subscription_matched_candidates, matched_credential);
+                }
+                else if (carrier_matched_final)
+                {
+                    cJSON_AddItemReferenceToArray(carrier_matched_candidates, matched_credential);
+                }
+                else if (subscription_matched == CLAIM_MATCH_YES)
+                {
+                    cJSON_AddItemReferenceToArray(sub_matched_candidates, matched_credential);
+                }
+                else
+                {
+                    cJSON_AddItemReferenceToArray(other_candidates, matched_credential);
+                }
             }
+        }
+
+        cJSON *c;
+        cJSON_ArrayForEach(c, phone_number_matched_candidates)
+        {
+            cJSON_AddItemReferenceToArray(matched_credentials, c);
+        }
+        cJSON_ArrayForEach(c, carrier_and_subscription_matched_candidates)
+        {
+            cJSON_AddItemReferenceToArray(matched_credentials, c);
+        }
+        cJSON_ArrayForEach(c, carrier_matched_candidates)
+        {
+            cJSON_AddItemReferenceToArray(matched_credentials, c);
+        }
+        cJSON_ArrayForEach(c, sub_matched_candidates)
+        {
+            cJSON_AddItemReferenceToArray(matched_credentials, c);
+        }
+        cJSON_ArrayForEach(c, other_candidates)
+        {
+            cJSON_AddItemReferenceToArray(matched_credentials, c);
         }
     }
 
