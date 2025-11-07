@@ -1,6 +1,10 @@
 #ifndef CREDENTIALMANAGER_H
 #define CREDENTIALMANAGER_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -111,4 +115,8 @@ __attribute__((import_module("credman_v4"), import_name("SelfDeclarePackageInfo"
 #endif
 void SelfDeclarePackageInfo(const char* package_display_name, const char* package_icon, size_t package_icon_len);
 
-#endif 
+#ifdef __cplusplus
+}
+#endif
+
+#endif

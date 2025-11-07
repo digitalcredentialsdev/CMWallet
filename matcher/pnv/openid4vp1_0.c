@@ -31,7 +31,11 @@ cJSON *GetCredsJson()
     return cJSON_Parse(creds_json);
 }
 
+#if defined(__wasm__)
 int main()
+#else
+int openid_main()
+#endif
 {
     uint32_t credentials_size;
     GetCredentialsSize(&credentials_size);
