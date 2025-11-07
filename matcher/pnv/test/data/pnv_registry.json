@@ -1,0 +1,842 @@
+{
+    "credentials": {
+        "dc-authorization+sd-jwt": {
+            "number-verification/verify/ts43": [
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "verify_1",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 1
+                        },
+                        "carrier_hint": {
+                            "value": "310250"
+                        },
+                        "android_carrier_hint": {
+                            "value": 3
+                        },
+                        "phone_number_hint": {
+                            "value": "+16502154321"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "verify_2",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 1
+                        },
+                        "carrier_hint": {
+                            "value": "310250"
+                        },
+                        "android_carrier_hint": {
+                            "value": 3
+                        },
+                        "phone_number_hint": {
+                            "value": "+19211104544"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "verify_3",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 1
+                        },
+                        "carrier_hint": {
+                            "value": "310250"
+                        },
+                        "android_carrier_hint": {
+                            "value": 33
+                        },
+                        "phone_number_hint": {
+                            "value": "+16502154321"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "verify_4",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 1
+                        },
+                        "carrier_hint": {
+                            "value": "310250"
+                        },
+                        "android_carrier_hint": {
+                            "value": 33
+                        },
+                        "phone_number_hint": {
+                            "value": "+19211104544"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "verify_5",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 1
+                        },
+                        "carrier_hint": {
+                            "value": "110999"
+                        },
+                        "android_carrier_hint": {
+                            "value": 3
+                        },
+                        "phone_number_hint": {
+                            "value": "+16502154321"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "verify_6",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 1
+                        },
+                        "carrier_hint": {
+                            "value": "110999"
+                        },
+                        "android_carrier_hint": {
+                            "value": 3
+                        },
+                        "phone_number_hint": {
+                            "value": "+19211104544"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "verify_7",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 1
+                        },
+                        "carrier_hint": {
+                            "value": "110999"
+                        },
+                        "android_carrier_hint": {
+                            "value": 33
+                        },
+                        "phone_number_hint": {
+                            "value": "+16502154321"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "verify_8",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 1
+                        },
+                        "carrier_hint": {
+                            "value": "110999"
+                        },
+                        "android_carrier_hint": {
+                            "value": 33
+                        },
+                        "phone_number_hint": {
+                            "value": "+19211104544"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "verify_9",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 11
+                        },
+                        "carrier_hint": {
+                            "value": "310250"
+                        },
+                        "android_carrier_hint": {
+                            "value": 3
+                        },
+                        "phone_number_hint": {
+                            "value": "+16502154321"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "verify_10",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 11
+                        },
+                        "carrier_hint": {
+                            "value": "310250"
+                        },
+                        "android_carrier_hint": {
+                            "value": 3
+                        },
+                        "phone_number_hint": {
+                            "value": "+19211104544"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "verify_11",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 11
+                        },
+                        "carrier_hint": {
+                            "value": "310250"
+                        },
+                        "android_carrier_hint": {
+                            "value": 33
+                        },
+                        "phone_number_hint": {
+                            "value": "+16502154321"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "verify_12",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 11
+                        },
+                        "carrier_hint": {
+                            "value": "310250"
+                        },
+                        "android_carrier_hint": {
+                            "value": 33
+                        },
+                        "phone_number_hint": {
+                            "value": "+19211104544"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "verify_13",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 11
+                        },
+                        "carrier_hint": {
+                            "value": "110999"
+                        },
+                        "android_carrier_hint": {
+                            "value": 3
+                        },
+                        "phone_number_hint": {
+                            "value": "+16502154321"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "verify_14",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 11
+                        },
+                        "carrier_hint": {
+                            "value": "110999"
+                        },
+                        "android_carrier_hint": {
+                            "value": 3
+                        },
+                        "phone_number_hint": {
+                            "value": "+19211104544"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "verify_15",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 11
+                        },
+                        "carrier_hint": {
+                            "value": "110999"
+                        },
+                        "android_carrier_hint": {
+                            "value": 33
+                        },
+                        "phone_number_hint": {
+                            "value": "+16502154321"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "verify_16",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 11
+                        },
+                        "carrier_hint": {
+                            "value": "110999"
+                        },
+                        "android_carrier_hint": {
+                            "value": 33
+                        },
+                        "phone_number_hint": {
+                            "value": "+19211104544"
+                        }
+                    }
+                }
+            ],
+            "number-verification/phone_number/ts43": [
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "phone_number_1",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 1
+                        },
+                        "carrier_hint": {
+                            "value": "310250"
+                        },
+                        "android_carrier_hint": {
+                            "value": 3
+                        },
+                        "phone_number_hint": {
+                            "value": "+16502154321"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "phone_number_2",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 1
+                        },
+                        "carrier_hint": {
+                            "value": "310250"
+                        },
+                        "android_carrier_hint": {
+                            "value": 3
+                        },
+                        "phone_number_hint": {
+                            "value": "+19211104544"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "phone_number_3",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 1
+                        },
+                        "carrier_hint": {
+                            "value": "310250"
+                        },
+                        "android_carrier_hint": {
+                            "value": 33
+                        },
+                        "phone_number_hint": {
+                            "value": "+16502154321"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "phone_number_4",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 1
+                        },
+                        "carrier_hint": {
+                            "value": "310250"
+                        },
+                        "android_carrier_hint": {
+                            "value": 33
+                        },
+                        "phone_number_hint": {
+                            "value": "+19211104544"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "phone_number_5",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 1
+                        },
+                        "carrier_hint": {
+                            "value": "110999"
+                        },
+                        "android_carrier_hint": {
+                            "value": 3
+                        },
+                        "phone_number_hint": {
+                            "value": "+16502154321"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "phone_number_6",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 1
+                        },
+                        "carrier_hint": {
+                            "value": "110999"
+                        },
+                        "android_carrier_hint": {
+                            "value": 3
+                        },
+                        "phone_number_hint": {
+                            "value": "+19211104544"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "phone_number_7",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 1
+                        },
+                        "carrier_hint": {
+                            "value": "110999"
+                        },
+                        "android_carrier_hint": {
+                            "value": 33
+                        },
+                        "phone_number_hint": {
+                            "value": "+16502154321"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "phone_number_8",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 1
+                        },
+                        "carrier_hint": {
+                            "value": "110999"
+                        },
+                        "android_carrier_hint": {
+                            "value": 33
+                        },
+                        "phone_number_hint": {
+                            "value": "+19211104544"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "phone_number_9",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 11
+                        },
+                        "carrier_hint": {
+                            "value": "310250"
+                        },
+                        "android_carrier_hint": {
+                            "value": 3
+                        },
+                        "phone_number_hint": {
+                            "value": "+16502154321"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "phone_number_10",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 11
+                        },
+                        "carrier_hint": {
+                            "value": "310250"
+                        },
+                        "android_carrier_hint": {
+                            "value": 3
+                        },
+                        "phone_number_hint": {
+                            "value": "+19211104544"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "phone_number_11",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 11
+                        },
+                        "carrier_hint": {
+                            "value": "310250"
+                        },
+                        "android_carrier_hint": {
+                            "value": 33
+                        },
+                        "phone_number_hint": {
+                            "value": "+16502154321"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "phone_number_12",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 11
+                        },
+                        "carrier_hint": {
+                            "value": "310250"
+                        },
+                        "android_carrier_hint": {
+                            "value": 33
+                        },
+                        "phone_number_hint": {
+                            "value": "+19211104544"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "phone_number_13",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 11
+                        },
+                        "carrier_hint": {
+                            "value": "110999"
+                        },
+                        "android_carrier_hint": {
+                            "value": 3
+                        },
+                        "phone_number_hint": {
+                            "value": "+16502154321"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "phone_number_14",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 11
+                        },
+                        "carrier_hint": {
+                            "value": "110999"
+                        },
+                        "android_carrier_hint": {
+                            "value": 3
+                        },
+                        "phone_number_hint": {
+                            "value": "+19211104544"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "phone_number_15",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 11
+                        },
+                        "carrier_hint": {
+                            "value": "110999"
+                        },
+                        "android_carrier_hint": {
+                            "value": 33
+                        },
+                        "phone_number_hint": {
+                            "value": "+16502154321"
+                        }
+                    }
+                },
+                {
+                    "shared_attribute_display_name": "Phone number",
+                    "id": "phone_number_16",
+                    "title": "Terrific Telecom",
+                    "subtitle": "+1 (650) 215-4321",
+                    "disclaimer": "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with ${CALLER_DISPLAY_NAME}",
+                    "verifier_terms_prefix": "Provider Terms:\n",
+                    "icon": {
+                        "start": 0,
+                        "length": 0
+                    },
+                    "paths": {
+                        "subscription_hint": {
+                            "value": 11
+                        },
+                        "carrier_hint": {
+                            "value": "110999"
+                        },
+                        "android_carrier_hint": {
+                            "value": 33
+                        },
+                        "phone_number_hint": {
+                            "value": "+19211104544"
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}
