@@ -1745,6 +1745,11 @@
       "id": "boarding_pass",
       "nameSpaces": {
         "com.google.wallet.boardingpass.1": {
+            "id": {
+                "value": "344758379afd404a8b9d4439478b1a3e",
+                "display": "ID",
+                "display_value": "344758379afd404a8b9d4439478b1a3e"
+            },
             "passenger_name": {
                 "value": "Tom Smith",
                 "display": "Passenger Name",
@@ -2007,6 +2012,250 @@
             "privateKey": "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgwIsB8DIeuU5jT7To1ij60Q0zE6L64ZIoj0zOyphPVoehRANCAARlMUrkrEysSULyRf7yugLzXhqygMfN-mrE0rZSFm3hcjLZHn3JL_7SOmsZ_FCoZU4OEcJGNP6XGNt6CBeU5Z7U"
           },
           "credential": "ompuYW1lU3BhY2VzoW9vcmcubWljb3YudnRyLjGE2BhYS6RoZGlnZXN0SUQAZnJhbmRvbVCF78duSXN0Cq1k1vEW-2w7cWVsZW1lbnRJZGVudGlmaWVyYmZubGVsZW1lbnRWYWx1ZWVTbWl0aNgYWEmkaGRpZ2VzdElEAWZyYW5kb21QgeOJmVqYIgBlP1JG1gL9aHFlbGVtZW50SWRlbnRpZmllcmJnbmxlbGVtZW50VmFsdWVjSm9u2BhYUaRoZGlnZXN0SUQCZnJhbmRvbVBQip1puiJt9bPJuJKQutKPcWVsZW1lbnRJZGVudGlmaWVyY2RvYmxlbGVtZW50VmFsdWVqMTk4OC0wOS0wMdgYWEekaGRpZ2VzdElEA2ZyYW5kb21QDkHTRidZXj71bch3RJnL8HFlbGVtZW50SWRlbnRpZmllcmNzZXhsZWxlbWVudFZhbHVlAmppc3N1ZXJBdXRohEOhASahGCFZAsQwggLAMIICZ6ADAgECAhQefxsyrU807-SwzAe3sOMzpwsYTTAKBggqhkjOPQQDAjB5MQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEcMBoGA1UECgwTRGlnaXRhbCBDcmVkZW50aWFsczEfMB0GA1UEAwwWZGlnaXRhbGNyZWRlbnRpYWxzLmRldjAeFw0yNTAyMTkyMzMwMThaFw0yNjAyMTkyMzMwMThaMHkxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1Nb3VudGFpbiBWaWV3MRwwGgYDVQQKDBNEaWdpdGFsIENyZWRlbnRpYWxzMR8wHQYDVQQDDBZkaWdpdGFsY3JlZGVudGlhbHMuZGV2MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE63k2K-LX85fDUAR9g-HjYizjVWs2D2pox1i7Ddxq-GwJr5pdXQ2ZOXYSw1onkZaYygAPyKTAAWzNiEh42AXjaaOBzDCByTAfBgNVHSMEGDAWgBSiT_SJ2XxG6G6jhtlHSM7MvtzP9TAdBgNVHQ4EFgQU3_5qWhLpwGLEvJinJdLZcPd6YCgwNAYDVR0fBC0wKzApoCegJYYjaHR0cHM6Ly9kaWdpdGFsLWNyZWRlbnRpYWxzLmRldi9jcmwwKgYDVR0SBCMwIYYfaHR0cHM6Ly9kaWdpdGFsLWNyZWRlbnRpYWxzLmRldjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lAQH_BAswCQYHKIGMXQUBAjAKBggqhkjOPQQDAgNHADBEAiBhxcv1fMHje_LgsTPaHyAxBF1wm1ohFA56aDCbywdC5wIgcK-i4cSb-6eMFcwJ5RntBH_KamMbIchPDbn8H0f1CwJZAdHYGFkBzKZndmVyc2lvbmMxLjBvZGlnZXN0QWxnb3JpdGhtZ1NIQS0yNTZnZG9jVHlwZWtvcmcubWljb3YuMWx2YWx1ZURpZ2VzdHOhb29yZy5taWNvdi52dHIuMaQAWCDiNxRvGmUP42ZwWnKlEwMFCJCCV3Ut9Yu0vm8Vlu6DoQFYIG-RMUJA9kUR6yJXPNFQwmZT3_4MQusoPnQeRtR4JA3mAlgglVZFjH1wDmolOTWSjhAbzq3_XrWfyfdy6OqS6LDblHUDWCD5habRiyDQ92eLBE1qftIOjkWl6rgwv86YbSyBD_XM1m1kZXZpY2VLZXlJbmZvoWlkZXZpY2VLZXmkAQIgASFYIGUxSuSsTKxJQvJF_vK6AvNeGrKAx836asTStlIWbeFyIlggMtkefckv_tI6axn8UKhlTg4RwkY0_pcY23oIF5TlntRsdmFsaWRpdHlJbmZvo2ZzaWduZWTAeBsyMDI1LTA0LTI1VDA3OjQxOjM3LjU4OTQwOVppdmFsaWRGcm9twHgbMjAyNS0wNC0yNVQwNzo0MTozNy41ODk0MThaanZhbGlkVW50aWzAeBsyMDM1LTA0LTEzVDA3OjQxOjM3LjU4OTQxOVpYQJa8r3UW8S4d9OPUVbV0KqWH1us9AqCK3lDOZhdTXFjmrI46EAQQYzhJTc_QGritzwA8S0sRWf1DmIqE6jN2abY"
+        }
+      ]
+    },
+    {
+      "id": "passport_photo_id",
+      "nameSpaces": {
+        "org.iso.23220.1": {
+            "family_name_unicode": {
+                "value": "Smith",
+                "display": "Family Name",
+                "display_value": "Smith"
+            },
+            "given_name_unicode": {
+                "value": "Jon",
+                "display": "Given Name",
+                "display_value": "Jon"
+            },
+            "birth_date": {
+                "value": "1988-09-01",
+                "display": "Date of birth",
+                "display_value": "1988-09-01"
+            },
+            "portrait": {
+                "value": "_9j_4AAQSkZJRgABAQAAAQABAAD_2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH_2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH_wAARCAABAAEDASIAAhEBAxEB_8QAHwAAAQUBAQEBAQEAAAAAAAAAAQIDBAUGBwgJCgv_xACMQACAQMDAgYiAgAAAAAAAABgQCAwUDBAcBAgQICQoRFRYf_xAAgEQACAQIEBgEBAAAAAAAAAAABAgMRBAAhBRIgQVFh_xAAiEQACAgIBAwQCAAAAAAAAAAABEQIDABIhMQVBUSNhcf_aAAwDAQACEQMRAD8A_cn+A_iP8OI_+v1f+gH_AD0r_9k===",
+                "display": "Portrait",
+                "display_value": "Portrait"
+            },
+            "issue_date": {
+                "value": "2022-01-01",
+                "display": "Date of issue",
+                "display_value": "2022-01-01"
+            },
+            "expiry_date": {
+                "value": "2026-01-01",
+                "display": "Date of expiry",
+                "display_value": "2026-01-01"
+            },
+            "issuing_authority_unicode": {
+                "value": "DC.dev",
+                "display": "Issuing Authority",
+                "display_value": "DC.dev"
+            },
+            "issuing_country": {
+                "value": "US",
+                "display": "Issuing country",
+                "display_value": "US"
+            },
+            "age_over_18": {
+                "value": true,
+                "display": "Age Over 18",
+                "display_value": "True"
+            },
+            "document_number": {
+                "value": "90001234",
+                "display": "License number",
+                "display_value": "90001234"
+            },
+            "nationality": {
+                "value": "US",
+                "display": "Nationality",
+                "display_value": "US"
+            },
+            "sex": {
+                "value": 1,
+                "display": "Sex",
+                "display_value": "Male"
+	    }
+        }
+      },
+      "config": {
+        "format": "mso_mdoc",
+        "doctype": "org.iso.23220.photoID.1",
+        "cryptographic_binding_methods_supported": [
+          "cose_key"
+        ],
+        "credential_signing_alg_values_supported": [
+          "ES256"
+        ],
+        "display": [
+          {
+            "name": "Passport photo ID",
+            "locale": "en-US",
+            "description": "Mobile passport"
+          }
+        ],
+        "claims": [
+          {
+              "path": [
+                  "org.iso.23220.1",
+                  "family_name_unicode"
+              ],
+              "display": [
+                  {
+                      "name": "Family Name",
+                      "locale": "en-US"
+                  }
+              ]
+          },
+          {
+              "path": [
+                  "org.iso.23220.1",
+                  "given_name_unicode"
+              ],
+              "display": [
+                  {
+                      "name": "Given Name",
+                      "locale": "en-US"
+                  }
+              ]
+          },
+          {
+              "path": [
+                  "org.iso.23220.1",
+                  "birth_date"
+              ],
+              "display": [
+                  {
+                      "name": "Date of birth",
+                      "locale": "en-US"
+                  }
+              ]
+          },
+          {
+              "path": [
+                  "org.iso.23220.1",
+                  "portrait"
+              ],
+              "display": [
+                  {
+                      "name": "Portrait",
+                      "locale": "en-US"
+                  }
+              ]
+          },
+          {
+              "path": [
+                  "org.iso.23220.1",
+                  "issue_date"
+              ],
+              "display": [
+                  {
+                      "name": "Date of issue",
+                      "locale": "en-US"
+                  }
+              ]
+          },
+          {
+              "path": [
+                  "org.iso.23220.1",
+                  "expiry_date"
+              ],
+              "display": [
+                  {
+                      "name": "Date of expiry",
+                      "locale": "en-US"
+                  }
+              ]
+          },
+          {
+              "path": [
+                  "org.iso.23220.1",
+                  "issuing_authority_unicode"
+              ],
+              "display": [
+                  {
+                      "name": "Issuing Authority",
+                      "locale": "en-US"
+                  }
+              ]
+          },
+          {
+              "path": [
+                  "org.iso.23220.1",
+                  "issuing_country"
+              ],
+              "display": [
+                  {
+                      "name": "Issuing country",
+                      "locale": "en-US"
+                  }
+              ]
+          },
+          {
+              "path": [
+                  "org.iso.23220.1",
+                  "age_over_18"
+              ],
+              "display": [
+                  {
+                      "name": "Age Over 18",
+                      "locale": "en-US"
+                  }
+              ]
+          },
+          {
+              "path": [
+                  "org.iso.23220.1",
+                  "document_number"
+              ],
+              "display": [
+                  {
+                      "name": "Document number",
+                      "locale": "en-US"
+                  }
+              ]
+          },
+          {
+              "path": [
+                  "org.iso.23220.1",
+                  "nationality"
+              ],
+              "display": [
+                  {
+                      "name": "Nationality",
+                      "locale": "en-US"
+                  }
+              ]
+          },
+          {
+              "path": [
+                  "org.iso.23220.1",
+                  "sex"
+              ],
+              "display": [
+                  {
+                      "name": "Sex",
+                      "locale": "en-US"
+                  }
+              ]
+          }
+        ]
+      },
+      "displayData": {
+        "title": "Jon's passport photo ID"
+  
+      },
+      "credentials": [
+        {
+          "key": {
+            "type": "SOFTWARE",
+            "publicKey": "123",
+            "privateKey": "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgxGmxbabgSEnIYOMz934HLLGfosgSgHSzMX6l0hl49S2hRANCAAQi0KbzdFfXKu-4dBzVy7Oj8YtMF0-gJCb9TUJBx6UjfbpB6i-96hw4dG6VR64XtuYa3rpfMla4YX-0-wXdlYi5"
+          },
+          "credential": "ompuYW1lU3BhY2VzoW9vcmcuaXNvLjIzMjIwLjGJ2BhYXKRoZGlnZXN0SUQAZnJhbmRvbVCf9oHm95hSny7sP-XET5NGcWVsZW1lbnRJZGVudGlmaWVyc2ZhbWlseV9uYW1lX3VuaWNvZGVsZWxlbWVudFZhbHVlZVNtaXRo2BhYWaRoZGlnZXN0SUQBZnJhbmRvbVCVdJuUQhzVCL5e1h8F1D5FcWVsZW1lbnRJZGVudGlmaWVycmdpdmVuX25hbWVfdW5pY29kZWxlbGVtZW50VmFsdWVjSm9u2BhYWKRoZGlnZXN0SUQCZnJhbmRvbVBy8Yex3qG-VkJBuVxZ7AujcWVsZW1lbnRJZGVudGlmaWVyamJpcnRoX2RhdGVsZWxlbWVudFZhbHVlajE5ODgtMDktMDHYGFkBq6RoZGlnZXN0SUQDZnJhbmRvbVA4bPl70SrWqhfFGQem-_5EcWVsZW1lbnRJZGVudGlmaWVyaHBvcnRyYWl0bGVsZW1lbnRWYWx1ZVkBXf_Y_-AAEEpGSUYAAQEAAAEAAQAA_9sAQwABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB_9sAQwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB_8AAEQgAAQABAwEiAAIRAQMRAf_EAB8AAAEFAQEBAQEBAAAAAAAAAAECAwQFBgcICQoL_8QAjEAAgEDAwIGIgIAAAAAAAAAYEAgMFAwQHAQIECAkKERUWH_8QAIBEAAgECBAYBAQAAAAAAAAAAAQIDEQQAIQUSIEFRYf8QAIhEAAgICAQMEAgAAAAAAAAAAARECAwASITEFQVEjYXH_2gAMAwEAAhEDEQA_AP3J_gP4j_DiP_r9X_oB_wA9K__bYGFhYpGhkaWdlc3RJRARmcmFuZG9tUB-pmdelz3OUA0crxScRYMhxZWxlbWVudElkZW50aWZpZXJqaXNzdWVfZGF0ZWxlbGVtZW50VmFsdWVqMjAyMi0wMS0wMdgYWFmkaGRpZ2VzdElEBWZyYW5kb21QuXfFG8b49b58LQOh4_7OnHFlbGVtZW50SWRlbnRpZmllcmtleHBpcnlfZGF0ZWxlbGVtZW50VmFsdWVqMjAyNi0wMS0wMdgYWGKkaGRpZ2VzdElEBmZyYW5kb21QgE2Mtx1Lm15IBMabo_K7cnFlbGVtZW50SWRlbnRpZmllcngZaXNzdWluZ19hdXRob3JpdHlfdW5pY29kZWxlbGVtZW50VmFsdWVkRmltZdgYWFWkaGRpZ2VzdElEB2ZyYW5kb21QviiYUgnVWIdMwFwQ-TJqanFlbGVtZW50SWRlbnRpZmllcm9pc3N1aW5nX2NvdW50cnlsZWxlbWVudFZhbHVlYlVT2BhYT6RoZGlnZXN0SUQIZnJhbmRvbVAtjC-10-ps7wLbXNakwGvYcWVsZW1lbnRJZGVudGlmaWVya2FnZV9vdmVyXzE4bGVsZW1lbnRWYWx1ZfVqaXNzdWVyQXV0aIRDoQEmoRghWQLEMIICwDCCAmegAwIBAgIUHn8bMq1PNO_ksMwHt7DjM6cLGE0wCgYIKoZIzj0EAwIweTELMAkGA1UEBhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExFjAUBgNVBAcMDU1vdW50YWluIFZpZXcxHDAaBgNVBAoME0RpZ2l0YWwgQ3JlZGVudGlhbHMxHzAdBgNVBAMMFmRpZ2l0YWxjcmVkZW50aWFscy5kZXYwHhcNMjUwMjE5MjMzMDE4WhcNMjYwMjE5MjMzMDE4WjB5MQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEcMBoGA1UECgwTRGlnaXRhbCBDcmVkZW50aWFsczEfMB0GA1UEAwwWZGlnaXRhbGNyZWRlbnRpYWxzLmRldjBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABOt5Nivi1_OXw1AEfYPh42Is41VrNg9qaMdYuw3cavhsCa-aXV0NmTl2EsNaJ5GWmMoAD8ikwAFszYhIeNgF42mjgcwwgckwHwYDVR0jBBgwFoAUok_0idl8Ruhuo4bZR0jOzL7cz_UwHQYDVR0OBBYEFN_-aloS6cBixLyYpyXS2XD3emAoMDQGA1UdHwQtMCswKaAnoCWGI2h0dHBzOi8vZGlnaXRhbC1jcmVkZW50aWFscy5kZXYvY3JsMCoGA1UdEgQjMCGGH2h0dHBzOi8vZGlnaXRhbC1jcmVkZW50aWFscy5kZXYwDgYDVR0PAQH_BAQDAgeAMBUGA1UdJQEB_wQLMAkGByiBjF0FAQIwCgYIKoZIzj0EAwIDRwAwRAIgYcXL9XzB43vy4LEz2h8gMQRdcJtaIRQOemgwm8sHQucCIHCvouHEm_unjBXMCeUZ7QR_ympjGyHITw25_B9H9QsCWQKM2BhZAoemZ3ZlcnNpb25jMS4wb2RpZ2VzdEFsZ29yaXRobWdTSEEtMjU2Z2RvY1R5cGV3b3JnLmlzby4yMzIyMC5waG90b2lkLjFsdmFsdWVEaWdlc3RzoW9vcmcuaXNvLjIzMjIwLjGpAFggzUiZ3rNmya62Ur-zWRsF8L3N0Tm4AzQ3CftgXvFNjhsBWCAHRIpZSGgQmZaP6h06L74L-2OZy3g0l42ZKd-la7acpwJYIKSowqYmrGVhh6nQgZX8Fjqf6zTGH9DZKuZDr3X9F99CA1ggG_k37anB85SanEQHjCbG2eqLM8Zqv4xWRTiJFjqmB0gEWCBxBBJTMKGNxaSpeg6Qsjkxx_jqLrNRQWyhXTgFJNNUPwVYIPlefP8qnQhRrbepbXnXCM6WPJZJRGerF-t9N2y-1kn2BlggalWKdneZSr4Ax83QJlBl0ux2qh73bOSU6FGBwduqtKoHWCDl1VGfwNELVNUZDmiMYGV_BnUP_Dwu4pCFNvGdEUIRlwhYIAARYzZ4uxWuI_9z3G-kLZ7c_MKVK0aSm1Ut8fjyzAN0bWRldmljZUtleUluZm-haWRldmljZUtleaQBAiABIVggItCm83RX1yrvuHQc1cuzo_GLTBdPoCQm_U1CQcelI30iWCC6QeovveocOHRulUeuF7bmGt66XzJWuGF_tPsF3ZWIuWx2YWxpZGl0eUluZm-jZnNpZ25lZMB4GzIwMjUtMDQtMjVUMDc6MjE6NDAuNDE2Mzc1Wml2YWxpZEZyb23AeBsyMDI1LTA0LTI1VDA3OjIxOjQwLjQxNjM4NVpqdmFsaWRVbnRpbMB4GzIwMzUtMDQtMTNUMDc6MjE6NDAuNDE2Mzg1WlhA2MnxZtnrsYraLez_yYfo0vp6lTZo8F8iJJg9VEPc9R3My0C7uem6t4Wy_XaRbxxnfWbwRa45GaN7Lkyj5U7DsA"
         }
       ]
     }
