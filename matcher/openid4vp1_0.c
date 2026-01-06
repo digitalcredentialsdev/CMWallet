@@ -256,11 +256,12 @@ int main()
                             cJSON *claim;
                             cJSON_ArrayForEach(claim, matched_claim_names)
                             {
-                                char *claim_value = cJSON_GetStringValue(cJSON_GetObjectItem(cJSON_GetObjectItem(claim, "verification"), "display"));
+                                char *claim_display = cJSON_GetStringValue(cJSON_GetObjectItem(cJSON_GetObjectItem(claim, "verification"), "display"));
+                                char *claim_value = cJSON_GetStringValue(cJSON_GetObjectItem(cJSON_GetObjectItem(claim, "verification"), "display_value"));
                                 if (wasm_version > 1)
                                 {
                                     printf("AddFieldToEntrySet %s\n", matched_id);
-                                    AddFieldToEntrySet(matched_id, claim_value, NULL, set_id, doc_idx);
+                                    AddFieldToEntrySet(matched_id, claim_display, claim_value, set_id, doc_idx);
                                 }
                                 else
                                 { // TODO: remove
@@ -269,7 +270,7 @@ int main()
                                     cJSON_AddItemReferenceToObject(id_obj, "dcql_cred_id", cJSON_GetObjectItem(matched_doc, "id"));
                                     cJSON_AddItemReferenceToObject(id_obj, "provider_idx", cJSON_CreateNumber(i));
                                     char *id = cJSON_PrintUnformatted(id_obj);
-                                    AddFieldForStringIdEntry(id, claim_value, NULL);
+                                    AddFieldForStringIdEntry(id, claim_display, claim_value);
                                 }
                             }
                         }
