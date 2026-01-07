@@ -2258,5 +2258,156 @@
           "credential": "ompuYW1lU3BhY2VzoW9vcmcuaXNvLjIzMjIwLjGJ2BhYXKRoZGlnZXN0SUQAZnJhbmRvbVCf9oHm95hSny7sP-XET5NGcWVsZW1lbnRJZGVudGlmaWVyc2ZhbWlseV9uYW1lX3VuaWNvZGVsZWxlbWVudFZhbHVlZVNtaXRo2BhYWaRoZGlnZXN0SUQBZnJhbmRvbVCVdJuUQhzVCL5e1h8F1D5FcWVsZW1lbnRJZGVudGlmaWVycmdpdmVuX25hbWVfdW5pY29kZWxlbGVtZW50VmFsdWVjSm9u2BhYWKRoZGlnZXN0SUQCZnJhbmRvbVBy8Yex3qG-VkJBuVxZ7AujcWVsZW1lbnRJZGVudGlmaWVyamJpcnRoX2RhdGVsZWxlbWVudFZhbHVlajE5ODgtMDktMDHYGFkBq6RoZGlnZXN0SUQDZnJhbmRvbVA4bPl70SrWqhfFGQem-_5EcWVsZW1lbnRJZGVudGlmaWVyaHBvcnRyYWl0bGVsZW1lbnRWYWx1ZVkBXf_Y_-AAEEpGSUYAAQEAAAEAAQAA_9sAQwABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB_9sAQwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB_8AAEQgAAQABAwEiAAIRAQMRAf_EAB8AAAEFAQEBAQEBAAAAAAAAAAECAwQFBgcICQoL_8QAjEAAgEDAwIGIgIAAAAAAAAAYEAgMFAwQHAQIECAkKERUWH_8QAIBEAAgECBAYBAQAAAAAAAAAAAQIDEQQAIQUSIEFRYf8QAIhEAAgICAQMEAgAAAAAAAAAAARECAwASITEFQVEjYXH_2gAMAwEAAhEDEQA_AP3J_gP4j_DiP_r9X_oB_wA9K__bYGFhYpGhkaWdlc3RJRARmcmFuZG9tUB-pmdelz3OUA0crxScRYMhxZWxlbWVudElkZW50aWZpZXJqaXNzdWVfZGF0ZWxlbGVtZW50VmFsdWVqMjAyMi0wMS0wMdgYWFmkaGRpZ2VzdElEBWZyYW5kb21QuXfFG8b49b58LQOh4_7OnHFlbGVtZW50SWRlbnRpZmllcmtleHBpcnlfZGF0ZWxlbGVtZW50VmFsdWVqMjAyNi0wMS0wMdgYWGKkaGRpZ2VzdElEBmZyYW5kb21QgE2Mtx1Lm15IBMabo_K7cnFlbGVtZW50SWRlbnRpZmllcngZaXNzdWluZ19hdXRob3JpdHlfdW5pY29kZWxlbGVtZW50VmFsdWVkRmltZdgYWFWkaGRpZ2VzdElEB2ZyYW5kb21QviiYUgnVWIdMwFwQ-TJqanFlbGVtZW50SWRlbnRpZmllcm9pc3N1aW5nX2NvdW50cnlsZWxlbWVudFZhbHVlYlVT2BhYT6RoZGlnZXN0SUQIZnJhbmRvbVAtjC-10-ps7wLbXNakwGvYcWVsZW1lbnRJZGVudGlmaWVya2FnZV9vdmVyXzE4bGVsZW1lbnRWYWx1ZfVqaXNzdWVyQXV0aIRDoQEmoRghWQLEMIICwDCCAmegAwIBAgIUHn8bMq1PNO_ksMwHt7DjM6cLGE0wCgYIKoZIzj0EAwIweTELMAkGA1UEBhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExFjAUBgNVBAcMDU1vdW50YWluIFZpZXcxHDAaBgNVBAoME0RpZ2l0YWwgQ3JlZGVudGlhbHMxHzAdBgNVBAMMFmRpZ2l0YWxjcmVkZW50aWFscy5kZXYwHhcNMjUwMjE5MjMzMDE4WhcNMjYwMjE5MjMzMDE4WjB5MQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEcMBoGA1UECgwTRGlnaXRhbCBDcmVkZW50aWFsczEfMB0GA1UEAwwWZGlnaXRhbGNyZWRlbnRpYWxzLmRldjBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABOt5Nivi1_OXw1AEfYPh42Is41VrNg9qaMdYuw3cavhsCa-aXV0NmTl2EsNaJ5GWmMoAD8ikwAFszYhIeNgF42mjgcwwgckwHwYDVR0jBBgwFoAUok_0idl8Ruhuo4bZR0jOzL7cz_UwHQYDVR0OBBYEFN_-aloS6cBixLyYpyXS2XD3emAoMDQGA1UdHwQtMCswKaAnoCWGI2h0dHBzOi8vZGlnaXRhbC1jcmVkZW50aWFscy5kZXYvY3JsMCoGA1UdEgQjMCGGH2h0dHBzOi8vZGlnaXRhbC1jcmVkZW50aWFscy5kZXYwDgYDVR0PAQH_BAQDAgeAMBUGA1UdJQEB_wQLMAkGByiBjF0FAQIwCgYIKoZIzj0EAwIDRwAwRAIgYcXL9XzB43vy4LEz2h8gMQRdcJtaIRQOemgwm8sHQucCIHCvouHEm_unjBXMCeUZ7QR_ympjGyHITw25_B9H9QsCWQKM2BhZAoemZ3ZlcnNpb25jMS4wb2RpZ2VzdEFsZ29yaXRobWdTSEEtMjU2Z2RvY1R5cGV3b3JnLmlzby4yMzIyMC5waG90b2lkLjFsdmFsdWVEaWdlc3RzoW9vcmcuaXNvLjIzMjIwLjGpAFggzUiZ3rNmya62Ur-zWRsF8L3N0Tm4AzQ3CftgXvFNjhsBWCAHRIpZSGgQmZaP6h06L74L-2OZy3g0l42ZKd-la7acpwJYIKSowqYmrGVhh6nQgZX8Fjqf6zTGH9DZKuZDr3X9F99CA1ggG_k37anB85SanEQHjCbG2eqLM8Zqv4xWRTiJFjqmB0gEWCBxBBJTMKGNxaSpeg6Qsjkxx_jqLrNRQWyhXTgFJNNUPwVYIPlefP8qnQhRrbepbXnXCM6WPJZJRGerF-t9N2y-1kn2BlggalWKdneZSr4Ax83QJlBl0ux2qh73bOSU6FGBwduqtKoHWCDl1VGfwNELVNUZDmiMYGV_BnUP_Dwu4pCFNvGdEUIRlwhYIAARYzZ4uxWuI_9z3G-kLZ7c_MKVK0aSm1Ut8fjyzAN0bWRldmljZUtleUluZm-haWRldmljZUtleaQBAiABIVggItCm83RX1yrvuHQc1cuzo_GLTBdPoCQm_U1CQcelI30iWCC6QeovveocOHRulUeuF7bmGt66XzJWuGF_tPsF3ZWIuWx2YWxpZGl0eUluZm-jZnNpZ25lZMB4GzIwMjUtMDQtMjVUMDc6MjE6NDAuNDE2Mzc1Wml2YWxpZEZyb23AeBsyMDI1LTA0LTI1VDA3OjIxOjQwLjQxNjM4NVpqdmFsaWRVbnRpbMB4GzIwMzUtMDQtMTNUMDc6MjE6NDAuNDE2Mzg1WlhA2MnxZtnrsYraLez_yYfo0vp6lTZo8F8iJJg9VEPc9R3My0C7uem6t4Wy_XaRbxxnfWbwRa45GaN7Lkyj5U7DsA"
         }
       ]
+    },
+    {
+      "id": "dpc_v3_2",
+      "nameSpaces": {
+        "com.emvco.dpc.1": {
+            "card_last_four": {
+                "value": "4444",
+                "display": "Last Four Digits of the Card Number",
+                "display_value": "4444"
+            },
+            "card_art_url": {
+                "value": "https://pocketbank.example/card.png",
+                "display": "Card Art"
+            },
+            "card_network_code": {
+                "value": "ACME",
+                "display": "Card Network Code"
+            },
+            "card_cobadged_network_code": {
+                "value": "LASER",
+                "display": "Card Co-badged Network Code"
+            },
+            "card_bin": {
+                "value": "990001",
+                "display": "Card BIN"
+            },
+            "card_id": {
+                "value": "5d8f7e9c0a12",
+                "display": "Card ID"
+            },
+            "card_par": {
+                "value": "9900ABC123XYZ789LMNOPQRSTUVWX",
+                "display": "Card PAR"
+            },
+            "credential_id": {
+                "value": "b3f1c8a2-6d4e-4f9a-9e3d-8a7c2f1b9d34",
+                "display": "Credential ID"
+            }
+        }
+      },
+      "config": {
+        "format": "mso_mdoc",
+        "doctype": "com.emvco.dpc",
+        "cryptographic_binding_methods_supported": [
+          "cose_key"
+        ],
+        "credential_signing_alg_values_supported": [
+          "ES256"
+        ]
+      },
+      "displayData": {
+        "title": "Pocket Bank SkyFly ACME Credit"
+      },
+      "credentials": [
+        {
+          "key": {
+            "type": "SOFTWARE",
+            "publicKey": "123",
+            "privateKey": "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgxGmxbabgSEnIYOMz934HLLGfosgSgHSzMX6l0hl49S2hRANCAAQi0KbzdFfXKu-4dBzVy7Oj8YtMF0-gJCb9TUJBx6UjfbpB6i-96hw4dG6VR64XtuYa3rpfMla4YX-0-wXdlYi5"
+          },
+          "credential": "ompuYW1lU3BhY2VzoW9vcmcuaXNvLjIzMjIwLjGJ2BhYXKRoZGlnZXN0SUQAZnJhbmRvbVCf9oHm95hSny7sP-XET5NGcWVsZW1lbnRJZGVudGlmaWVyc2ZhbWlseV9uYW1lX3VuaWNvZGVsZWxlbWVudFZhbHVlZVNtaXRo2BhYWaRoZGlnZXN0SUQBZnJhbmRvbVCVdJuUQhzVCL5e1h8F1D5FcWVsZW1lbnRJZGVudGlmaWVycmdpdmVuX25hbWVfdW5pY29kZWxlbGVtZW50VmFsdWVjSm9u2BhYWKRoZGlnZXN0SUQCZnJhbmRvbVBy8Yex3qG-VkJBuVxZ7AujcWVsZW1lbnRJZGVudGlmaWVyamJpcnRoX2RhdGVsZWxlbWVudFZhbHVlajE5ODgtMDktMDHYGFkBq6RoZGlnZXN0SUQDZnJhbmRvbVA4bPl70SrWqhfFGQem-_5EcWVsZW1lbnRJZGVudGlmaWVyaHBvcnRyYWl0bGVsZW1lbnRWYWx1ZVkBXf_Y_-AAEEpGSUYAAQEAAAEAAQAA_9sAQwABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB_9sAQwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB_8AAEQgAAQABAwEiAAIRAQMRAf_EAB8AAAEFAQEBAQEBAAAAAAAAAAECAwQFBgcICQoL_8QAjEAAgEDAwIGIgIAAAAAAAAAYEAgMFAwQHAQIECAkKERUWH_8QAIBEAAgECBAYBAQAAAAAAAAAAAQIDEQQAIQUSIEFRYf8QAIhEAAgICAQMEAgAAAAAAAAAAARECAwASITEFQVEjYXH_2gAMAwEAAhEDEQA_AP3J_gP4j_DiP_r9X_oB_wA9K__bYGFhYpGhkaWdlc3RJRARmcmFuZG9tUB-pmdelz3OUA0crxScRYMhxZWxlbWVudElkZW50aWZpZXJqaXNzdWVfZGF0ZWxlbGVtZW50VmFsdWVqMjAyMi0wMS0wMdgYWFmkaGRpZ2VzdElEBWZyYW5kb21QuXfFG8b49b58LQOh4_7OnHFlbGVtZW50SWRlbnRpZmllcmtleHBpcnlfZGF0ZWxlbGVtZW50VmFsdWVqMjAyNi0wMS0wMdgYWGKkaGRpZ2VzdElEBmZyYW5kb21QgE2Mtx1Lm15IBMabo_K7cnFlbGVtZW50SWRlbnRpZmllcngZaXNzdWluZ19hdXRob3JpdHlfdW5pY29kZWxlbGVtZW50VmFsdWVkRmltZdgYWFWkaGRpZ2VzdElEB2ZyYW5kb21QviiYUgnVWIdMwFwQ-TJqanFlbGVtZW50SWRlbnRpZmllcm9pc3N1aW5nX2NvdW50cnlsZWxlbWVudFZhbHVlYlVT2BhYT6RoZGlnZXN0SUQIZnJhbmRvbVAtjC-10-ps7wLbXNakwGvYcWVsZW1lbnRJZGVudGlmaWVya2FnZV9vdmVyXzE4bGVsZW1lbnRWYWx1ZfVqaXNzdWVyQXV0aIRDoQEmoRghWQLEMIICwDCCAmegAwIBAgIUHn8bMq1PNO_ksMwHt7DjM6cLGE0wCgYIKoZIzj0EAwIweTELMAkGA1UEBhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExFjAUBgNVBAcMDU1vdW50YWluIFZpZXcxHDAaBgNVBAoME0RpZ2l0YWwgQ3JlZGVudGlhbHMxHzAdBgNVBAMMFmRpZ2l0YWxjcmVkZW50aWFscy5kZXYwHhcNMjUwMjE5MjMzMDE4WhcNMjYwMjE5MjMzMDE4WjB5MQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEcMBoGA1UECgwTRGlnaXRhbCBDcmVkZW50aWFsczEfMB0GA1UEAwwWZGlnaXRhbGNyZWRlbnRpYWxzLmRldjBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABOt5Nivi1_OXw1AEfYPh42Is41VrNg9qaMdYuw3cavhsCa-aXV0NmTl2EsNaJ5GWmMoAD8ikwAFszYhIeNgF42mjgcwwgckwHwYDVR0jBBgwFoAUok_0idl8Ruhuo4bZR0jOzL7cz_UwHQYDVR0OBBYEFN_-aloS6cBixLyYpyXS2XD3emAoMDQGA1UdHwQtMCswKaAnoCWGI2h0dHBzOi8vZGlnaXRhbC1jcmVkZW50aWFscy5kZXYvY3JsMCoGA1UdEgQjMCGGH2h0dHBzOi8vZGlnaXRhbC1jcmVkZW50aWFscy5kZXYwDgYDVR0PAQH_BAQDAgeAMBUGA1UdJQEB_wQLMAkGByiBjF0FAQIwCgYIKoZIzj0EAwIDRwAwRAIgYcXL9XzB43vy4LEz2h8gMQRdcJtaIRQOemgwm8sHQucCIHCvouHEm_unjBXMCeUZ7QR_ympjGyHITw25_B9H9QsCWQKM2BhZAoemZ3ZlcnNpb25jMS4wb2RpZ2VzdEFsZ29yaXRobWdTSEEtMjU2Z2RvY1R5cGV3b3JnLmlzby4yMzIyMC5waG90b2lkLjFsdmFsdWVEaWdlc3RzoW9vcmcuaXNvLjIzMjIwLjGpAFggzUiZ3rNmya62Ur-zWRsF8L3N0Tm4AzQ3CftgXvFNjhsBWCAHRIpZSGgQmZaP6h06L74L-2OZy3g0l42ZKd-la7acpwJYIKSowqYmrGVhh6nQgZX8Fjqf6zTGH9DZKuZDr3X9F99CA1ggG_k37anB85SanEQHjCbG2eqLM8Zqv4xWRTiJFjqmB0gEWCBxBBJTMKGNxaSpeg6Qsjkxx_jqLrNRQWyhXTgFJNNUPwVYIPlefP8qnQhRrbepbXnXCM6WPJZJRGerF-t9N2y-1kn2BlggalWKdneZSr4Ax83QJlBl0ux2qh73bOSU6FGBwduqtKoHWCDl1VGfwNELVNUZDmiMYGV_BnUP_Dwu4pCFNvGdEUIRlwhYIAARYzZ4uxWuI_9z3G-kLZ7c_MKVK0aSm1Ut8fjyzAN0bWRldmljZUtleUluZm-haWRldmljZUtleaQBAiABIVggItCm83RX1yrvuHQc1cuzo_GLTBdPoCQm_U1CQcelI30iWCC6QeovveocOHRulUeuF7bmGt66XzJWuGF_tPsF3ZWIuWx2YWxpZGl0eUluZm-jZnNpZ25lZMB4GzIwMjUtMDQtMjVUMDc6MjE6NDAuNDE2Mzc1Wml2YWxpZEZyb23AeBsyMDI1LTA0LTI1VDA3OjIxOjQwLjQxNjM4NVpqdmFsaWRVbnRpbMB4GzIwMzUtMDQtMTNUMDc6MjE6NDAuNDE2Mzg1WlhA2MnxZtnrsYraLez_yYfo0vp6lTZo8F8iJJg9VEPc9R3My0C7uem6t4Wy_XaRbxxnfWbwRa45GaN7Lkyj5U7DsA"
+        }
+      ]
+    },
+    {
+        "id": "dpc_v3_2_sdjwt",
+        "paths": {
+            "card_last_four": {
+                "value": "4444",
+                "display": "Last Four Digits of the Card Number",
+                "display_value": "4444",
+                "_sd": true
+            },
+            "card_art_url": {
+                "value": "https://pocketbank.example/card.png",
+                "display": "Card Art",
+                "_sd": true
+            },
+            "card_network_code": {
+                "value": "ACME",
+                "display": "Card Network Code",
+                "_sd": true
+            },
+            "card_cobadged_network_code": {
+                "value": "LASER",
+                "display": "Card Co-badged Network Code",
+                "_sd": true
+            },
+            "card_bin": {
+                "value": "990001",
+                "display": "Card Identifier (BIN)",
+                "_sd": true
+            },
+            "card_id": {
+                "value": "5d8f7e9c0a12",
+                "display": "Card Identifier (ID)",
+                "_sd": true
+            },
+            "card_par": {
+                "value": "9900ABC123XYZ789LMNOPQRSTUVWX",
+                "display": "Card Identifier (PAR)",
+                "_sd": true
+            },
+            "credential_id": {
+                "value": "b3f1c8a2-6d4e-4f9a-9e3d-8a7c2f1b9d34",
+                "display": "Credential ID",
+                "_sd": true
+            },
+            "iss": {
+                "value": "https://digital-credentials.dev",
+                "_sd": false
+            },
+            "iat": {
+                "value": 1683000000,
+                "_sd": false
+            },
+            "exp": {
+                "value": 1883000000,
+                "_sd": false
+            }
+        },
+        "config": {
+            "format": "dc+sd-jwt",
+            "vct": "com.emvco.dpc",
+            "cryptographic_binding_methods_supported": [
+                "jwk"
+            ],
+            "credential_signing_alg_values_supported": [
+                "ES256"
+            ],
+            "display": [
+                {
+                    "name": "Pocket Bank SkyFly ACME Credit",
+                    "locale": "en-US",
+                    "description": "Pocket Bank SkyFly ACME Credit"
+                }
+            ]
+        },
+        "displayData": {
+            "title": "Pocket Bank SkyFly ACME Credit"
+        },
+        "credentials": [
+            {
+                "credential": "eyJhbGciOiAiRVMyNTYiLCAidHlwIjogImRjK3NkLWp3dCIsICJ4NWMiOiBbIk1JSUM1akNDQW8yZ0F3SUJBZ0lVRVJjNEQzRVpQY25MdXg2N1ZWZDU4d2lrWGRjd0NnWUlLb1pJemowRUF3SXdlakVMTUFrR0ExVUVCaE1DVlZNeEV6QVJCZ05WQkFnTUNrTmhiR2xtYjNKdWFXRXhGakFVQmdOVkJBY01EVTF2ZFc1MFlXbHVJRlpwWlhjeEhEQWFCZ05WQkFvTUUwUnBaMmwwWVd3Z1EzSmxaR1Z1ZEdsaGJITXhJREFlQmdOVkJBTU1GMlJwWjJsMFlXd3RZM0psWkdWdWRHbGhiSE11WkdWMk1CNFhEVEkxTURReU5URTBNVEl5TmxvWERUSTJNRFF5TlRFME1USXlObG93ZWpFTE1Ba0dBMVVFQmhNQ1ZWTXhFekFSQmdOVkJBZ01Da05oYkdsbWIzSnVhV0V4RmpBVUJnTlZCQWNNRFUxdmRXNTBZV2x1SUZacFpYY3hIREFhQmdOVkJBb01FMFJwWjJsMFlXd2dRM0psWkdWdWRHbGhiSE14SURBZUJnTlZCQU1NRjJScFoybDBZV3d0WTNKbFpHVnVkR2xoYkhNdVpHVjJNRmt3RXdZSEtvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUV1TGQ1aUhPK05UNlJzNDZwQkFrQWM4RW1mb3gvOGtqSXJFclF2UGFBSjMxemRWWEV2a1pPZFFqV0wydy9xblJKZ2c4c2hETnp5RUZ0UENqMTg0WExGcU9COERDQjdUQWZCZ05WSFNNRUdEQVdnQlQ2aVpRaFo4NG83Mi9lWGZyZHpxMXBUSTdQQ2pBZEJnTlZIUTRFRmdRVWc3ZE1LSjViaElVTnBsS2RmWFlhUkdQQ2dOVXdJZ1lEVlIwUkJCc3dHWUlYWkdsbmFYUmhiQzFqY21Wa1pXNTBhV0ZzY3k1a1pYWXdOQVlEVlIwZkJDMHdLekFwb0NlZ0pZWWphSFIwY0hNNkx5OWthV2RwZEdGc0xXTnlaV1JsYm5ScFlXeHpMbVJsZGk5amNtd3dLZ1lEVlIwU0JDTXdJWVlmYUhSMGNITTZMeTlrYVdkcGRHRnNMV055WldSbGJuUnBZV3h6TG1SbGRqQU9CZ05WSFE4QkFmOEVCQU1DQjRBd0ZRWURWUjBsQVFIL0JBc3dDUVlIS0lHTVhRVUJBakFLQmdncWhrak9QUVFEQWdOSEFEQkVBaUFnR3VXekxpdnJGbTRWOU45SEN5Z1ErbHU2am9zN2FlZ0d1N2xaOEs1WFFRSWdLM1N0Rm5nL2YwTTdhcUZGWGs1S0VUUTN1UUZtY3JUcVE3eHJwWWF3dTFNPSIsICJNSUlDdVRDQ0FsK2dBd0lCQWdJVVE3aG5TbTNrSWRGdUFOYW5GcGs0ekVkeW4xc3dDZ1lJS29aSXpqMEVBd0l3ZWpFTE1Ba0dBMVVFQmhNQ1ZWTXhFekFSQmdOVkJBZ01Da05oYkdsbWIzSnVhV0V4RmpBVUJnTlZCQWNNRFUxdmRXNTBZV2x1SUZacFpYY3hIREFhQmdOVkJBb01FMFJwWjJsMFlXd2dRM0psWkdWdWRHbGhiSE14SURBZUJnTlZCQU1NRjJScFoybDBZV3d0WTNKbFpHVnVkR2xoYkhNdVpHVjJNQjRYRFRJMU1EUXlOVEUwTVRJeU5sb1hEVE0xTURReE16RTBNVEl5Tmxvd2VqRUxNQWtHQTFVRUJoTUNWVk14RXpBUkJnTlZCQWdNQ2tOaGJHbG1iM0p1YVdFeEZqQVVCZ05WQkFjTURVMXZkVzUwWVdsdUlGWnBaWGN4SERBYUJnTlZCQW9NRTBScFoybDBZV3dnUTNKbFpHVnVkR2xoYkhNeElEQWVCZ05WQkFNTUYyUnBaMmwwWVd3dFkzSmxaR1Z1ZEdsaGJITXVaR1YyTUZrd0V3WUhLb1pJemowQ0FRWUlLb1pJemowREFRY0RRZ0FFcUlEL0lLV21UMGVlYmQzaEd5OEIwQ2R6VDlxclliOG5IYVFSNGJFNG5YUVFCSEF3ZFd5bTJqakxmYjVXbzJzSCtSdkZrRkFwUG5tdjBhcFA3SXkwaTZPQndqQ0J2ekFpQmdOVkhSRUVHekFaZ2hka2FXZHBkR0ZzTFdOeVpXUmxiblJwWVd4ekxtUmxkakFkQmdOVkhRNEVGZ1FVK29tVUlXZk9LTzl2M2wzNjNjNnRhVXlPendvd0h3WURWUjBqQkJnd0ZvQVUrb21VSVdmT0tPOXYzbDM2M2M2dGFVeU96d293RWdZRFZSMFRBUUgvQkFnd0JnRUIvd0lCQURBT0JnTlZIUThCQWY4RUJBTUNBUVl3S2dZRFZSMFNCQ013SVlZZmFIUjBjSE02THk5a2FXZHBkR0ZzTFdOeVpXUmxiblJwWVd4ekxtUmxkakFKQmdOVkhSOEVBakFBTUFvR0NDcUdTTTQ5QkFNQ0EwZ0FNRVVDSUEwdFc0ayt1SEFsOXRmNFdOa3NxRVIwT1JLK2pHd1NoV2Z2RjJtVzZKenZBaUVBaGhjQUxxNm1sSmd2MThwZnpjZ1B6N3lPMTc1bmxFWTF0ZVlpYVBmWWlucz0iXX0.eyJfc2QiOiBbIjdkNnVhdWg0bmsyOHlkZ213ZzJ2d0U1c3I4LXlXaXVBamRZYW4zVl9mMnciLCAiOHF1LVluTGxmZlVaZmI1RHpDUUlfZU9najF1ajdnemV5UWxsSldvZk1jdyIsICJDUXZIV3NZLUZfckd6X1A0NHlhcDBMbHpIRUpVdE1SXzViVmR3S1lVVnpBIiwgIkdSdUUtZ3BLUG5VNkFnWG5GczFnb2FlTmpoMjlyQTk0ZmtLcVoyX1dnSkkiLCAiSW92emRJU1k2MTVuV05TZGxSTHB3cTQyV0NmOFNURG05UVVwSGFOcjBoZyIsICJLZU9sOWdvZ215SXRfa1hEUFNnRjk3OTVLVGhHU2NmV0RHdjVxME45VGNZIiwgImdVc25oUHhmN2NVYWFqeDJVNWd3WmphZTljaTdCaTdZdlhOc21NX2VyQTAiLCAibTRpYUs5bU1LNUNKRkNodkJQNXBqaDRBVTZNVWpSS0FMbFFqRFVvSEIwWSIsICJtdDMtekRzblI4LU1TYzZQYUhIa1NzeC11dDZHXzc0QTh6U0hYbGdLeHAwIiwgInR4MXAxR0lUOFdFYmVnbmR3aW9ueTcyeENXRVpERUNsYkRhMkFHdjAxLUUiLCAidUpaMXdZUXFOcHFkY1p4cVNlYmNiZk1tcW5aX2haUm40VWFlWDVwZGluZyJdLCAiYWdlX2VxdWFsX29yX292ZXIiOiB7Il9zZCI6IFsiWng2ZEx1REZRamFSNXU0b2JtWGt1TkZ0Rnp4SGtkam5vc3AxakhZX0ZYOCJdfSwgImlzcyI6ICJodHRwczovL2RpZ2l0YWwtY3JlZGVudGlhbHMuZGV2IiwgImlhdCI6IDE2ODMwMDAwMDAsICJleHAiOiAxODgzMDAwMDAwLCAidmN0IjogInVybjpldWRpOnBpZDoxIiwgIl9zZF9hbGciOiAic2hhLTI1NiIsICJjbmYiOiB7Imp3ayI6IHsia3R5IjogIkVDIiwgImNydiI6ICJQLTI1NiIsICJ4IjogIjJkZXN5U0hfWXBCWHh5RGRsSlpCM1h2dmhvc2dTTGItUzhzcTVSMGpIcTAiLCAieSI6ICJOMV9GU2NLU3REVk5rc3ZyU3RmTEZUVThxb0hWR0gxY3lvWHFDMV85X1g4In19fQ.92qiV_62108mXGoL79-TLjZptAAL7KkKePuNC6p9dazy0wqm7MbKoiHQ_AdRY5Vy31R22xzl3nN7eaVaiqfmlw~WyJKQ0xqdjZXbDdqTV84b1ZoTTRaTV9nIiwgInBlcnNvbmFsX2FkbWluaXN0cmF0aXZlX251bWJlciIsICIzMzM4MTQ4MzYiXQ~WyJRRFM5M21JYUl1M0JqYkRHOTB2QmNnIiwgImZhbWlseV9uYW1lIiwgIlNtaXQiXQ~WyJqbHktdG0zVEtxdDAxUW5lTktJbHdBIiwgImdpdmVuX25hbWUiLCAiSmFuIl0~WyJtbXp0ZWJnUkdGTXYxazVCSVhHTFdRIiwgInNleCIsIDFd~WyJxelNnZ3I2M0gwWEl6ZTlHS09vanlBIiwgImJpcnRoZGF0ZSIsICIxOTc0LTAxLTE3Il0~WyJETFRYRUJaaGItczFCcWdOcE1BTmd3IiwgIjE4IiwgdHJ1ZV0~WyJnVENmWldpRGFKTlhHelFVcG9lOFBnIiwgInBvcnRyYWl0IiwgIlRPRE8iXQ~WyJELXlEVVJJX0wtWXZCV0hldTFpNTVnIiwgImVtYWlsIiwgImphbkBlbWFpbC5jb20iXQ~WyJBOThYdEZNdFI1TGExRG1xMWhralRBIiwgInBob25lX251bWJlciIsICIrMSAoMzEwKSAxMjMtNDU2NyJd~WyJ1VkxhVExnLVNnRm1aTlRxY3VTVnJBIiwgIk5MIl0~WyI5TVdac1Myc1RRRGtvRzhNMXhqbnVnIiwgIm5hdGlvbmFsaXRpZXMiLCBbeyIuLi4iOiAiNTN3b2pRMHd6NVMxaXBaOTI4RC1CUEdSU2JCdWtnVGtFcTlFckN2TFY5cyJ9XV0~WyJoR2l1MVFNWUVsb0VMV0t3Ql9DTVpRIiwgImxvY2FsaXR5IiwgIlJvdHRlcmRhbSJd~WyJvS3BGS1ROX0QzNTRBR2lVRUE1cjdnIiwgImNvdW50cnkiLCAiTkwiXQ~WyJxWEk0UHc1dktxYUJ2SmphMF96SEhRIiwgInBsYWNlX29mX2JpcnRoIiwgeyJfc2QiOiBbImRFT0dFX1RXV3Z6ZlV3blNkRVdPLVFOemxLdnd6a0lELVlvSVFxVERoU00iLCAibzlIVEpmLWQyZzZkR1Q5UXhjNWJuNnUySi1RYmFIS0RRNDBuQjZQQkhHWSJdfV0~WyJBZ2s5SU9iQzBldzBiZmxGLVgwSXBnIiwgImZvcm1hdHRlZCIsICJTY2hlbmtrYWRlIDkwMDAsIDMwMTFBQSJd~WyJLdHBKcS1HZHZsUWtuVGFRTjAzZW1RIiwgImhvdXNlX251bWJlciIsICI5MDAwIl0~WyJCVVhfYTVqRXcyYVFuMjhEWU9XWm9nIiwgInN0cmVldF9hZGRyZXNzIiwgIlNjaGVua2thZGUgOTAwMCJd~WyJidTVnMm9NTkh4NEJLdnlUQkEtb2ZnIiwgInBvc3RhbF9jb2RlIiwgIjMwMTFBQSJd~WyI4UWM2c2pFQWQxZ3hkVk1rbVJxbW1BIiwgImxvY2FsaXR5IiwgIlJvdHRlcmRhbSJd~WyJDODJEeklWUHpTbmNFR0ZGdE1WRjdRIiwgImNvdW50cnkiLCAiTkwiXQ~WyJVQUVJMWJqbElTVmRjcFBONHpleC1nIiwgImFkZHJlc3MiLCB7Il9zZCI6IFsiNkthVVJJSXR4dTVlSENoUkxDWVhzRTZmWGJrQVh3Z0NnN3U1UklINDFxbyIsICJHR3ZWcEZsNHotbU1NaDJudXNfWHV5b0ZLS3kxSVd2TTRRektDLU5id09JIiwgIlFTT2FhU1czQ1NDanE3WWs5Zl9vOVJIMUtvWEZlaDlWMWVoMENTdHplNjAiLCAiWmtleUt4Rzg4ZGZYS190UWp4MFZ6X3pVdGtzdGZua292NGNtVmF2bHJLYyIsICJzaVVXWFhTZ0pJTGxCWGNWaGZ2NDNWM3BsT3NJUmxtZUhjZU9TTkFBTTJRIiwgInZHekpBamx1YVpyS0lpNWlzUVpXYlY4UjE1QVl6Vm9DVks4RXJ0WHBVLVkiXX1d~",
+                "key": {
+                    "type": "SOFTWARE",
+                    "publicKey": "123",
+                    "privateKey": "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgQt4dJLpXLIINCxyo9q4RC-eVWE_V2k2UYvu1u3RdT3-hRANCAATZ16zJIf9ikFfHIN2UlkHde--GiyBItv5LyyrlHSMerTdfxUnCkrQ1TZLL60rXyxU1PKqB1Rh9XMqF6gtf_f1_"
+                }
+            }
+        ]
     }
   ]
