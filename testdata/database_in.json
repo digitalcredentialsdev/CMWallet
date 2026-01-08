@@ -2260,7 +2260,7 @@
       ]
     },
     {
-      "id": "dpc_v3_2",
+      "id": "dpc_v3_2_mdoc",
       "nameSpaces": {
         "com.emvco.dpc.1": {
             "card_last_four": {
