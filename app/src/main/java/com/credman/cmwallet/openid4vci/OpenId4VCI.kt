@@ -121,6 +121,7 @@ class OpenId4VCI(val credentialOfferJson: String) {
         val clientAttestationPayload = buildJsonObject {
             put("iss", "https://digital-credentials.dev/")
             put("sub", TEST_VCI_CLIENT_ID)
+            put("wallet_name", "CMWallet: An Android sample wallet")
             put("exp", Instant.now().epochSecond + 3000)
             put("cnf", buildJsonObject {
                 put("jwk", kp.public.toJWK())
@@ -132,7 +133,7 @@ class OpenId4VCI(val credentialOfferJson: String) {
             tmpKeyPriv
         )
         val clientAttestationPopHeader = buildJsonObject {
-            put("typ", "oauth-client-attestation-pop")
+            put("typ", "oauth-client-attestation-pop+jwt")
             put("alg", "ES256")
         }
         val clientAttestationPopPayload = buildJsonObject {
@@ -197,6 +198,7 @@ class OpenId4VCI(val credentialOfferJson: String) {
         val clientAttestationPayload = buildJsonObject {
             put("iss", "https://digital-credentials.dev/")
             put("sub", TEST_VCI_CLIENT_ID)
+            put("wallet_name", "CMWallet: An Android sample wallet")
             put("exp", Instant.now().epochSecond + 3000)
             put("cnf", buildJsonObject {
                 put("jwk", kp.public.toJWK())
@@ -204,7 +206,7 @@ class OpenId4VCI(val credentialOfferJson: String) {
         }
         val clientAttestation = createJWTES256(clientAttestationHeader, clientAttestationPayload, tmpKeyPriv)
         val clientAttestationPopHeader = buildJsonObject {
-            put("typ", "oauth-client-attestation-pop")
+            put("typ", "oauth-client-attestation-pop+jwt")
             put("alg", "ES256")
         }
         val clientAttestationPopPayload = buildJsonObject {
