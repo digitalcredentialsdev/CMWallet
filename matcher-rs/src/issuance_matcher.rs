@@ -10,8 +10,8 @@ pub enum OpenId4VciFilter {
     And { filters: Vec<OpenId4VciFilter> },
     Or { filters: Vec<OpenId4VciFilter> },
     Not { filter: Box<OpenId4VciFilter> },
-    IssuerAllowlist { issuers: HashSet<String> },
-    ConfigurationIdAllowlist { configuration_ids: HashSet<String> },
+    AllowsIssuers { issuers: HashSet<String> },
+    AllowsConfigurationIds { configuration_ids: HashSet<String> },
     SupportsAuthCodeFlow {},
     SupportsPreAuthFlow {},
     SupportsNonceEndpoint {},
@@ -35,10 +35,10 @@ impl OpenId4VciFilter {
             Self::And { filters } => filters.iter().all(|f| f.matches(request)),
             Self::Or { filters } => filters.iter().any(|f| f.matches(request)),
             Self::Not { filter } => !filter.matches(request),
-            Self::IssuerAllowlist { issuers } => {
+            Self::AllowsIssuers { issuers } => {
                 issuers.contains(&request.credential_offer.credential_issuer)
             }
-            Self::ConfigurationIdAllowlist { configuration_ids } => request
+            Self::AllowsConfigurationIds { configuration_ids } => request
                 .credential_offer
                 .credential_configuration_ids
                 .iter()
