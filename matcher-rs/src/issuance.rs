@@ -126,11 +126,11 @@ mod test {
         "filter": {
           "And": {
             "filters": [{
-              "ConfigurationIdAllowlist": {
+              "AllowsConfigurationIds": {
                 "configuration_ids": ["US_SOCIAL_SECURITY_NUMBER", "EU_AGE"]
               }
             }, {
-              "IssuerAllowlist": {
+              "AllowsIssuers": {
                 "issuers": ["ccb", "https://issuer.my"]
               }
             }]
@@ -229,7 +229,7 @@ mod test {
     "And": {
       "filters": [
         {
-          "ConfigurationIdAllowlist": {
+          "AllowsConfigurationIds": {
             "configuration_ids": [
               "US_SOCIAL_SECURITY_NUMBER",
               "EU_AGE"
@@ -237,7 +237,7 @@ mod test {
           }
         },
         {
-          "IssuerAllowlist": {
+          "AllowsIssuers": {
             "issuers": [
               "ccb",
               "https://issuer.my"
@@ -309,7 +309,7 @@ mod test {
     "Or": {
       "filters": [
         {
-          "ConfigurationIdAllowlist": {
+          "AllowsConfigurationIds": {
             "configuration_ids": [
               "US_SOCIAL_SECURITY_NUMBER",
               "EU_AGE"
@@ -317,7 +317,7 @@ mod test {
           }
         },
         {
-          "IssuerAllowlist": {
+          "AllowsIssuers": {
             "issuers": [
               "ccb"
             ]
