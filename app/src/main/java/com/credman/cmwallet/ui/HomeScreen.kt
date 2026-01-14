@@ -47,8 +47,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.credman.cmwallet.MainActivity
 import com.credman.cmwallet.R
 import com.credman.cmwallet.data.model.CredentialItem
+import com.credman.cmwallet.data.model.CredentialKeySoftware
 import com.credman.cmwallet.decodeBase64
 import com.credman.cmwallet.openid4vci.data.CredentialConfigurationMDoc
+import com.credman.cmwallet.openid4vci.data.CredentialConfigurationSdJwtVc
+import com.credman.cmwallet.sdjwt.SdJwt
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -174,6 +177,65 @@ fun CredentialDialog(
                             }
                         }
                     }
+                } else if (credentialItem.config is CredentialConfigurationSdJwtVc) {
+                    val sdJwtVc = SdJwt(
+                        credentialItem.credentials.first().credential,
+                        (credentialItem.credentials.first().key as CredentialKeySoftware).privateKey
+                    )
+                    val rawJwt = sdJwtVc.verifiedResult.processedJwt
+
+                    // Show the vct values
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp)
+                    ) {
+                        Row(Modifier.background(Color.LightGray)) {
+                            Text(
+                                text = "vct",
+                                modifier = Modifier
+                                    .border(1.dp, Color.Black)
+                                    .weight(1.0f)
+                                    .padding(5.dp)
+                            )
+                        }
+                        Row() {
+                            Text(
+                                text = rawJwt["vct"] as String,
+                                modifier = Modifier
+                                    .border(1.dp, Color.Black)
+                                    .weight(0.5f)
+                                    .padding(5.dp)
+                            )
+                        }
+                    }
+
+                    // Show the whole jwt
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp)
+                    ) {
+                        Row(Modifier.background(Color.LightGray)) {
+                            Text(
+                                text = "Full jwt details",
+                                modifier = Modifier
+                                    .border(1.dp, Color.Black)
+                                    .weight(1.0f)
+                                    .padding(5.dp)
+                            )
+                        }
+                        Row() {
+                            Text(
+                                text = rawJwt.toString(2),
+                                modifier = Modifier
+                                    .border(1.dp, Color.Black)
+                                    .weight(0.5f)
+                                    .padding(5.dp)
+                            )
+                        }
+                    }
+
                 }
                 Button(
                     modifier = Modifier.padding(10.dp),
