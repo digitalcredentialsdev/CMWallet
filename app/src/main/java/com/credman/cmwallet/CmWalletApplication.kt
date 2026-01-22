@@ -7,32 +7,18 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.credentials.DigitalCredential
 import androidx.credentials.ExperimentalDigitalCredentialApi
 import androidx.credentials.provider.CallingAppInfo
-import androidx.credentials.registry.digitalcredentials.openid4vp.OpenId4VpRegistry
-import androidx.credentials.registry.provider.RegisterCredentialsRequest
+import androidx.credentials.registry.provider.RegisterCreationOptionsRequest
 import androidx.credentials.registry.provider.RegistryManager
 import androidx.credentials.registry.provider.digitalcredentials.DigitalCredentialRegistry
 import androidx.room.Room
 import com.credman.cmwallet.data.repository.CredentialRepository
-import com.credman.cmwallet.data.repository.CredentialRepository.Companion.ICON
-import com.credman.cmwallet.data.repository.CredentialRepository.Companion.ID
-import com.credman.cmwallet.data.repository.CredentialRepository.Companion.LENGTH
-import com.credman.cmwallet.data.repository.CredentialRepository.Companion.START
-import com.credman.cmwallet.data.repository.CredentialRepository.Companion.SUBTITLE
-import com.credman.cmwallet.data.repository.CredentialRepository.Companion.TITLE
-import com.credman.cmwallet.data.repository.CredentialRepository.RegistryIcon
 import com.credman.cmwallet.data.room.CredentialDatabase
 import com.credman.cmwallet.mdoc.MDoc
-import com.google.android.gms.identitycredentials.IdentityCredentialClient
-import com.google.android.gms.identitycredentials.IdentityCredentialManager
-import com.google.android.gms.identitycredentials.RegisterCreationOptionsRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import java.io.ByteArrayOutputStream
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 
@@ -58,7 +44,6 @@ class CmWalletApplication : Application() {
     }
 
     private val registryManager = RegistryManager.create(this)
-    private lateinit var identityCredentialClient: IdentityCredentialClient
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     @OptIn(ExperimentalDigitalCredentialApi::class, ExperimentalEncodingApi::class)
@@ -73,7 +58,6 @@ class CmWalletApplication : Application() {
         val mdoc = MDoc(testIssuerSigned)
         println(mdoc.issuerSignedNamespaces)
 
-        identityCredentialClient = IdentityCredentialManager.getClient(applicationContext)
         database = Room.databaseBuilder(
             applicationContext,
             CredentialDatabase::class.java, "credential-database"
@@ -101,22 +85,24 @@ class CmWalletApplication : Application() {
                 ) {})
 
                 // Phone number verification demo
-                credentialRepo.registerPhoneNumberVerification(registryManager, loadPhoneNumberMatcher())
+                credentialRepo.registerPhoneNumberVerification(
+                    registryManager,
+                    loadPhoneNumberMatcher()
+                )
             }
-        }
-
-        identityCredentialClient.registerCreationOptions(
-            RegisterCreationOptionsRequest(
-                createOptions = buildIssuanceData(),
-                matcher = loadIssuanceMatcher(),
-                type = DigitalCredential.TYPE_DIGITAL_CREDENTIAL,
-                id = "openid4vci",
-                fulfillmentActionName = "",
-            )
-        ).addOnSuccessListener {
-            Log.i(TAG, "Issuance registration succeeded.")
-        }.addOnFailureListener { e ->
-            Log.e(TAG, "Issuance registration failed.", e)
+            try {
+                registryManager.registerCreationOptions(object :
+                    RegisterCreationOptionsRequest(
+                        creationOptions = buildIssuanceData(),
+                        matcher = loadIssuanceMatcher(),
+                        type = DigitalCredential.TYPE_DIGITAL_CREDENTIAL,
+                        id = "openid4vci",
+                        intentAction = "",
+                    ) {})
+                Log.i(TAG, "Issuance registration succeeded.")
+            } catch (e: Exception) {
+                Log.e(TAG, "Issuance registration failed.", e)
+            }
         }
 
 //        TODO: delete: this is only for testing.
