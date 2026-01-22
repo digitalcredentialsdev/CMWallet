@@ -1,10 +1,9 @@
 package com.credman.cmwallet.ui
 
-import android.content.Context
-import android.os.Bundle
-import android.util.Base64
 import android.util.Log
-import androidx.credentials.DigitalCredential
+import androidx.credentials.CreateDigitalCredentialRequest
+import androidx.credentials.CreateDigitalCredentialResponse
+import androidx.credentials.CredentialManager
 import androidx.credentials.ExperimentalDigitalCredentialApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,22 +11,12 @@ import com.credman.cmwallet.CmWalletApplication
 import com.credman.cmwallet.CmWalletApplication.Companion.TAG
 import com.credman.cmwallet.MainActivity
 import com.credman.cmwallet.data.model.CredentialItem
-import com.credman.cmwallet.loadECPrivateKey
-import com.credman.cmwallet.openid4vci.OpenId4VCI
-import com.credman.cmwallet.openid4vci.data.AuthorizationDetailResponseOpenIdCredential
-import com.credman.cmwallet.openid4vci.data.CredentialRequest
-import com.credman.cmwallet.openid4vci.data.TokenRequest
-import com.google.android.gms.identitycredentials.CreateCredentialRequest
-import com.google.android.gms.identitycredentials.IdentityCredentialManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import java.security.KeyFactory
-import java.security.interfaces.ECPrivateKey
-import java.security.spec.X509EncodedKeySpec
 
 data class HomeScreenUiState(
     val credentials: List<CredentialItem>
@@ -57,25 +46,26 @@ class HomeViewModel : ViewModel() {
     fun testIssuance(activity: MainActivity) {
         Log.i("HomeViewModel", "testIssuance")
         val credOfferJson = JSONObject(CmWalletApplication.credentialRepo.openId4VCITestRequestJson)
-        val requestJson = JSONObject().put("protocol", "openid4vci1.0").put("data", credOfferJson.toString()).toString()
+        val requestJson =
+            JSONObject().put("protocol", "openid4vci1.0").put("data", credOfferJson.toString())
+                .toString()
 
-        // Note: Long term this will be wrapped by a simple structured Jetpack API that
-        // automatically handles the request Bundle formation and pending intent launching
-        IdentityCredentialManager.getClient(activity).createCredential(
-            CreateCredentialRequest(
-                type = DigitalCredential.TYPE_DIGITAL_CREDENTIAL,
-                credentialData = Bundle().apply { putString("androidx.credentials.BUNDLE_KEY_REQUEST_JSON", requestJson) },
-                candidateQueryData = Bundle.EMPTY,
-                origin = null,
-                requestJson = requestJson,
-                resultReceiver = null
-            )
-        ).addOnSuccessListener {
-            Log.d(TAG, "Issuance pending intent received ${it.pendingIntent}")
-            assert(it.pendingIntent != null) { "PendingIntent must be non-null in this case" }
-            activity.launchIssuanceIntent(it.pendingIntent!!)
-        }.addOnFailureListener {
-            Log.e(TAG, "Issuance failure", it)
+        viewModelScope.launch {
+            val response = try {
+                CredentialManager.create(activity).createCredential(
+                    activity,
+                    CreateDigitalCredentialRequest(
+                        origin = null,
+                        requestJson = requestJson,
+                    )
+                )
+            } catch (e: Exception) {
+                Log.e(TAG, "Issuance failure", e)
+                null
+            }
+            (response as? CreateDigitalCredentialResponse)?.let {
+                Log.d(TAG, "Issuance response ${it.responseJson}")
+            }
         }
 
 //        val openId4VCI = OpenId4VCI(requestJson)

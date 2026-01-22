@@ -1,9 +1,6 @@
 package com.credman.cmwallet
 
-import android.R.attr.data
 import android.app.PendingIntent
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -15,7 +12,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import com.credman.cmwallet.CmWalletApplication.Companion.TAG
 import com.credman.cmwallet.ui.HomeScreen
 import com.credman.cmwallet.ui.theme.CMWalletTheme
-import com.google.android.gms.identitycredentials.IntentHelper.BUNDLE_KEY_PROVIDER_DATA
 
 
 class MainActivity : ComponentActivity() {

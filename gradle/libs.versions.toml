@@ -53,7 +53,6 @@ ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx
 lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx" }
 androidx-lifecycle-runtime-compose-android = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose-android", version.ref = "lifecycleRuntimeComposeAndroid" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomRuntime" }
-play-services-identity-credentials = {module = "com.google.android.gms:play-services-identity-credentials", version = "16.0.0-alpha06"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

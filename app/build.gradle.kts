@@ -53,7 +53,6 @@ dependencies {
     implementation(libs.androidx.registry.provider)
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play)
-    implementation(libs.play.services.identity.credentials)
     implementation(libs.androidx.registry.provider.play.services)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.androidx.core.ktx)
