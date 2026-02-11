@@ -74,7 +74,7 @@ class CmWalletApplication : Application() {
         credentialRepo.openId4VCITestRequestJson = loadOpenId4VCIRequestJson().decodeToString()
 
         // Listen for new credentials and update the registry.
-        applicationScope.launch {
+        applicationScope.launch(Dispatchers.IO) {
             credentialRepo.credentialRegistryDatabase.collect { openid4vpRegistry ->
                 Log.i(TAG, "Credentials changed $openid4vpRegistry")
 //                registryManager.registerCredentials(openid4vpRegistry)
@@ -90,7 +90,10 @@ class CmWalletApplication : Application() {
                     loadPhoneNumberMatcher()
                 )
             }
+        }
+        applicationScope.launch(Dispatchers.IO) {
             try {
+                Log.i(TAG, "Issuance registration started.")
                 registryManager.registerCreationOptions(object :
                     RegisterCreationOptionsRequest(
                         creationOptions = buildIssuanceData(),
