@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "cJSON/cJSON.h"
 #include "credentialmanager.h"
@@ -170,7 +171,7 @@ void report_matched_credential_set(char* set_id, int curr_set_idx, cJSON *matche
         cJSON *matched_option;
         cJSON_ArrayForEach(matched_option, matched_credential_set) {
             cJSON *curr_matched_credential_ids = cJSON_GetObjectItemCaseSensitive(matched_option, "matched_credential_ids");
-            char *dcql_set_idx = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(matched_option, "set_id")); // TODO
+            char *dcql_set_idx = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(matched_option, "set_id"));
             char *dcql_option_idx = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(matched_option, "option_id"));
             cJSON *matched_doc;
             cJSON *matched_credential_id;
@@ -292,13 +293,17 @@ int main()
                     transaction_data = cJSON_Parse(transaction_data_json);
                     transaction_credential_ids = cJSON_GetObjectItem(transaction_data, "credential_ids");
                     char *transaction_data_type = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "type"));
-                    if (strcmp(transaction_data_type, "payment_details") == 0) {
-                        merchant_name = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "payee_name"));
+                    if (strcmp(transaction_data_type, "urn:eudi:sca:payment:1") == 0) {
+                        cJSON *payload = cJSON_GetObjectItem(transaction_data, "payload");
+                        merchant_name = cJSON_GetStringValue(cJSON_GetObjectItem(cJSON_GetObjectItem(payload, "payee"), "name"));
                         
-                        char *amount = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "payment_amount"));
-                        char *currency = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "payment_currency"));
-                        transaction_amount = malloc(strlen(amount) + strlen(currency) + 2);
-                        sprintf(transaction_amount, "%s %s", currency, amount);
+                        double amount = cJSON_GetNumberValue(cJSON_GetObjectItem(payload, "amount"));
+                        int length_for_amount = log10(amount);
+                        char *currency = cJSON_GetStringValue(cJSON_GetObjectItem(payload, "currency"));
+                        int total_length = length_for_amount + 4 + strlen(currency) + 2;
+                        transaction_amount = malloc(length_for_amount + 4 + strlen(currency) + 2);
+                        sprintf(transaction_amount, "%s %f", currency, amount);
+                        transaction_amount[total_length - 1] = '\0';
                         printf("transaction amount %s\n", transaction_amount);
                         
                         additional_info = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "additional_info"));
