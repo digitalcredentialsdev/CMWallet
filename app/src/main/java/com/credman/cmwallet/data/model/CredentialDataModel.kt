@@ -46,5 +46,7 @@ data class CredentialKeyHardware(
 data class CredentialDisplayData(
     val title: String,
     val subtitle: String?,
-    val icon: String?
+    val icon: String?,
+    val explainer: String? = null,
+    val metadataDisplayText: String? = null,
 )

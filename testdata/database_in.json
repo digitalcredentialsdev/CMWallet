@@ -1879,7 +1879,10 @@
         ]
       },
       "displayData": {
-        "title": "Jon's Boarding Pass"
+        "title": "Jon's Boarding Pass",
+        "subtitle": "SFO to DEN",
+        "metadataDisplayText": "Boarding pass info",
+        "explainer": "[Google's privacy policy](www.google.com) describes how your data is being handled by Google Wallet. Look to [TSA's privacy policy](www.google.com) to learn how your data is being handled by TSA"
   
       },
       "credentials": [
@@ -2001,8 +2004,9 @@
         ]
       },
       "displayData": {
-        "title": "Jane's ID Pass"
-  
+        "title": "Jane's ID Pass",
+        "subtitle": "Elisa Beckett",
+        "explainer": "[Google's privacy policy](www.google.com) describes how your data is being handled by Google Wallet. Look to [TSA's privacy policy](www.google.com) to learn how your data is being handled by TSA"
       },
       "credentials": [
         {

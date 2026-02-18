@@ -253,6 +253,7 @@ class CredentialRepository {
                                 val displayName = item.config.claims?.firstOrNull{
                                     it.path[0] == namespace && it.path[1] == element
                                 }?.display?.first()?.name!!
+                                val namespaceData = mdoc.issuerSignedNamespaces[namespace]?.get(element)
                                 mdocFields.add(
                                     MdocField(
                                         namespace = namespace,
@@ -261,7 +262,7 @@ class CredentialRepository {
                                         fieldDisplayPropertySet = setOf(
                                             VerificationFieldDisplayProperties(
                                                 displayName = displayName,
-//                                                displayValue = namespaceData.value.displayValue
+                                                displayValue = namespaceData as? String
                                             )
                                         )
                                     )
@@ -277,7 +278,9 @@ class CredentialRepository {
                             subtitle = item.displayData.subtitle,
                             icon = item.displayData.icon?.decodeBase64()?.let {
                                 BitmapFactory.decodeByteArray(it, 0, it.size)
-                            } ?: CmWalletApplication.walletIcon
+                            } ?: CmWalletApplication.walletIcon,
+                            explainer = item.displayData.explainer,
+                            metadataDisplayText = item.displayData.metadataDisplayText
                         )),
                         id = item.id,
                     ))

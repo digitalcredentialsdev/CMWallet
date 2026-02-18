@@ -112,6 +112,8 @@ void report_matched_credential(uint32_t wasm_version, cJSON* matched_doc, cJSON*
             cJSON* c_display = cJSON_GetObjectItem(cJSON_GetObjectItem(c, "display"), "verification");
             char *title = cJSON_GetStringValue(cJSON_GetObjectItem(c_display, "title"));
             char *subtitle = cJSON_GetStringValue(cJSON_GetObjectItem(c_display, "subtitle"));
+            char *explainer = cJSON_GetStringValue(cJSON_GetObjectItem(c_display, "explainer"));
+            char *metadata_display_text = cJSON_GetStringValue(cJSON_GetObjectItem(c_display, "metadata_display_text"));
             cJSON *icon = cJSON_GetObjectItem(c_display, "icon");
             int icon_start_int = 0;
             int icon_len = 0;
@@ -129,7 +131,7 @@ void report_matched_credential(uint32_t wasm_version, cJSON* matched_doc, cJSON*
             if (wasm_version > 1)
             {
                 printf("AddEntryToSet %s, metadata: %s\n", matched_id, metadata);
-                AddEntryToSet(matched_id, creds_blob + icon_start_int, icon_len, title, subtitle, NULL, NULL, metadata, set_id, doc_idx);
+                AddEntryToSet(matched_id, creds_blob + icon_start_int, icon_len, title, subtitle, explainer, NULL, metadata, set_id, doc_idx);
             }
             else
             { // TODO: remove
@@ -160,6 +162,9 @@ void report_matched_credential(uint32_t wasm_version, cJSON* matched_doc, cJSON*
                     char *id = cJSON_PrintUnformatted(id_obj);
                     AddFieldForStringIdEntry(id, claim_display, claim_value);
                 }
+            }
+            if (wasm_version >= 5) {
+                AddMetadataDisplayTextToEntrySet(matched_id, metadata_display_text, set_id, doc_idx);
             }
         }
     }

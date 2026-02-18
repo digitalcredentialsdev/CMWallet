@@ -115,6 +115,11 @@ __attribute__((import_module("credman_v4"), import_name("SelfDeclarePackageInfo"
 #endif
 void SelfDeclarePackageInfo(const char* package_display_name, const char* package_icon, size_t package_icon_len);
 
+#if defined(__wasm__)
+__attribute__((import_module("credman_v5"), import_name("AddMetadataDisplayTextToEntrySet")))
+#endif
+void AddMetadataDisplayTextToEntrySet(const char *cred_id, const char *metadata_display_text, const char *set_id, int set_index);
+
 #ifdef __cplusplus
 }
 #endif
