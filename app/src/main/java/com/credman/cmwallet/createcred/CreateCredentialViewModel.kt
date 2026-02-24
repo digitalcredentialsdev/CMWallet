@@ -16,7 +16,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.credman.cmwallet.CmWalletApplication
 import com.credman.cmwallet.CmWalletApplication.Companion.TAG
-import com.credman.cmwallet.CmWalletApplication.Companion.TEST_VCI_CLIENT_ID
 import com.credman.cmwallet.CmWalletApplication.Companion.computeClientId
 import com.credman.cmwallet.data.model.Credential
 import com.credman.cmwallet.data.model.CredentialDisplayData
@@ -27,6 +26,7 @@ import com.credman.cmwallet.decodeBase64UrlNoPadding
 import com.credman.cmwallet.getcred.createOpenID4VPResponse
 import com.credman.cmwallet.mdoc.MDoc
 import com.credman.cmwallet.openid4vci.OpenId4VCI
+import com.credman.cmwallet.openid4vci.OpenId4VCI.Companion.TEST_VCI_CLIENT_ID
 import com.credman.cmwallet.openid4vci.data.AuthorizationDetailResponseOpenIdCredential
 import com.credman.cmwallet.openid4vci.data.CredentialConfigurationMDoc
 import com.credman.cmwallet.openid4vci.data.CredentialConfigurationSdJwtVc

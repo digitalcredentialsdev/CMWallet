@@ -3,7 +3,6 @@ package com.credman.cmwallet.openid4vci
 import android.util.Base64
 import android.util.Log
 import com.credman.cmwallet.CmWalletApplication.Companion.TAG
-import com.credman.cmwallet.CmWalletApplication.Companion.TEST_VCI_CLIENT_ID
 import com.credman.cmwallet.createJWTES256
 import com.credman.cmwallet.loadECPrivateKey
 import com.credman.cmwallet.openid4vci.data.CredentialOffer
@@ -59,6 +58,38 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 class OpenId4VCI(val credentialOfferJson: String) {
+
+    companion object {
+        const val TEST_VCI_CLIENT_ID = "52480754053"
+        const val WALLET_ISS = "https://cmwallet-provider.example.com"
+        const val WALLET_SUB = "https://cmwallet.example.org"
+        const val WALLET_NAME = "CMWallet"
+
+        /** Priv key for [WALLET_CERT] */
+        /** Should be generated server side. Only use this for testing purpose */
+        val WALLET_CERT_PRV_KEY =
+            loadECPrivateKey(Base64.decode(
+                "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgp7MvoXLpeRcEjKdUETZNjqCkAtU86ER2cesSDYRwTcqhRANCAAQIr_o2Q9PaiQg7AOsJD4jLvhr0x_i_JrwhNKAF6WQDty3QKaMZlYZIabS9wTpUkEPMOYJ7sqwTS81okBqoYGG2", Base64.URL_SAFE)) as ECPrivateKey
+
+
+        const val WALLET_CERT = "-----BEGIN CERTIFICATE-----\n" +
+                "MIICrTCCAlOgAwIBAgIUMfoUOsCwoUcR5adonlnZTfcIw1owCgYIKoZIzj0EAwIw\n" +
+                "dTELMAkGA1UEBhMCVVMxEzARBgNVBAgMCkNhbGlmb3JuaWExFjAUBgNVBAcMDU1v\n" +
+                "dW50YWluIFZpZXcxETAPBgNVBAoMCENNV2FsbGV0MSYwJAYDVQQDDB1jbXdhbGxl\n" +
+                "dC1wcm92aWRlci5leGFtcGxlLmNvbTAeFw0yNjAyMTMwMTM2MzNaFw0zNjAyMDEw\n" +
+                "MTM2MzNaMHUxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYD\n" +
+                "VQQHDA1Nb3VudGFpbiBWaWV3MREwDwYDVQQKDAhDTVdhbGxldDEmMCQGA1UEAwwd\n" +
+                "Y213YWxsZXQtcHJvdmlkZXIuZXhhbXBsZS5jb20wWTATBgcqhkjOPQIBBggqhkjO\n" +
+                "PQMBBwNCAAQIr/o2Q9PaiQg7AOsJD4jLvhr0x/i/JrwhNKAF6WQDty3QKaMZlYZI\n" +
+                "abS9wTpUkEPMOYJ7sqwTS81okBqoYGG2o4HAMIG9MB0GA1UdDgQWBBRiENDlrMNA\n" +
+                "dBU2zs4tK6Yuyp6/6jAfBgNVHSMEGDAWgBRiENDlrMNAdBU2zs4tK6Yuyp6/6jAP\n" +
+                "BgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIHgDAwBgNVHRIEKTAnhiVodHRw\n" +
+                "czovL2Ntd2FsbGV0LXByb3ZpZGVyLmV4YW1wbGUuY29tMCgGA1UdEQQhMB+CHWNt\n" +
+                "d2FsbGV0LXByb3ZpZGVyLmV4YW1wbGUuY29tMAoGCCqGSM49BAMCA0gAMEUCICDU\n" +
+                "6quuv/9kP90eDaZs6hZsmYOh1UA37qHg6n7Lom4FAiEAvfaJE4YylFDXdyF7YgB2\n" +
+                "FddC70oU1mVNrH6WlLmdQxY=\n" +
+                "-----END CERTIFICATE-----"
+    }
     private val json = Json {
         explicitNulls = false
         ignoreUnknownKeys = true
@@ -110,18 +141,15 @@ class OpenId4VCI(val credentialOfferJson: String) {
     suspend fun requestParEndpoint(
         clientId: String
     ): ParResponse? {
-        val tmpKeyPriv =
-            loadECPrivateKey(Base64.decode(
-                "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgp71n8d_UOIJKQq7gyQcMZjWBzG1JhAg_bioIpOL-gU-hRANCAAQ6r-Jruh-EOpl3gG3buc9E6pKJ9IBj1AkPXTlkPWnNF3m6FdQyi7L7pfalCujcoid0rvbjq11dA5L5cpF-egpE", Base64.URL_SAFE)) as ECPrivateKey
         val clientAttestationHeader = buildJsonObject {
             put("typ", "oauth-client-attestation+jwt")
             put("alg", "ES256")
             put("kid", "11")
         }
         val clientAttestationPayload = buildJsonObject {
-            put("iss", "https://digital-credentials.dev/")
-            put("sub", TEST_VCI_CLIENT_ID)
-            put("wallet_name", "CMWallet: An Android sample wallet")
+            put("iss", WALLET_ISS)
+            put("sub", WALLET_SUB)
+            put("wallet_name", WALLET_NAME)
             put("exp", Instant.now().epochSecond + 3000)
             put("cnf", buildJsonObject {
                 put("jwk", kp.public.toJWK())
@@ -130,7 +158,7 @@ class OpenId4VCI(val credentialOfferJson: String) {
         val clientAttestation = createJWTES256(
             clientAttestationHeader,
             clientAttestationPayload,
-            tmpKeyPriv
+            WALLET_CERT_PRV_KEY
         )
         val clientAttestationPopHeader = buildJsonObject {
             put("typ", "oauth-client-attestation-pop+jwt")
@@ -187,24 +215,21 @@ class OpenId4VCI(val credentialOfferJson: String) {
         Log.d(TAG, "TokenRequest: $tokenRequest")
         val endpoint = requestAuthServerMetadata(authServer).tokenEndpoint
         require(endpoint != null) { "Token Endpoint Missed from Auth Server metadata" }
-        val tmpKeyPriv =
-            loadECPrivateKey(Base64.decode(
-                "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgp71n8d_UOIJKQq7gyQcMZjWBzG1JhAg_bioIpOL-gU-hRANCAAQ6r-Jruh-EOpl3gG3buc9E6pKJ9IBj1AkPXTlkPWnNF3m6FdQyi7L7pfalCujcoid0rvbjq11dA5L5cpF-egpE", Base64.URL_SAFE)) as ECPrivateKey
         val clientAttestationHeader = buildJsonObject {
             put("typ", "oauth-client-attestation+jwt")
             put("alg", "ES256")
             put("kid", "11")
         }
         val clientAttestationPayload = buildJsonObject {
-            put("iss", "https://digital-credentials.dev/")
-            put("sub", TEST_VCI_CLIENT_ID)
-            put("wallet_name", "CMWallet: An Android sample wallet")
+            put("iss", WALLET_ISS)
+            put("sub", WALLET_SUB)
+            put("wallet_name", WALLET_NAME)
             put("exp", Instant.now().epochSecond + 3000)
             put("cnf", buildJsonObject {
                 put("jwk", kp.public.toJWK())
             })
         }
-        val clientAttestation = createJWTES256(clientAttestationHeader, clientAttestationPayload, tmpKeyPriv)
+        val clientAttestation = createJWTES256(clientAttestationHeader, clientAttestationPayload, WALLET_CERT_PRV_KEY)
         val clientAttestationPopHeader = buildJsonObject {
             put("typ", "oauth-client-attestation-pop+jwt")
             put("alg", "ES256")
