@@ -98,6 +98,11 @@ __attribute__((import_module("credman"), import_name("SetAdditionalDisclaimerAnd
 #endif
 void SetAdditionalDisclaimerAndUrlForVerificationEntry(const char* cred_id, const char* secondary_disclaimer, const char* url_display_text, const char* url_value);
 
+#if defined(__wasm__)
+__attribute__((import_module("credman_v6"), import_name("SetAdditionalDisclaimerAndUrlForVerificationEntryInCredentialSet")))
+#endif
+void SetAdditionalDisclaimerAndUrlForVerificationEntryInCredentialSet(const char* cred_id, const char* secondary_disclaimer, const char* url_display_text, const char* url_value, const char* set_id, int set_index);
+
 typedef struct CallingAppInfo {
 	char package_name[256];
 	char origin[512];

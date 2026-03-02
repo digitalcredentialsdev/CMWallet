@@ -273,6 +273,10 @@ fun maybeHandlePnv(
 ): DigitalCredentialResult? {
     if (selectedID != TEST_PNV_1_GET_PHONE_NUMBER.tokenId && selectedID != TEST_PNV_2_VERIFY_PHONE_NUMBER.tokenId) {
         return null
+    } else if (selectedID == TEST_PNV_1_GET_PHONE_NUMBER.tokenId) {
+        Log.d(TAG, "Selected number: ${TEST_PNV_1_GET_PHONE_NUMBER.title}")
+    } else {
+        Log.d(TAG, "Selected number: ${TEST_PNV_2_VERIFY_PHONE_NUMBER.title}")
     }
     val digitalCredentialOptions = DigitalCredentialRequestOptions.createFrom(requestJson)
     val requestProtocol = DigitalCredentialRequestOptions.getRequestProtocolAtIndex(
