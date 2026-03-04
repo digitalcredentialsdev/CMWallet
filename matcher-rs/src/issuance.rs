@@ -1,8 +1,12 @@
+use std::ffi::CString;
+
 use crate::{
     credman::CredmanApi,
     issuance_matcher::IssuanceMatcherData,
     openid4vci::{DigitalCredentialCreationRequest, RegularizedOpenId4VciRequestData},
 };
+
+use nanoserde::DeJson;
 
 const ALLOWED_PROTOCOLS: [&str; 4] = [
     "openid4vci-1.0",
@@ -14,10 +18,11 @@ const ALLOWED_PROTOCOLS: [&str; 4] = [
 pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::error::Error>> {
     let matcher_data_buffer = credman.get_registered_data();
     let json_start = u32::from_le_bytes(matcher_data_buffer[..size_of::<u32>()].try_into()?);
-    let matcher_data: IssuanceMatcherData =
-        serde_json::from_slice(&matcher_data_buffer[json_start.try_into()?..])?;
+    let matcher_data: IssuanceMatcherData = DeJson::deserialize_json(std::str::from_utf8(
+        &matcher_data_buffer[json_start.try_into()?..],
+    )?)?;
     let request: DigitalCredentialCreationRequest =
-        serde_json::from_slice(&credman.get_request_buffer())?;
+        DeJson::deserialize_json(std::str::from_utf8(&credman.get_request_buffer())?)?;
     if request.requests.iter().any(|r| {
         ALLOWED_PROTOCOLS.iter().any(|s| r.protocol == *s)
             && matcher_data
@@ -25,11 +30,20 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
                 .matches(&RegularizedOpenId4VciRequestData::from(&r.data))
     }) {
         let icon = &matcher_data_buffer[matcher_data.icon.0..matcher_data.icon.1];
+        let entry_id = CString::new(matcher_data.entry_id)?;
+        let title = matcher_data
+            .title
+            .map(|s| CString::new(s))
+            .transpose()?;
+        let subtitle = matcher_data
+            .subtitle
+            .map(|s| CString::new(s))
+            .transpose()?;
         credman.add_string_id_entry(
-            matcher_data.entry_id.as_c_str(),
+            &entry_id,
             if icon.is_empty() { None } else { Some(icon) },
-            matcher_data.title.as_deref(),
-            matcher_data.subtitle.as_deref(),
+            title.as_deref(),
+            subtitle.as_deref(),
             None,
             None,
         );
@@ -188,7 +202,7 @@ mod test {
         };
 
         let errmsg = format!("{:?}", issuance_main(&mut credman).unwrap_err());
-        assert!(errmsg.contains("EOF while parsing an object"));
+        assert!(errmsg.contains("Unexpected token Eof") || errmsg.contains("Unexpected end of file"));
     }
 
     #[test]
@@ -301,36 +315,63 @@ mod test {
   "entry_id": "C",
   "title": "TTTT",
   "subtitle": "SSSSS",
-  "icon": [
-    0,
-    0
-  ],
+  "icon": [0, 0],
   "filter": {
-    "Or": {
-      "filters": [
-        {
-          "AllowsConfigurationIds": {
-            "configuration_ids": [
-              "US_SOCIAL_SECURITY_NUMBER",
-              "EU_AGE"
-            ]
+    "SupportsMdocDoctype": {
+      "doctypes": ["org.iso.18013.5.1.mDL"]
+    }
+  }
+}"#,
+            icon: Vec::new(),
+            added_entries: Vec::new(),
+        };
+
+        issuance_main(&mut credman).unwrap();
+
+        assert_eq!(credman.added_entries.len(), 1);
+    }
+
+    #[test]
+    fn match_mdoc_with_algs() {
+        let mut credman = FakeCredman {
+            request_json: r#"
+{
+  "requests": [
+    {
+      "protocol": "openid4vci-1.1",
+      "data": {
+        "credential_offer": {
+          "credential_issuer": "https://issuer.my",
+          "credential_configuration_ids": [
+            "FICTITIOUS_STATE_MDL"
+          ],
+          "grants": {
+            "authorization_code": {}
           }
         },
-        {
-          "AllowsIssuers": {
-            "issuers": [
-              "ccb"
-            ]
-          }
-        },
-        {
-          "SupportsMdocDoctype": {
-            "doctypes": [
-              "org.iso.18013.5.1.mDL"
-            ]
+        "credential_issuer_metadata": {
+          "nonce_endpoint": "https://nonce.my",
+          "credential_configurations_supported": {
+            "FICTITIOUS_STATE_MDL": {
+              "format": "mso_mdoc",
+              "doctype": "org.iso.18013.5.1.mDL",
+              "credential_signing_alg_values_supported": ["ES256", "ES384"]
+            }
           }
         }
-      ]
+      }
+    }
+  ]
+}"#,
+            registered_json: r#"
+{
+  "entry_id": "C",
+  "title": "TTTT",
+  "subtitle": "SSSSS",
+  "icon": [0, 0],
+  "filter": {
+    "SupportsMdocDoctype": {
+      "doctypes": ["org.iso.18013.5.1.mDL"]
     }
   }
 }"#,
