@@ -312,6 +312,16 @@ int main()
                         printf("transaction amount %s\n", transaction_amount);
                         
                         additional_info = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "additional_info"));
+                    } else if (strcmp(transaction_data_type, "payment_details") == 0) {
+                        merchant_name = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "payee_name"));
+
+                        char *amount = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "payment_amount"));
+                        char *currency = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "payment_currency"));
+                        transaction_amount = malloc(strlen(amount) + strlen(currency) + 2);
+                        sprintf(transaction_amount, "%s %s", currency, amount);
+                        printf("transaction amount %s\n", transaction_amount);
+
+                        additional_info = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "additional_info"));
                     } else {
                         merchant_name = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "merchant_name"));
                         transaction_amount = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "amount"));
