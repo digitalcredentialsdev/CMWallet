@@ -299,7 +299,7 @@ MatchCredential(cJSON *credential, cJSON *credential_store)
                     }
                     else if (cJSON_Compare(paths, disallow_carriers_paths, cJSON_True) && claim_values != NULL)
                     {   // If the carrier ID matches any value in the disallow carrier list, then we don't show this option.
-                        cJSON *candidate_carrier_id = cJSON_GetObjectItem(candidate_claims, "carrier_hint");
+                        cJSON *candidate_carrier_id = cJSON_GetObjectItem(candidate_claims, "android_carrier_hint");
                         cJSON *v;
                         cJSON_ArrayForEach(v, claim_values)
                         {
