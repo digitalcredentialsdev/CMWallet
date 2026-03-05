@@ -188,6 +188,7 @@ int main()
 int openid_main()
 #endif
 {
+    printf("Telephony matcher\n");
     uint32_t credentials_size;
     GetCredentialsSize(&credentials_size);
 
