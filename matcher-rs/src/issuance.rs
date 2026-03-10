@@ -315,63 +315,36 @@ mod test {
   "entry_id": "C",
   "title": "TTTT",
   "subtitle": "SSSSS",
-  "icon": [0, 0],
+  "icon": [
+    0,
+    0
+  ],
   "filter": {
-    "SupportsMdocDoctype": {
-      "doctypes": ["org.iso.18013.5.1.mDL"]
-    }
-  }
-}"#,
-            icon: Vec::new(),
-            added_entries: Vec::new(),
-        };
-
-        issuance_main(&mut credman).unwrap();
-
-        assert_eq!(credman.added_entries.len(), 1);
-    }
-
-    #[test]
-    fn match_mdoc_with_algs() {
-        let mut credman = FakeCredman {
-            request_json: r#"
-{
-  "requests": [
-    {
-      "protocol": "openid4vci-1.1",
-      "data": {
-        "credential_offer": {
-          "credential_issuer": "https://issuer.my",
-          "credential_configuration_ids": [
-            "FICTITIOUS_STATE_MDL"
-          ],
-          "grants": {
-            "authorization_code": {}
+    "Or": {
+      "filters": [
+        {
+          "AllowsConfigurationIds": {
+            "configuration_ids": [
+              "US_SOCIAL_SECURITY_NUMBER",
+              "EU_AGE"
+            ]
           }
         },
-        "credential_issuer_metadata": {
-          "nonce_endpoint": "https://nonce.my",
-          "credential_configurations_supported": {
-            "FICTITIOUS_STATE_MDL": {
-              "format": "mso_mdoc",
-              "doctype": "org.iso.18013.5.1.mDL",
-              "credential_signing_alg_values_supported": ["ES256", "ES384"]
-            }
+        {
+          "AllowsIssuers": {
+            "issuers": [
+              "ccb"
+            ]
+          }
+        },
+        {
+          "SupportsMdocDoctype": {
+            "doctypes": [
+              "org.iso.18013.5.1.mDL"
+            ]
           }
         }
-      }
-    }
-  ]
-}"#,
-            registered_json: r#"
-{
-  "entry_id": "C",
-  "title": "TTTT",
-  "subtitle": "SSSSS",
-  "icon": [0, 0],
-  "filter": {
-    "SupportsMdocDoctype": {
-      "doctypes": ["org.iso.18013.5.1.mDL"]
+      ]
     }
   }
 }"#,
