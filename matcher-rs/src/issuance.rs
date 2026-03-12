@@ -115,14 +115,12 @@ mod test {
     {
       "protocol": "openid4vci-1.1",
       "data": {
-        "credential_offer": {
-          "credential_issuer": "https://issuer.my",
-          "credential_configuration_ids": [
-            "US_SOCIAL_SECURITY_NUMBER"
-          ],
-          "grants": {
-            "authorization_code": {}
-          }
+        "credential_issuer": "https://issuer.my",
+        "credential_configuration_ids": [
+          "US_SOCIAL_SECURITY_NUMBER"
+        ],
+        "grants": {
+          "authorization_code": {}
         },
         "credential_issuer_metadata": {
           "nonce_endpoint": "https://nonce.my"
@@ -174,14 +172,12 @@ mod test {
     {
       "protocol": "openid4vci-1.1",
       "data": {
-        "credential_offer": {
-          "credential_issuer": "https://issuer.my",
-          "credential_configuration_ids": [
-            "US_SOCIAL_SECURITY_NUMBER"
-          ],
-          "grants": {
-            "authorization_code": {}
-          }
+        "credential_issuer": "https://issuer.my",
+        "credential_configuration_ids": [
+          "US_SOCIAL_SECURITY_NUMBER"
+        ],
+        "grants": {
+          "authorization_code": {}
         },
         "credential_issuer_metadata": {
           "nonce_endpoint": "https://nonce.my"
@@ -214,14 +210,12 @@ mod test {
     {
       "protocol": "openid4vci-1.1",
       "data": {
-        "credential_offer": {
-          "credential_issuer": "https://issuer.my",
-          "credential_configuration_ids": [
-            "US_SOCIAL_SECURITY_NUMBER"
-          ],
-          "grants": {
-            "authorization_code": {}
-          }
+        "credential_issuer": "https://issuer.my",
+        "credential_configuration_ids": [
+          "US_SOCIAL_SECURITY_NUMBER"
+        ],
+        "grants": {
+          "authorization_code": {}
         },
         "credential_issuer_metadata": {
           "nonce_endpoint": "https://nonce.my"
@@ -288,14 +282,12 @@ mod test {
     {
       "protocol": "openid4vci-1.1",
       "data": {
-        "credential_offer": {
-          "credential_issuer": "https://issuer.my",
-          "credential_configuration_ids": [
-            "FICTITIOUS_STATE_MDL"
-          ],
-          "grants": {
-            "authorization_code": {}
-          }
+        "credential_issuer": "https://issuer.my",
+        "credential_configuration_ids": [
+          "FICTITIOUS_STATE_MDL"
+        ],
+        "grants": {
+          "authorization_code": {}
         },
         "credential_issuer_metadata": {
           "nonce_endpoint": "https://nonce.my",

@@ -1,6 +1,7 @@
 #![allow(unused)]
 
 use nanoserde::DeJson;
+use std::collections::HashMap;
 
 #[derive(DeJson, Debug, Default)]
 #[nserde(default)]
@@ -18,7 +19,9 @@ pub struct OpenId4VciRequest {
 #[derive(DeJson, Debug, Default)]
 #[nserde(default)]
 pub struct OpenId4VciRequestData {
-    pub credential_offer: credential_offer::CredentialOffer,
+    pub credential_issuer: String,
+    pub credential_configuration_ids: Vec<String>,
+    pub grants: HashMap<String, credential_offer::Grant>,
     pub credential_issuer_metadata: Option<credential_issuer_metadata::CredentialIssuerMetadata>,
 }
 
@@ -26,8 +29,9 @@ pub struct OpenId4VciRequestData {
  * This correlates the `credential_configuration_ids` in the offer and `credential_configurations_supported` in the issuer metadata.
  */
 pub struct RegularizedOpenId4VciRequestData<'a> {
-    // Borrow the offer
-    pub credential_offer: &'a credential_offer::CredentialOffer,
+    pub credential_issuer: &'a str,
+    pub credential_configuration_ids: &'a [String],
+    pub grants: &'a HashMap<String, credential_offer::Grant>,
     // Borrow the metadata
     pub credential_issuer_metadata:
         Option<&'a credential_issuer_metadata::CredentialIssuerMetadata>,
@@ -38,10 +42,10 @@ pub struct RegularizedOpenId4VciRequestData<'a> {
 impl<'a> From<&'a OpenId4VciRequestData> for RegularizedOpenId4VciRequestData<'a> {
     fn from(value: &'a OpenId4VciRequestData) -> Self {
         let mut configurations =
-            Vec::with_capacity(value.credential_offer.credential_configuration_ids.len());
+            Vec::with_capacity(value.credential_configuration_ids.len());
 
         if let Some(metadata) = &value.credential_issuer_metadata {
-            for id in &value.credential_offer.credential_configuration_ids {
+            for id in &value.credential_configuration_ids {
                 if let Some(config) = metadata.credential_configurations_supported.get(id) {
                     configurations.push(config);
                 }
@@ -49,7 +53,9 @@ impl<'a> From<&'a OpenId4VciRequestData> for RegularizedOpenId4VciRequestData<'a
         }
 
         Self {
-            credential_offer: &value.credential_offer,
+            credential_issuer: &value.credential_issuer,
+            credential_configuration_ids: &value.credential_configuration_ids,
+            grants: &value.grants,
             credential_issuer_metadata: value.credential_issuer_metadata.as_ref(),
             credential_configurations: configurations,
         }
@@ -58,15 +64,6 @@ impl<'a> From<&'a OpenId4VciRequestData> for RegularizedOpenId4VciRequestData<'a
 
 pub mod credential_offer {
     use nanoserde::DeJson;
-    use std::collections::HashMap;
-
-    #[derive(DeJson, Debug, Default)]
-    #[nserde(default)]
-    pub struct CredentialOffer {
-        pub credential_issuer: String,
-        pub credential_configuration_ids: Vec<String>,
-        pub grants: HashMap<String, Grant>,
-    }
 
     #[derive(DeJson, Debug, Default)]
     #[nserde(default)]
