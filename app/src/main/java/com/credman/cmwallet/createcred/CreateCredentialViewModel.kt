@@ -26,7 +26,7 @@ import com.credman.cmwallet.decodeBase64UrlNoPadding
 import com.credman.cmwallet.getcred.createOpenID4VPResponse
 import com.credman.cmwallet.mdoc.MDoc
 import com.credman.cmwallet.openid4vci.OpenId4VCI
-import com.credman.cmwallet.openid4vci.OpenId4VCI.Companion.TEST_VCI_CLIENT_ID
+import com.credman.cmwallet.openid4vci.OpenId4VCI.Companion.WALLET_CLIENT_ID
 import com.credman.cmwallet.openid4vci.data.AuthorizationDetailResponseOpenIdCredential
 import com.credman.cmwallet.openid4vci.data.CredentialConfigurationMDoc
 import com.credman.cmwallet.openid4vci.data.CredentialConfigurationSdJwtVc
@@ -90,17 +90,13 @@ class CreateCredentialViewModel : ViewModel() {
         uiState = uiState.copy(authServer = null)
         viewModelScope.launch {
             // Figure out auth server
-            val authServer =
-                if (openId4VCI.credentialOffer.issuerMetadata.authorizationServers == null) {
-                    openId4VCI.credentialOffer.issuerMetadata.credentialIssuer
-                } else {
-                    "Can't do this yet"
-                }
+            val authServer = openId4VCI.authServerIdentifier()
             val tokenResponse = openId4VCI.requestTokenFromEndpoint(
                 authServer, TokenRequest(
                     grantType = "authorization_code",
                     code  =  code,
                     redirectUri = redirectUrl,
+                    clientId = WALLET_CLIENT_ID,
                     scope = openId4VCI.credentialOffer.credentialConfigurationIds.first(),
                     codeVerifier = openId4VCI.codeVerifier
                 )
@@ -248,12 +244,7 @@ class CreateCredentialViewModel : ViewModel() {
     @OptIn(ExperimentalUuidApi::class)
     fun onApprove() {
         viewModelScope.launch {
-            val authServer =
-                if (openId4VCI.credentialOffer.issuerMetadata.authorizationServers == null) {
-                    openId4VCI.credentialOffer.issuerMetadata.credentialIssuer
-                } else {
-                    "Can't do this yet"
-                }
+            val authServer = openId4VCI.authServerIdentifier()
             val authServerUrl = Uri.parse(openId4VCI.authEndpoint(authServer))
                 .buildUpon()
                 .appendQueryParameter("response_type", "code")
@@ -304,12 +295,7 @@ class CreateCredentialViewModel : ViewModel() {
                     openId4VCI =
                         OpenId4VCI(digitalCredentialCreateRequest.getJSONObject("data").toString())
                     // Figure out auth server
-                    val authServer =
-                        if (openId4VCI.credentialOffer.issuerMetadata.authorizationServers == null) {
-                            openId4VCI.credentialOffer.issuerMetadata.credentialIssuer
-                        } else {
-                            "Can't do this yet"
-                        }
+                    val authServer = openId4VCI.authServerIdentifier()
                     require(openId4VCI.credentialOffer.grants != null)
 
                     if (openId4VCI.credentialOffer.grants!!.preAuthorizedCode != null) {
@@ -320,7 +306,7 @@ class CreateCredentialViewModel : ViewModel() {
                                 grantType = "urn:ietf:params:oauth:grant-type:pre-authorized_code",
                                 preAuthorizedCode = grant?.preAuthorizedCode,
                                 txCode = "123456",
-                                clientId = TEST_VCI_CLIENT_ID,
+                                clientId = WALLET_CLIENT_ID,
                                 scope = openId4VCI.credentialOffer.credentialConfigurationIds.first()
                             )
                         )
@@ -350,7 +336,7 @@ class CreateCredentialViewModel : ViewModel() {
                             uiState = uiState.copy(vpResponse = selectedCredential, tmpCode = grant)
 
                         } else {
-                            val parResponse = openId4VCI.requestParEndpoint(TEST_VCI_CLIENT_ID)
+                            val parResponse = openId4VCI.requestParEndpoint()
                             val authServerUrl = if (parResponse == null) {
                                 Uri.parse(openId4VCI.authEndpoint(authServer))
                                     .buildUpon()
@@ -365,7 +351,7 @@ class CreateCredentialViewModel : ViewModel() {
                             } else {
                                 Uri.parse(openId4VCI.authEndpoint(authServer))
                                     .buildUpon()
-                                    .appendQueryParameter("client_id", TEST_VCI_CLIENT_ID)
+                                    .appendQueryParameter("client_id", WALLET_CLIENT_ID)
                                     .appendQueryParameter("request_uri", parResponse.requestUri)
                                     .build()
                             }

@@ -12,8 +12,11 @@ import android.util.Base64
 import com.credman.cmwallet.createJWTES256
 import com.credman.cmwallet.jwsDeserialization
 import com.credman.cmwallet.loadECPrivateKey
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonArray
 import java.lang.IllegalStateException
 import java.security.PrivateKey
 import java.time.Instant
@@ -75,10 +78,12 @@ class SdJwt(
         }
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     fun present(
         claimSets: JSONArray?, // If null, match all
         nonce: String,
         aud: String,
+        transactionDataHashes: Map<String, List<ByteArray>>
     ): String {
         val sdJwtComponents = mutableListOf(issuerJwt)
         if (claimSets == null) {
@@ -143,6 +148,15 @@ class SdJwt(
             put("aud", aud)
             put("nonce", nonce)
             put("sd_hash", digest)
+            if (transactionDataHashes.isNotEmpty()) {
+                for (transactionData in transactionDataHashes) {
+                    putJsonArray(transactionData.key) {
+                        transactionData.value.forEach { data ->
+                            add(data.toBase64UrlNoPadding())
+                        }
+                    }
+                }
+            }
         }
         val kbJwt = createJWTES256(kbHeader, kbPayload, holderKey)
         return sdJwt + kbJwt

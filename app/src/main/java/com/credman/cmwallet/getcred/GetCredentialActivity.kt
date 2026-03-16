@@ -77,11 +77,15 @@ fun createOpenID4VPResponse(
                     selectedCredential.credentials.first().credential,
                     (selectedCredential.credentials.first().key as CredentialKeySoftware).privateKey
                 )
+                val transaction_data_hashes =
+                    openId4VPRequest.generateDeviceSignedTransactionData(matchedCredential.dcqlId).deviceSignedTransactionData
+
                 credentialResponse =
                     sdJwtVc.present(
                         claims,
                         nonce = openId4VPRequest.nonce,
-                        aud = openId4VPRequest.getSdJwtKbAud(origin)
+                        aud = openId4VPRequest.getSdJwtKbAud(origin),
+                        transactionDataHashes = transaction_data_hashes
                     )
             }
 

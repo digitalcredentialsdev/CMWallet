@@ -57,12 +57,11 @@ import java.time.Instant
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
+@OptIn(ExperimentalUuidApi::class)
 class OpenId4VCI(val credentialOfferJson: String) {
 
     companion object {
-        const val TEST_VCI_CLIENT_ID = "52480754053"
-        const val WALLET_ISS = "https://cmwallet-provider.example.com"
-        const val WALLET_SUB = "https://cmwallet.example.org"
+        const val WALLET_CLIENT_ID = "https://cmwallet.example.org"
         const val WALLET_NAME = "CMWallet"
 
         /** Priv key for [WALLET_CERT] */
@@ -127,6 +126,12 @@ class OpenId4VCI(val credentialOfferJson: String) {
         return authServerCache[server]!!
     }
 
+    fun authServerIdentifier(): String = if (credentialOffer.issuerMetadata.authorizationServers == null) {
+        credentialOffer.issuerMetadata.credentialIssuer
+    } else {
+        "Can't do this yet"
+    }
+
     suspend fun authEndpoint(authServer: String): String {
         return requestAuthServerMetadata(authServer).authorizationEndpoint!!
     }
@@ -138,39 +143,9 @@ class OpenId4VCI(val credentialOfferJson: String) {
 
     /** Returns null if par endpoint isn't specified in the authorization server metadata. */
     @OptIn(ExperimentalUuidApi::class)
-    suspend fun requestParEndpoint(
-        clientId: String
-    ): ParResponse? {
-        val clientAttestationHeader = buildJsonObject {
-            put("typ", "oauth-client-attestation+jwt")
-            put("alg", "ES256")
-            put("kid", "11")
-        }
-        val clientAttestationPayload = buildJsonObject {
-            put("iss", WALLET_ISS)
-            put("sub", WALLET_SUB)
-            put("wallet_name", WALLET_NAME)
-            put("exp", Instant.now().epochSecond + 3000)
-            put("cnf", buildJsonObject {
-                put("jwk", kp.public.toJWK())
-            })
-        }
-        val clientAttestation = createJWTES256(
-            clientAttestationHeader,
-            clientAttestationPayload,
-            WALLET_CERT_PRV_KEY
-        )
-        val clientAttestationPopHeader = buildJsonObject {
-            put("typ", "oauth-client-attestation-pop+jwt")
-            put("alg", "ES256")
-        }
-        val clientAttestationPopPayload = buildJsonObject {
-            put("iss", TEST_VCI_CLIENT_ID)
-            put("sub", "https://demo.certification.openid.net/test/a/vci-wallet-test-dc-api/")
-            put("exp", Instant.now().epochSecond + 3000)
-            put("jti", Uuid.random().toByteArray().encodeBase64())
-        }
-        val clientAttestationPop = createJWTES256(clientAttestationPopHeader, clientAttestationPopPayload, kp.private)
+    suspend fun requestParEndpoint(): ParResponse? {
+        val clientAttestation = getClientAttestationJwt()
+        val clientAttestationPop = getClientAttestationJwt()
 
         val parEndpoint = credentialOffer.authorizationServerMetadata?.mtlsEndpointAliases?.pushedAuthorizationRequestEndpoint ?:
             credentialOffer.authorizationServerMetadata?.pushedAuthorizationRequestEndpoint ?: return null
@@ -181,7 +156,7 @@ class OpenId4VCI(val credentialOfferJson: String) {
         val result = httpClient.submitForm(
             url = parEndpoint,
             formParameters = parameters {
-                append("client_id", clientId)
+                append("client_id", WALLET_CLIENT_ID)
                 append("response_type", "code")
                 append("state", Uuid.random().toString())
                 append(
@@ -205,7 +180,58 @@ class OpenId4VCI(val credentialOfferJson: String) {
         return result.body()
     }
 
-    @OptIn(ExperimentalUuidApi::class)
+    /**
+     * The client (wallet) attestation should have been generated from the wallet server. We only
+     * do this device side for the ease of demoing.
+     */
+    suspend fun getClientAttestationJwt(): String {
+        val clientAttestationHeader = buildJsonObject {
+            put("typ", "oauth-client-attestation+jwt")
+            put("alg", "ES256")
+        }
+        val clientAttestationPayload = buildJsonObject {
+            put("sub", WALLET_CLIENT_ID)
+            put("wallet_name", WALLET_NAME)
+            put("exp", Instant.now().epochSecond + 3000)
+            put("cnf", buildJsonObject {
+                put("jwk", kp.public.toJWK())
+            })
+        }
+        return createJWTES256(clientAttestationHeader, clientAttestationPayload, WALLET_CERT_PRV_KEY)
+    }
+
+    fun generateClientAttestationPopJwt(): String {
+        val clientAttestationPopHeader = buildJsonObject {
+            put("typ", "oauth-client-attestation-pop+jwt")
+            put("alg", "ES256")
+        }
+        val clientAttestationPopPayload = buildJsonObject {
+            put("aud", authServerIdentifier())
+            put("jti", Uuid.random().toByteArray().encodeBase64())
+            put("iat", Instant.now().epochSecond)
+            // TODO: support challenge
+//            put("challenge", "5c1a9e10-29ff-4c2b-ae73-57c0957c09c4")
+        }
+        return createJWTES256(clientAttestationPopHeader, clientAttestationPopPayload, kp.private)
+    }
+
+    fun generateDpopJwt(method: String, endpoint: String, dpopNonce: String?, ath: String? = null): String {
+        val dpopHeader = buildJsonObject {
+            put("typ", "dpop+jwt")
+            put("alg", "ES256")
+            put("jwk", kp.public.toJWK())
+        }
+        val dpopPayload = buildJsonObject {
+            put("jti", Uuid.random().toByteArray().encodeBase64())
+            put("htm", method)
+            put("htu", endpoint)
+            put("iat", Instant.now().epochSecond)
+            ath?.let { put("ath", ath) }
+            dpopNonce?.let { put("nonce", dpopNonce) }
+        }
+        return createJWTES256(dpopHeader, dpopPayload, kp.private)
+    }
+
     suspend fun requestTokenFromEndpoint(
         authServer: String,
         tokenRequest: TokenRequest,
@@ -215,45 +241,10 @@ class OpenId4VCI(val credentialOfferJson: String) {
         Log.d(TAG, "TokenRequest: $tokenRequest")
         val endpoint = requestAuthServerMetadata(authServer).tokenEndpoint
         require(endpoint != null) { "Token Endpoint Missed from Auth Server metadata" }
-        val clientAttestationHeader = buildJsonObject {
-            put("typ", "oauth-client-attestation+jwt")
-            put("alg", "ES256")
-            put("kid", "11")
-        }
-        val clientAttestationPayload = buildJsonObject {
-            put("iss", WALLET_ISS)
-            put("sub", WALLET_SUB)
-            put("wallet_name", WALLET_NAME)
-            put("exp", Instant.now().epochSecond + 3000)
-            put("cnf", buildJsonObject {
-                put("jwk", kp.public.toJWK())
-            })
-        }
-        val clientAttestation = createJWTES256(clientAttestationHeader, clientAttestationPayload, WALLET_CERT_PRV_KEY)
-        val clientAttestationPopHeader = buildJsonObject {
-            put("typ", "oauth-client-attestation-pop+jwt")
-            put("alg", "ES256")
-        }
-        val clientAttestationPopPayload = buildJsonObject {
-            put("iss", TEST_VCI_CLIENT_ID)
-            put("sub", "https://demo.certification.openid.net/test/a/vci-wallet-test-dc-api/")
-            put("exp", Instant.now().epochSecond + 3000)
-            put("jti", Uuid.random().toByteArray().encodeBase64())
-        }
-        val clientAttestationPop = createJWTES256(clientAttestationPopHeader, clientAttestationPopPayload, kp.private)
-        val dpopHeader = buildJsonObject {
-            put("typ", "dpop+jwt")
-            put("alg", "ES256")
-            put("jwk", kp.public.toJWK())
-        }
-        val dpopPayload = buildJsonObject {
-            put("jti", Uuid.random().toByteArray().encodeBase64())
-            put("htm", "POST")
-            put("htu", endpoint)
-            put("iat", Instant.now().epochSecond)
-            dpopNonce?.let { put("nonce", dpopNonce) }
-        }
-        val dpop = createJWTES256(dpopHeader, dpopPayload, kp.private)
+
+        val clientAttestation = getClientAttestationJwt()
+        val clientAttestationPop = generateClientAttestationPopJwt()
+        val dpop = generateDpopJwt("POST", endpoint, dpopNonce)
 
         val result = httpClient.submitForm(
             url = endpoint,
@@ -297,28 +288,15 @@ class OpenId4VCI(val credentialOfferJson: String) {
         val endpoint = credentialOffer.issuerMetadata.credentialEndpoint
         val md = MessageDigest.getInstance("SHA256")
         val accessTokenHash = md.digest(accessToken.toByteArray()).toBase64UrlNoPadding()
-        val dpopHeader = buildJsonObject {
-            put("typ", "dpop+jwt")
-            put("alg", "ES256")
-            put("jwk", kp.public.toJWK())
-        }
-        val dpopPayload = buildJsonObject {
-            put("jti", Uuid.random().toByteArray().encodeBase64())
-            put("htm", "POST")
-            put("htu", endpoint)
-            put("iat", Instant.now().epochSecond)
-            put("ath", accessTokenHash)
-            nonce?.let { put("nonce", nonce) }
-        }
-        val dpop = createJWTES256(dpopHeader, dpopPayload, kp.private)
+        val dpop = generateDpopJwt("POST", endpoint, nonce, accessTokenHash)
 
         val result = httpClient.post(endpoint) {
-//            bearerAuth(accessToken)
             header(HttpHeaders.Authorization, "Dpop $accessToken")
+            header("dpop", dpop)
+
             contentType(ContentType.Application.Json)
             setBody(json.encodeToJsonElement(credentialRequest))
 
-            header("dpop", dpop)
         }
 
         if (result.status == HttpStatusCode.Unauthorized) {
