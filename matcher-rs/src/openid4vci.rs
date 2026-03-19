@@ -41,8 +41,7 @@ pub struct RegularizedOpenId4VciRequestData<'a> {
 // Implement From on a Reference
 impl<'a> From<&'a OpenId4VciRequestData> for RegularizedOpenId4VciRequestData<'a> {
     fn from(value: &'a OpenId4VciRequestData) -> Self {
-        let mut configurations =
-            Vec::with_capacity(value.credential_configuration_ids.len());
+        let mut configurations = Vec::with_capacity(value.credential_configuration_ids.len());
 
         if let Some(metadata) = &value.credential_issuer_metadata {
             for id in &value.credential_configuration_ids {
@@ -67,7 +66,12 @@ pub mod credential_offer {
 
     #[derive(DeJson, Debug, Default)]
     #[nserde(default)]
-    pub struct Grant {}
+    pub struct Grant {
+        // Workaround for nanoserde bug:
+        // https://github.com/not-fl3/nanoserde/issues/157
+        #[allow(unused)]
+        pub _dummy_not_in_use: i32,
+    }
 }
 
 mod credential_issuer_metadata {
