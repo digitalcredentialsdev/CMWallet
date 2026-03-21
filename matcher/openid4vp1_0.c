@@ -302,13 +302,17 @@ int main()
                         cJSON *payload = cJSON_GetObjectItem(transaction_data, "payload");
                         merchant_name = cJSON_GetStringValue(cJSON_GetObjectItem(cJSON_GetObjectItem(payload, "payee"), "name"));
                         
-                        double amount = cJSON_GetNumberValue(cJSON_GetObjectItem(payload, "amount"));
-                        int length_for_amount = log10(amount);
-                        char *currency = cJSON_GetStringValue(cJSON_GetObjectItem(payload, "currency"));
-                        int total_length = length_for_amount + 4 + strlen(currency) + 2;
-                        transaction_amount = malloc(length_for_amount + 4 + strlen(currency) + 2);
-                        sprintf(transaction_amount, "%s %f", currency, amount);
-                        transaction_amount[total_length - 1] = '\0';
+                        transaction_amount = cJSON_GetStringValue(cJSON_GetObjectItem(payload, "amount_display"));
+
+                        if (transaction_amount == NULL) {
+                            double amount = cJSON_GetNumberValue(cJSON_GetObjectItem(payload, "amount"));
+                            int length_for_amount = log10(amount);
+                            char *currency = cJSON_GetStringValue(cJSON_GetObjectItem(payload, "currency"));
+                            int total_length = length_for_amount + 4 + strlen(currency) + 2;
+                            transaction_amount = malloc(length_for_amount + 4 + strlen(currency) + 2);
+                            sprintf(transaction_amount, "%s %f", currency, amount);
+                            transaction_amount[total_length - 1] = '\0';
+                        }
                         printf("transaction amount %s\n", transaction_amount);
                         
                         additional_info = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "additional_info"));
