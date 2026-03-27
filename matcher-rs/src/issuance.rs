@@ -31,14 +31,8 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
     }) {
         let icon = &matcher_data_buffer[matcher_data.icon.0..matcher_data.icon.1];
         let entry_id = CString::new(matcher_data.entry_id)?;
-        let title = matcher_data
-            .title
-            .map(|s| CString::new(s))
-            .transpose()?;
-        let subtitle = matcher_data
-            .subtitle
-            .map(|s| CString::new(s))
-            .transpose()?;
+        let title = matcher_data.title.map(|s| CString::new(s)).transpose()?;
+        let subtitle = matcher_data.subtitle.map(|s| CString::new(s)).transpose()?;
         credman.add_string_id_entry(
             &entry_id,
             if icon.is_empty() { None } else { Some(icon) },
@@ -198,7 +192,9 @@ mod test {
         };
 
         let errmsg = format!("{:?}", issuance_main(&mut credman).unwrap_err());
-        assert!(errmsg.contains("Unexpected token Eof") || errmsg.contains("Unexpected end of file"));
+        assert!(
+            errmsg.contains("Unexpected token Eof") || errmsg.contains("Unexpected end of file")
+        );
     }
 
     #[test]

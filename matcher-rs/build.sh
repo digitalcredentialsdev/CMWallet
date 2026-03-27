@@ -12,6 +12,6 @@ cargo +nightly build \
 
 # 2. Further shrink using wasm-opt (if available)
 for wasm in target/wasm32-unknown-unknown/release/*.wasm; do
-  wasm-opt -Oz --strip-debug --enable-bulk-memory "$wasm" -o "$wasm"
+  wasm-opt -Oz --strip-debug --enable-bulk-memory --enable-sign-ext "$wasm" -o "$wasm"
 done
 

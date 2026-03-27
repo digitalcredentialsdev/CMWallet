@@ -35,16 +35,12 @@ impl OpenId4VciFilter {
             Self::And { filters } => filters.iter().all(|f| f.matches(request)),
             Self::Or { filters } => filters.iter().any(|f| f.matches(request)),
             Self::Not { filter } => !filter.matches(request),
-            Self::AllowsIssuers { issuers } => {
-                issuers.contains(request.credential_issuer)
-            }
+            Self::AllowsIssuers { issuers } => issuers.contains(request.credential_issuer),
             Self::AllowsConfigurationIds { configuration_ids } => request
                 .credential_configuration_ids
                 .iter()
                 .any(|id| configuration_ids.contains(id)),
-            Self::SupportsAuthCodeFlow {} => request
-                .grants
-                .contains_key("authorization_code"),
+            Self::SupportsAuthCodeFlow {} => request.grants.contains_key("authorization_code"),
             Self::SupportsPreAuthFlow {} => request
                 .grants
                 .contains_key("urn:ietf:params:oauth:grant-type:pre-authorized_code"),
