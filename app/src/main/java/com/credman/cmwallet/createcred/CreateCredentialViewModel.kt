@@ -91,84 +91,91 @@ class CreateCredentialViewModel : ViewModel() {
         viewModelScope.launch {
             // Figure out auth server
             val authServer = openId4VCI.authServerIdentifier()
+            val scope = openId4VCI.credentialOffer.credentialConfigurationIds.first()
             val tokenResponse = openId4VCI.requestTokenFromEndpoint(
                 authServer, TokenRequest(
                     grantType = "authorization_code",
                     code  =  code,
                     redirectUri = redirectUrl,
                     clientId = WALLET_CLIENT_ID,
-                    scope = openId4VCI.credentialOffer.credentialConfigurationIds.first(),
+                    scope = scope,
                     codeVerifier = openId4VCI.codeVerifier
                 )
             )
             Log.i(TAG, "tokenResponse $tokenResponse")
-            processToken(tokenResponse)
+            processToken(tokenResponse, tokenRequestScope = scope)
         }
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    private suspend fun processToken(tokenResponse: TokenResponse) {
+    private suspend fun processToken(
+        tokenResponse: TokenResponse,
+        tokenRequestScope: String? // Fallback when the tokenResponse doesn't contain a scope property
+    ) {
         val newCredentials = mutableListOf<CredentialItem>()
-        tokenResponse.scopes?.split(" ")?.forEach { scope ->
-            val deviceKeys: MutableList<KeyPair> = mutableListOf()
-            val kpg = KeyPairGenerator.getInstance("EC")
-            kpg.initialize(ECGenParameterSpec("secp256r1"))
-            for (i in 0..< (openId4VCI.credentialOffer.issuerMetadata.batchCredentialIssuance?.batchSize ?: 1)) {
-                deviceKeys.add(kpg.genKeyPair())
-            }
-            val credentialResponse = openId4VCI.requestCredentialFromEndpoint(
-                accessToken = tokenResponse.accessToken,
-                credentialRequest = CredentialRequest(
-                    credentialConfigurationId = scope,
-                    proofs = openId4VCI.createProofJwt(deviceKeys)
-                )
-            )
-            Log.i(TAG, "credentialResponse $credentialResponse")
-            val config = openId4VCI.credentialOffer.issuerMetadata.credentialConfigurationsSupported[scope]!!
-            val display = credentialResponse.display?.firstOrNull()
-            val configDisplay = config.credentialMetadata?.display?.firstOrNull()
-            val newCredentialItem = CredentialItem(
-                id = Uuid.random().toHexString(),
-                config = config,
-                displayData = CredentialDisplayData(
-                    title = display?.name ?: configDisplay?.name ?: "Unknown",
-                    subtitle = display?.description ?: configDisplay?.description,
-                    icon = display?.logo?.uri.imageUriToImageB64()
-                ),
-                credentials = credentialResponse.credentials!!.map {
-                    val deviceKeyPair = when (config) {
-                        is CredentialConfigurationMDoc -> {
-                            val mdoc = MDoc(it.credential.decodeBase64UrlNoPadding())
-                            val deviceKey = mdoc.deviceKey
-                            deviceKeys.firstOrNull {
-                                val public = it.public as ECPublicKey
-                                val x = String(public.w.affineX.toFixedByteArray(32))
-                                val y = String(public.w.affineY.toFixedByteArray(32))
-                                x == deviceKey.first && y == deviceKey.second
-                            }
-                        }
-                        is CredentialConfigurationSdJwtVc -> {
-                            val issuerJwtString = it.credential.split('~')[0]
-                            val cnfKey = IssuerJwt(issuerJwtString).payload.getJSONObject("cnf").getJSONObject("jwk")
-                            deviceKeys.firstOrNull {
-                                val public = it.public as ECPublicKey
-                                val x = public.w.affineX.toFixedByteArray(32).toBase64UrlNoPadding()
-                                val y = public.w.affineY.toFixedByteArray(32).toBase64UrlNoPadding()
-                                x == cnfKey.getString("x") && y == cnfKey.getString("y")
-                            }
-                        }
-                        else -> throw UnsupportedOperationException("Unknown configuration $config")
-                    }
-                    Credential(
-                        key = CredentialKeySoftware(
-                            publicKey = Base64.encodeToString(deviceKeyPair!!.public.encoded, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
-                            privateKey = Base64.encodeToString(deviceKeyPair.private.encoded, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
-                        ),
-                        credential = it.credential
-                    )
+        if (tokenResponse.authorizationDetails == null) {
+            val scopes = (tokenResponse.scopes ?: tokenRequestScope)?.split(" ")
+            scopes?.forEach { scope ->
+                val deviceKeys: MutableList<KeyPair> = mutableListOf()
+                val kpg = KeyPairGenerator.getInstance("EC")
+                kpg.initialize(ECGenParameterSpec("secp256r1"))
+                for (i in 0..< (openId4VCI.credentialOffer.issuerMetadata.batchCredentialIssuance?.batchSize ?: 1)) {
+                    deviceKeys.add(kpg.genKeyPair())
                 }
-            )
-            newCredentials.add(newCredentialItem)
+                val credentialResponse = openId4VCI.requestCredentialFromEndpoint(
+                    accessToken = tokenResponse.accessToken,
+                    credentialRequest = CredentialRequest(
+                        credentialConfigurationId = scope,
+                        proofs = openId4VCI.createProofJwt(deviceKeys)
+                    )
+                )
+                Log.i(TAG, "credentialResponse $credentialResponse")
+                val config = openId4VCI.credentialOffer.issuerMetadata.credentialConfigurationsSupported[scope]!!
+                val display = credentialResponse.display?.firstOrNull()
+                val configDisplay = config.credentialMetadata?.display?.firstOrNull()
+                val newCredentialItem = CredentialItem(
+                    id = Uuid.random().toHexString(),
+                    config = config,
+                    displayData = CredentialDisplayData(
+                        title = display?.name ?: configDisplay?.name ?: "Unknown",
+                        subtitle = display?.description ?: configDisplay?.description,
+                        icon = display?.logo?.uri.imageUriToImageB64()
+                    ),
+                    credentials = credentialResponse.credentials!!.map {
+                        val deviceKeyPair = when (config) {
+                            is CredentialConfigurationMDoc -> {
+                                val mdoc = MDoc(it.credential.decodeBase64UrlNoPadding())
+                                val deviceKey = mdoc.deviceKey
+                                deviceKeys.firstOrNull {
+                                    val public = it.public as ECPublicKey
+                                    val x = String(public.w.affineX.toFixedByteArray(32))
+                                    val y = String(public.w.affineY.toFixedByteArray(32))
+                                    x == deviceKey.first && y == deviceKey.second
+                                }
+                            }
+                            is CredentialConfigurationSdJwtVc -> {
+                                val issuerJwtString = it.credential.split('~')[0]
+                                val cnfKey = IssuerJwt(issuerJwtString).payload.getJSONObject("cnf").getJSONObject("jwk")
+                                deviceKeys.firstOrNull {
+                                    val public = it.public as ECPublicKey
+                                    val x = public.w.affineX.toFixedByteArray(32).toBase64UrlNoPadding()
+                                    val y = public.w.affineY.toFixedByteArray(32).toBase64UrlNoPadding()
+                                    x == cnfKey.getString("x") && y == cnfKey.getString("y")
+                                }
+                            }
+                            else -> throw UnsupportedOperationException("Unknown configuration $config")
+                        }
+                        Credential(
+                            key = CredentialKeySoftware(
+                                publicKey = Base64.encodeToString(deviceKeyPair!!.public.encoded, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
+                                privateKey = Base64.encodeToString(deviceKeyPair.private.encoded, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP),
+                            ),
+                            credential = it.credential
+                        )
+                    }
+                )
+                newCredentials.add(newCredentialItem)
+            }
         }
         tokenResponse.authorizationDetails?.forEach { authDetail ->
             when (authDetail) {
@@ -300,18 +307,18 @@ class CreateCredentialViewModel : ViewModel() {
 
                     if (openId4VCI.credentialOffer.grants!!.preAuthorizedCode != null) {
                         val grant = openId4VCI.credentialOffer.grants!!.preAuthorizedCode
-
+                        val scope = openId4VCI.credentialOffer.credentialConfigurationIds.first()
                         val tokenResponse = openId4VCI.requestTokenFromEndpoint(
                             authServer, TokenRequest(
                                 grantType = "urn:ietf:params:oauth:grant-type:pre-authorized_code",
                                 preAuthorizedCode = grant?.preAuthorizedCode,
                                 txCode = "123456",
                                 clientId = WALLET_CLIENT_ID,
-                                scope = openId4VCI.credentialOffer.credentialConfigurationIds.first()
+                                scope = scope
                             )
                         )
                         Log.i(TAG, "tokenResponse $tokenResponse")
-                        processToken(tokenResponse)
+                        processToken(tokenResponse, tokenRequestScope = scope)
 
                     } else if (openId4VCI.credentialOffer.grants!!.authorizationCode != null) {
                         val grant = openId4VCI.credentialOffer.grants!!.authorizationCode!!
