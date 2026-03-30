@@ -48,6 +48,7 @@ import com.credman.cmwallet.MainActivity
 import com.credman.cmwallet.R
 import com.credman.cmwallet.data.model.CredentialItem
 import com.credman.cmwallet.data.model.CredentialKeySoftware
+import com.credman.cmwallet.data.model.toPrivateKey
 import com.credman.cmwallet.decodeBase64
 import com.credman.cmwallet.openid4vci.data.CredentialConfigurationMDoc
 import com.credman.cmwallet.openid4vci.data.CredentialConfigurationSdJwtVc
@@ -180,7 +181,7 @@ fun CredentialDialog(
                 } else if (credentialItem.config is CredentialConfigurationSdJwtVc) {
                     val sdJwtVc = SdJwt(
                         credentialItem.credentials.first().credential,
-                        (credentialItem.credentials.first().key as CredentialKeySoftware).privateKey
+                        credentialItem.credentials.first().key.toPrivateKey()
                     )
                     val rawJwt = sdJwtVc.verifiedResult.processedJwt
 

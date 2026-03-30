@@ -27,6 +27,7 @@ import com.credman.cmwallet.CmWalletApplication.Companion.computeClientId
 import com.credman.cmwallet.createcred.CreateCredentialActivity
 import com.credman.cmwallet.data.model.CredentialItem
 import com.credman.cmwallet.data.model.CredentialKeySoftware
+import com.credman.cmwallet.data.model.toPrivateKey
 import com.credman.cmwallet.decodeBase64UrlNoPadding
 import com.credman.cmwallet.getcred.GetCredentialActivity.DigitalCredentialResult
 import com.credman.cmwallet.loadECPrivateKey
@@ -75,9 +76,9 @@ fun createOpenID4VPResponse(
                     (matchedCredential.matchedClaims as OpenId4VPMatchedSdJwtClaims).claimSets
                 val sdJwtVc = SdJwt(
                     selectedCredential.credentials.first().credential,
-                    (selectedCredential.credentials.first().key as CredentialKeySoftware).privateKey
+                    selectedCredential.credentials.first().key.toPrivateKey()
                 )
-                val transaction_data_hashes =
+                val transactionDataHashes =
                     openId4VPRequest.generateDeviceSignedTransactionData(matchedCredential.dcqlId).deviceSignedTransactionData
 
                 credentialResponse =
@@ -85,7 +86,7 @@ fun createOpenID4VPResponse(
                         claims,
                         nonce = openId4VPRequest.nonce,
                         aud = openId4VPRequest.getSdJwtKbAud(origin),
-                        transactionDataHashes = transaction_data_hashes
+                        transactionDataHashes = transactionDataHashes
                     )
             }
 
@@ -116,8 +117,7 @@ fun createOpenID4VPResponse(
                         )
                     )
                 }
-                val devicePrivateKey =
-                    loadECPrivateKey((selectedCredential.credentials.first().key as CredentialKeySoftware).privateKey.decodeBase64UrlNoPadding())
+                val devicePrivateKey = selectedCredential.credentials.first().key.toPrivateKey()
                 val deviceResponse = generateDeviceResponse(
                     doctype = selectedCredential.config.doctype,
                     issuerSigned = filteredIssuerSigned,

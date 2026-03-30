@@ -25,18 +25,17 @@ import kotlin.collections.mutableListOf
 
 class SdJwt(
     credential: String,
-    holderPrivateKey: String
+    val holderKey: PrivateKey
 ) {
     val issuerJwt: String
     val disclosures: List<String>
-    val holderKey: PrivateKey
     init {
         val composition = credential.split('~')
         issuerJwt = composition[0]
         disclosures =
             if (composition.size <= 1) emptyList()
             else composition.subList(1, composition.size - 1)
-        holderKey = loadECPrivateKey(holderPrivateKey.decodeBase64UrlNoPadding())
+//        holderKey = loadECPrivateKey(holderPrivateKey.decodeBase64UrlNoPadding())
     }
 
     val verifiedResult: VerificationResult by lazy {

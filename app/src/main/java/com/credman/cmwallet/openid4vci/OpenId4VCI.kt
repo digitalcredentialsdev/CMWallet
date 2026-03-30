@@ -1,7 +1,10 @@
 package com.credman.cmwallet.openid4vci
 
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import android.util.Base64
 import android.util.Log
+import androidx.compose.ui.input.key.Key
 import com.credman.cmwallet.CmWalletApplication.Companion.TAG
 import com.credman.cmwallet.createJWTES256
 import com.credman.cmwallet.loadECPrivateKey
@@ -47,6 +50,7 @@ import kotlinx.serialization.json.put
 import org.json.JSONObject
 import java.security.KeyPair
 import java.security.KeyPairGenerator
+import java.security.KeyStore
 import java.security.MessageDigest
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -54,6 +58,7 @@ import java.security.SecureRandom
 import java.security.interfaces.ECPrivateKey
 import java.security.spec.ECGenParameterSpec
 import java.time.Instant
+import java.security.cert.Certificate
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -329,27 +334,81 @@ class OpenId4VCI(val credentialOfferJson: String) {
         )
     }
 
-    suspend fun createProofJwt(keyPairs: List<KeyPair>): Proofs {
-        return Proofs(
-            jwt = keyPairs.map {
-                createJwt(it.public, it.private)
-            }
+    suspend fun createKeyProofs(credentialConfigurationId: String): Pair<Proofs, List<DeviceKey>> {
+        val proofTypesSupported = credentialOffer.issuerMetadata.credentialConfigurationsSupported[credentialConfigurationId]?.proofTypesSupported!!
+        return if (proofTypesSupported.containsKey("android_keystore_attestation")) {
+            createAndroidAttestationProofJwt()
+        } else if (proofTypesSupported.containsKey("jwt")) {
+            createProofJwt()
+        } else {
+            throw UnsupportedOperationException("Can handle proof types $proofTypesSupported")
+        }
+    }
+
+    private suspend fun createAndroidAttestationProofJwt(): Pair<Proofs, List<DeviceKey>> {
+        val nonceResponse = requestNonceFromEndpoint()
+        val certificates: MutableList<Array<Certificate>> = mutableListOf()
+        val deviceKeys: MutableList<HardwareKey> = mutableListOf()
+        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        keyStore.load(null) // Load the default Android keystore
+        for (i in 0..<(credentialOffer.issuerMetadata.batchCredentialIssuance?.batchSize ?: 1)) {
+            val keyAlias = Uuid.random().toHexString()
+            val kpg = KeyPairGenerator.getInstance("EC", "AndroidKeyStore")
+            val spec = KeyGenParameterSpec.Builder(
+                keyAlias,
+                KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY
+            )
+                .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
+                .setDigests(KeyProperties.DIGEST_SHA256)
+                .setAttestationChallenge(nonceResponse.cNonce.toByteArray(Charsets.UTF_8))
+                .build()
+            kpg.initialize(spec)
+            val kp = kpg.genKeyPair()
+            deviceKeys.add(HardwareKey(keyAlias, kp.public))
+            val certificateChain = keyStore.getCertificateChain(keyAlias)
+            certificates.add(certificateChain)
+        }
+
+        return Pair(
+            first = Proofs(
+                androidKeystoreAttestation = certificates.map { certificateArray ->
+                    certificateArray.map { certificate -> certificate.encoded.toBase64UrlNoPadding() }
+                }
+            ),
+            second = deviceKeys
         )
     }
 
-//    fun generateCredentialToSave(
-//        credentialEndpointResponse: CredentialResponse,
-//        deviceKey: PrivateKey,
-//        credentialConfigurationId: String = credentialOffer.credentialConfigurationIds.first(),
-//    ): CredentialItem {
-//        val credentialIssuerSigned = Base64.decode(
-//            credentialEndpointResponse.credentials!!.first().credential,
-//            Base64.URL_SAFE
-//        )
-//        return toCredentialItem(
-//            credentialIssuerSigned,
-//            deviceKey,
-//            credentialOffer.issuerMetadata.credentialConfigurationsSupported[credentialConfigurationId]!!
-//        )
-//    }
+    private suspend fun createProofJwt(): Pair<Proofs, List<DeviceKey>> {
+        val deviceKeys: MutableList<SoftwareKey> = mutableListOf()
+        val kpg = KeyPairGenerator.getInstance("EC")
+        kpg.initialize(ECGenParameterSpec("secp256r1"))
+        for (i in 0..< (credentialOffer.issuerMetadata.batchCredentialIssuance?.batchSize ?: 1)) {
+            val kp = kpg.genKeyPair()
+            deviceKeys.add(SoftwareKey(publicKey = kp.public, privateKey = kp.private))
+        }
+
+        return Pair(
+            first = Proofs(
+                jwt = deviceKeys.map {
+                    createJwt(it.publicKey, it.privateKey)
+                }
+            ),
+            second = deviceKeys
+        )
+    }
 }
+
+sealed class DeviceKey(
+    val publicKey: PublicKey
+)
+
+class SoftwareKey(
+    val privateKey: PrivateKey,
+    publicKey: PublicKey
+) : DeviceKey(publicKey)
+
+class HardwareKey(
+    val keyAlias: String,
+    publicKey: PublicKey
+) : DeviceKey(publicKey)

@@ -9,7 +9,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Proofs(
     @SerialName("jwt") val jwt: List<String>? = null,
-    @SerialName("attestation") val attestation: String? = null
+    @SerialName("attestation") val attestation: String? = null,
+    @SerialName("android_keystore_attestation") val androidKeystoreAttestation: List<List<String>>? = null
 )
 
 @Serializable

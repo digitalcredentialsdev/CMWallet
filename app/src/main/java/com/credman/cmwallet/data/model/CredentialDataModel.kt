@@ -1,10 +1,13 @@
 package com.credman.cmwallet.data.model
 
 import com.credman.cmwallet.decodeBase64UrlNoPadding
+import com.credman.cmwallet.loadECPrivateKey
 import com.credman.cmwallet.mdoc.MDoc
 import com.credman.cmwallet.openid4vci.data.CredentialConfiguration
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.security.KeyStore
+import java.security.PrivateKey
 
 @Serializable
 data class CredentialItem(
@@ -39,7 +42,7 @@ data class CredentialKeySoftware(
 @SerialName("HARDWARE")
 data class CredentialKeyHardware(
     val publicKey: String,
-    val privateKey: String
+    val keyAlias: String,
 ) : CredentialKey()
 
 @Serializable
@@ -50,3 +53,16 @@ data class CredentialDisplayData(
     val explainer: String? = null,
     val metadataDisplayText: String? = null,
 )
+
+fun CredentialKey.toPrivateKey(): PrivateKey {
+    return when (this) {
+        is CredentialKeySoftware ->
+            loadECPrivateKey(this.privateKey.decodeBase64UrlNoPadding())
+        is CredentialKeyHardware -> {
+            val keyStore = KeyStore.getInstance("AndroidKeyStore")
+            keyStore.load(null)
+            keyStore.getKey(this.keyAlias, null) as? PrivateKey
+                ?: throw IllegalArgumentException("No private key found for alias: $this.keyAlias")
+        }
+    }
+}

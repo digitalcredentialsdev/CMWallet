@@ -21,6 +21,7 @@ import com.credman.cmwallet.CmWalletApplication
 import com.credman.cmwallet.data.model.CredentialDisplayData
 import com.credman.cmwallet.data.model.CredentialItem
 import com.credman.cmwallet.data.model.CredentialKeySoftware
+import com.credman.cmwallet.data.model.toPrivateKey
 import com.credman.cmwallet.data.source.CredentialDatabaseDataSource
 import com.credman.cmwallet.data.source.TestCredentialsDataSource
 import com.credman.cmwallet.decodeBase64
@@ -227,7 +228,7 @@ class CredentialRepository {
         items.forEach { item ->
             when (item.config) {
                 is CredentialConfigurationSdJwtVc -> {
-                    val sdJwtVc = SdJwt(item.credentials.first().credential, (item.credentials.first().key as CredentialKeySoftware).privateKey)
+                    val sdJwtVc = SdJwt(item.credentials.first().credential, item.credentials.first().key.toPrivateKey())
                     val rawJwt = sdJwtVc.verifiedResult.processedJwt
                     val claims = mutableListOf<SdJwtClaim>()
                     constructJwtClaims(rawJwt, item.config, claims, emptyList())
