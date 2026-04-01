@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.compose.ui.input.key.Key
 import com.credman.cmwallet.CmWalletApplication.Companion.TAG
 import com.credman.cmwallet.createJWTES256
+import com.credman.cmwallet.jweSerialization
 import com.credman.cmwallet.loadECPrivateKey
 import com.credman.cmwallet.openid4vci.data.CredentialOffer
 import com.credman.cmwallet.openid4vci.data.CredentialRequest
@@ -37,6 +38,7 @@ import io.ktor.http.parameters
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.encodeBase64
 import kotlinx.coroutines.delay
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
@@ -283,6 +285,19 @@ class OpenId4VCI(val credentialOfferJson: String) {
         return result.body()
     }
 
+    fun requireCredentialRequestEncryption(): Boolean = credentialOffer.issuerMetadata.credentialRequestEncryption?.encryptionRequired ?: false
+    fun getCredentialRequestEncryptionKey(): JSONObject {
+        require(credentialOffer.issuerMetadata.credentialRequestEncryption!!.encValuesSupported.contains("A128GCM")) {
+            "Don't support the credential request encryption method yet"
+        }
+        val keys = credentialOffer.issuerMetadata.credentialRequestEncryption.jwks.keys
+        val key = keys.firstOrNull{
+            it.alg == "ECDH-ES"
+        } ?: throw java.lang.UnsupportedOperationException("No supported encryption key")
+        return JSONObject(Json.encodeToString(key))
+    }
+    fun requireCredentialResponseEncryption(): Boolean = credentialOffer.issuerMetadata.credentialResponseEncryption?.encryptionRequired ?: false
+
     @OptIn(ExperimentalUuidApi::class)
     suspend fun requestCredentialFromEndpoint(
         accessToken: String,
@@ -299,9 +314,18 @@ class OpenId4VCI(val credentialOfferJson: String) {
             header(HttpHeaders.Authorization, "Dpop $accessToken")
             header("dpop", dpop)
 
-            contentType(ContentType.Application.Json)
-            setBody(json.encodeToJsonElement(credentialRequest))
-
+            if (requireCredentialRequestEncryption()) {
+                contentType(ContentType("application", "jwt"))
+                setBody(jweSerialization(
+                    recipientKeyJwk = getCredentialRequestEncryptionKey(),
+                    plainText = json.encodeToJsonElement(credentialRequest).toString()
+                ))
+            } else {
+                contentType(ContentType.Application.Json)
+                setBody(
+                    json.encodeToJsonElement(credentialRequest)
+                )
+            }
         }
 
         if (result.status == HttpStatusCode.Unauthorized) {

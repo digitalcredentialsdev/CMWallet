@@ -26,6 +26,29 @@ data class Grants(
 )
 
 @Serializable
+data class JwkKey(
+    @SerialName("kty") val kty: String,
+    @SerialName("use") val use: String?,
+    @SerialName("alg") val alg: String?,
+    @SerialName("kid") val kid: String?,
+    @SerialName("x") val x: String?,
+    @SerialName("y") val y: String?,
+)
+
+@Serializable
+data class Jwks(
+    @SerialName("keys") val keys: List<JwkKey>,
+)
+
+
+@Serializable
+data class CredentialRequestEncryption(
+    @SerialName("jwks") val jwks: Jwks,
+    @SerialName("enc_values_supported") val encValuesSupported: List<String>,
+    @SerialName("encryption_required") val encryptionRequired: Boolean
+)
+
+@Serializable
 data class CredentialResponseEncryption(
     @SerialName("alg_values_supported") val algValuesSupported: List<String>,
     @SerialName("enc_values_supported") val encValuesSupported: List<String>,
@@ -170,6 +193,7 @@ data class CredentialIssuerMetadata(
     @SerialName("nonce_endpoint") val nonceEndpoint: String?,
     @SerialName("deferred_credential_endpoint") val deferredCredentialEndpoint: String?,
     @SerialName("notification_endpoint") val notificationEndpoint: String?,
+    @SerialName("credential_request_encryption") val credentialRequestEncryption: CredentialRequestEncryption?,
     @SerialName("credential_response_encryption") val credentialResponseEncryption: CredentialResponseEncryption?,
     @SerialName("batch_credential_issuance") val batchCredentialIssuance: BatchCredentialIssuance?,
     @SerialName("signed_metadata") val signedMetadata: String?,
