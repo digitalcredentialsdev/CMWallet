@@ -44,10 +44,7 @@ import com.credman.cmwallet.toBase64UrlNoPadding
 import com.credman.cmwallet.toFixedByteArray
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import java.security.KeyPair
-import java.security.KeyPairGenerator
 import java.security.interfaces.ECPublicKey
-import java.security.spec.ECGenParameterSpec
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -119,19 +116,20 @@ class CreateCredentialViewModel : ViewModel() {
         if (tokenResponse.authorizationDetails == null) {
             val scopes = (tokenResponse.scopes ?: tokenRequestScope)?.split(" ")
             scopes?.forEach { scope ->
-                val keyPairsAndProofs = openId4VCI.createKeyProofs(scope)
+                val proofCreationResult = openId4VCI.createKeyProofs(scope)
                 val credentialResponse = openId4VCI.requestCredentialFromEndpoint(
                     accessToken = tokenResponse.accessToken,
                     credentialRequest = CredentialRequest(
                         credentialConfigurationId = scope,
-                        proofs = keyPairsAndProofs.first
-                    )
+                        proofs = proofCreationResult.proofs
+                    ),
+                    dpopNonce = proofCreationResult.dpopNonce
                 )
                 Log.i(TAG, "credentialResponse $credentialResponse")
                 val config = openId4VCI.credentialOffer.issuerMetadata.credentialConfigurationsSupported[scope]!!
                 val display = credentialResponse.display?.firstOrNull()
                 val configDisplay = config.credentialMetadata?.display?.firstOrNull()
-                val deviceKeys = keyPairsAndProofs.second
+                val deviceKeys = proofCreationResult.deviceKeys
                 val newCredentialItem = CredentialItem(
                     id = Uuid.random().toHexString(),
                     config = config,
@@ -188,19 +186,20 @@ class CreateCredentialViewModel : ViewModel() {
             when (authDetail) {
                 is AuthorizationDetailResponseOpenIdCredential -> {
                     authDetail.credentialIdentifiers.forEach { credentialId ->
-                        val keyPairsAndProofs = openId4VCI.createKeyProofs(authDetail.credentialConfigurationId)
+                        val proofCreationResult = openId4VCI.createKeyProofs(authDetail.credentialConfigurationId)
                         val credentialResponse = openId4VCI.requestCredentialFromEndpoint(
                             accessToken = tokenResponse.accessToken,
                             credentialRequest = CredentialRequest(
                                 credentialIdentifier = credentialId,
-                                proofs = keyPairsAndProofs.first
+                                proofs = proofCreationResult.proofs
                             ),
+                            dpopNonce = proofCreationResult.dpopNonce
                         )
                         Log.i(TAG, "credentialResponse $credentialResponse")
                         val config = openId4VCI.credentialOffer.issuerMetadata.credentialConfigurationsSupported[authDetail.credentialConfigurationId]!!
                         val display = credentialResponse.display?.firstOrNull()
                         val displayFromOffer = config.credentialMetadata?.display?.firstOrNull()
-                        val deviceKeys = keyPairsAndProofs.second
+                        val deviceKeys = proofCreationResult.deviceKeys
                         val newCredentialItem = CredentialItem(
                             id = Uuid.random().toHexString(),
                             config = config,

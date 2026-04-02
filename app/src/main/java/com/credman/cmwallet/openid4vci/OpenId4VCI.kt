@@ -4,7 +4,6 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import android.util.Log
-import androidx.compose.ui.input.key.Key
 import com.credman.cmwallet.CmWalletApplication.Companion.TAG
 import com.credman.cmwallet.createJWTES256
 import com.credman.cmwallet.jweDecrypt
@@ -147,9 +146,13 @@ class OpenId4VCI(val credentialOfferJson: String) {
         return requestAuthServerMetadata(authServer).authorizationEndpoint!!
     }
 
-    suspend fun requestNonceFromEndpoint(): NonceResponse {
+    /* Returns Nonce response, and dpop nonce from header if present (https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-1_1-wg-draft.html#name-nonce-endpoint). */
+    suspend fun requestNonceFromEndpoint(): Pair<NonceResponse, String?> {
         require(credentialOffer.issuerMetadata.nonceEndpoint != null) { "nonce_endpoint must be set when requesting a nonce" }
-        return httpClient.post(credentialOffer.issuerMetadata.nonceEndpoint).body()
+        val result = httpClient.post(credentialOffer.issuerMetadata.nonceEndpoint)
+        val dpopNonce = result.headers.get("dpop-nonce")
+        Log.d(TAG, "Dpop nonce from nonce endpoint: ${dpopNonce}")
+        return Pair(result.body(), dpopNonce)
     }
 
     /** Returns null if par endpoint isn't specified in the authorization server metadata. */
@@ -280,8 +283,9 @@ class OpenId4VCI(val credentialOfferJson: String) {
         if (result.status == HttpStatusCode.BadRequest) {
             val body = JSONObject(result.bodyAsText())
             if ("use_dpop_nonce" == body.optString("error")) {
-                val dpopNonce = result.headers.get("dpop-nonce")!!
-                return requestTokenFromEndpoint(authServer, tokenRequest, dpopNonce)
+                val dpopNonceFromResponse = result.headers.get("dpop-nonce")!!
+                Log.d(TAG, "Dpop nonce from token endpoint: ${dpopNonceFromResponse}, retrying request with the nonce")
+                return requestTokenFromEndpoint(authServer, tokenRequest, dpopNonceFromResponse)
             }
             throw IllegalStateException("Token endpoint returns error: $body")
         }
@@ -306,7 +310,7 @@ class OpenId4VCI(val credentialOfferJson: String) {
     suspend fun requestCredentialFromEndpoint(
         accessToken: String,
         credentialRequest: CredentialRequest,
-        nonce: String? = null,
+        dpopNonce: String?,
     ): CredentialResponse {
         var responseEncryptionKey: KeyPair? = null
         val request: CredentialRequest = if (requireCredentialResponseEncryption()) {
@@ -331,7 +335,7 @@ class OpenId4VCI(val credentialOfferJson: String) {
         val endpoint = credentialOffer.issuerMetadata.credentialEndpoint
         val md = MessageDigest.getInstance("SHA256")
         val accessTokenHash = md.digest(accessToken.toByteArray()).toBase64UrlNoPadding()
-        val dpop = generateDpopJwt("POST", endpoint, nonce, accessTokenHash)
+        val dpop = generateDpopJwt("POST", endpoint, dpopNonce, accessTokenHash)
 
         val result = httpClient.post(endpoint) {
             header(HttpHeaders.Authorization, "Dpop $accessToken")
@@ -352,9 +356,10 @@ class OpenId4VCI(val credentialOfferJson: String) {
         }
 
         if (result.status == HttpStatusCode.Unauthorized) {
-            val dpopNonce = result.headers.get("dpop-nonce")
-            if (dpopNonce != null) {
-                return requestCredentialFromEndpoint(accessToken, credentialRequest, dpopNonce)
+            val dpopNonceFromResponse = result.headers.get("dpop-nonce")
+            if (dpopNonceFromResponse != null) {
+                Log.d(TAG, "Dpop nonce from credential endpoint: ${dpopNonceFromResponse}, retrying request with the nonce")
+                return requestCredentialFromEndpoint(accessToken, credentialRequest, dpopNonceFromResponse)
             }
             throw IllegalStateException("Token endpoint returns error: $result")
         }
@@ -369,24 +374,28 @@ class OpenId4VCI(val credentialOfferJson: String) {
         }
     }
 
-    suspend fun createJwt(publicKey: PublicKey, privateKey: PrivateKey): String {
-        val nonceResponse = requestNonceFromEndpoint()
-        return createJWTES256(
-            header = buildJsonObject {
-                put("typ", "openid4vci-proof+jwt")
-                put("alg", "ES256")
-                put("jwk", publicKey.toJWK())
-            },
-            payload = buildJsonObject {
-                put("aud", credentialOffer.credentialIssuer)
-                put("iat", Instant.now().epochSecond)
-                put("nonce", nonceResponse.cNonce)
-            },
-            privateKey = privateKey
+    /* Jwt, Dpop Nonce if it's present from the nonce response header */
+    suspend fun createJwt(publicKey: PublicKey, privateKey: PrivateKey): Pair<String, String?> {
+        val (nonceResponse, dpopNonce) = requestNonceFromEndpoint()
+        return Pair(
+            first = createJWTES256(
+                header = buildJsonObject {
+                    put("typ", "openid4vci-proof+jwt")
+                    put("alg", "ES256")
+                    put("jwk", publicKey.toJWK())
+                },
+                payload = buildJsonObject {
+                    put("aud", credentialOffer.credentialIssuer)
+                    put("iat", Instant.now().epochSecond)
+                    put("nonce", nonceResponse.cNonce)
+                },
+                privateKey = privateKey
+            ),
+            second = dpopNonce
         )
     }
 
-    suspend fun createKeyProofs(credentialConfigurationId: String): Pair<Proofs, List<DeviceKey>> {
+    suspend fun createKeyProofs(credentialConfigurationId: String): ProofCreationResult {
         val proofTypesSupported = credentialOffer.issuerMetadata.credentialConfigurationsSupported[credentialConfigurationId]?.proofTypesSupported!!
         return if (proofTypesSupported.containsKey("android_keystore_attestation")) {
             createAndroidAttestationProofJwt()
@@ -397,8 +406,8 @@ class OpenId4VCI(val credentialOfferJson: String) {
         }
     }
 
-    private suspend fun createAndroidAttestationProofJwt(): Pair<Proofs, List<DeviceKey>> {
-        val nonceResponse = requestNonceFromEndpoint()
+    private suspend fun createAndroidAttestationProofJwt(): ProofCreationResult {
+        val (nonceResponse, dpopNonce) = requestNonceFromEndpoint()
         val certificates: MutableList<Array<Certificate>> = mutableListOf()
         val deviceKeys: MutableList<HardwareKey> = mutableListOf()
         val keyStore = KeyStore.getInstance("AndroidKeyStore")
@@ -421,17 +430,18 @@ class OpenId4VCI(val credentialOfferJson: String) {
             certificates.add(certificateChain)
         }
 
-        return Pair(
-            first = Proofs(
+        return ProofCreationResult(
+            proofs = Proofs(
                 androidKeystoreAttestation = certificates.map { certificateArray ->
                     certificateArray.map { certificate -> certificate.encoded.toBase64NoPadding() }
                 }
             ),
-            second = deviceKeys
+            deviceKeys = deviceKeys,
+            dpopNonce = dpopNonce
         )
     }
 
-    private suspend fun createProofJwt(): Pair<Proofs, List<DeviceKey>> {
+    private suspend fun createProofJwt(): ProofCreationResult {
         val deviceKeys: MutableList<SoftwareKey> = mutableListOf()
         val kpg = KeyPairGenerator.getInstance("EC")
         kpg.initialize(ECGenParameterSpec("secp256r1"))
@@ -439,14 +449,19 @@ class OpenId4VCI(val credentialOfferJson: String) {
             val kp = kpg.genKeyPair()
             deviceKeys.add(SoftwareKey(publicKey = kp.public, privateKey = kp.private))
         }
+        var dpopNonce: String? = null
+        val jwt = deviceKeys.map {
+            val (jwt, nonce) = createJwt(it.publicKey, it.privateKey)
+            dpopNonce = nonce
+            jwt
+        }
 
-        return Pair(
-            first = Proofs(
-                jwt = deviceKeys.map {
-                    createJwt(it.publicKey, it.privateKey)
-                }
+        return ProofCreationResult(
+            proofs = Proofs(
+                jwt = jwt
             ),
-            second = deviceKeys
+            deviceKeys = deviceKeys,
+            dpopNonce = dpopNonce
         )
     }
 }
@@ -464,3 +479,9 @@ class HardwareKey(
     val keyAlias: String,
     publicKey: PublicKey
 ) : DeviceKey(publicKey)
+
+data class ProofCreationResult(
+    val proofs: Proofs,
+    val deviceKeys: List<DeviceKey>,
+    val dpopNonce: String?,
+)
