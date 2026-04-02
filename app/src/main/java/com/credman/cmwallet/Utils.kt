@@ -107,6 +107,11 @@ fun ByteArray.toBase64UrlNoPadding(): String {
 }
 
 @OptIn(ExperimentalEncodingApi::class)
+fun ByteArray.toBase64NoPadding(): String {
+    return Base64.Default.withPadding(Base64.PaddingOption.ABSENT).encode(this)
+}
+
+@OptIn(ExperimentalEncodingApi::class)
 fun String.decodeBase64UrlNoPadding(): ByteArray {
     return Base64.UrlSafe.withPadding(kotlin.io.encoding.Base64.PaddingOption.ABSENT).decode(this)
 }

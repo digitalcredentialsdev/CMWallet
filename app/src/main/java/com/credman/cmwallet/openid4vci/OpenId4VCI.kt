@@ -21,6 +21,7 @@ import com.credman.cmwallet.openid4vci.data.ParResponse
 import com.credman.cmwallet.openid4vci.data.Proofs
 import com.credman.cmwallet.openid4vci.data.TokenRequest
 import com.credman.cmwallet.openid4vci.data.TokenResponse
+import com.credman.cmwallet.toBase64NoPadding
 import com.credman.cmwallet.toBase64UrlNoPadding
 import com.credman.cmwallet.toJWK
 import io.ktor.client.HttpClient
@@ -423,7 +424,7 @@ class OpenId4VCI(val credentialOfferJson: String) {
         return Pair(
             first = Proofs(
                 androidKeystoreAttestation = certificates.map { certificateArray ->
-                    certificateArray.map { certificate -> certificate.encoded.toBase64UrlNoPadding() }
+                    certificateArray.map { certificate -> certificate.encoded.toBase64NoPadding() }
                 }
             ),
             second = deviceKeys
