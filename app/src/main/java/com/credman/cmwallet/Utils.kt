@@ -77,7 +77,6 @@ fun ecJwkThumbprintSha256(jwk: JSONObject): ByteArray {
         put("y", jwk.get("y"))
     }
     val md = MessageDigest.getInstance("SHA-256")
-    Log.d("helenqinn", jwkWithRequired.toString())
     return md.digest(jwkWithRequired.toString().toByteArray())
 }
 
@@ -188,15 +187,11 @@ fun jwsDeserialization(jws: String): Pair<JSONObject, JSONObject> {
     return Pair(header, JSONObject(payload))
 }
 
-/** ECDH-ES key agreement, A128GCM encryption, JWE Compact Serialization */
-fun jweSerialization(recipientKeyJwk: JSONObject, plainText: String): String {
-    val kid = recipientKeyJwk.optString("kid")
-    val x = recipientKeyJwk.getString("x")
-    val y = recipientKeyJwk.getString("y")
+fun toEcPublicKey(x: String, y: String): PublicKey {
     val kf = KeyFactory.getInstance("EC")
     val parameters = AlgorithmParameters.getInstance("EC")
     parameters.init(ECGenParameterSpec("secp256r1"))
-    val publicKey = kf.generatePublic(
+    return kf.generatePublic(
         ECPublicKeySpec(
             ECPoint(
                 BigInteger(1, x.decodeBase64UrlNoPadding()),
@@ -205,6 +200,12 @@ fun jweSerialization(recipientKeyJwk: JSONObject, plainText: String): String {
             parameters.getParameterSpec(ECParameterSpec::class.java)
         )
     )
+}
+
+/** ECDH-ES key agreement, A128GCM encryption, JWE Compact Serialization */
+fun jweSerialization(recipientKeyJwk: JSONObject, plainText: String): String {
+    val kid = recipientKeyJwk.optString("kid")
+    val publicKey = toEcPublicKey(recipientKeyJwk.getString("x"), recipientKeyJwk.getString("y"))
     val kpg =  KeyPairGenerator.getInstance("EC")
     kpg.initialize(ECGenParameterSpec("secp256r1"))
     val kp = kpg.genKeyPair()
@@ -250,4 +251,64 @@ fun jweSerialization(recipientKeyJwk: JSONObject, plainText: String): String {
     val tag = encrypted.slice((encrypted.size - 16) until encrypted.size).toByteArray()
     val tagEncoded = tag.toBase64UrlNoPadding()
     return "${headerEncoded}..${ivEncoded}.${ctEncoded}.${tagEncoded}"
+}
+
+fun jweDecrypt(jwe: String, privateKey: PrivateKey): String {
+    val parts = jwe.split(".")
+
+    val headerB64 = parts[0]
+    val ivB64 = parts[2]
+    val ciphertextB64 = parts[3]
+    val tagB64 = parts[4]
+
+    val headerJsonStr = String(headerB64.decodeBase64UrlNoPadding(), Charsets.UTF_8)
+    val header = JSONObject(headerJsonStr)
+
+    val alg = header.optString("alg")
+    val enc = header.optString("enc")
+    require(alg == "ECDH-ES" && enc == "A128GCM") { "Unsupported algorithms: alg=$alg, enc=$enc" }
+
+    val epk = header.getJSONObject("epk")
+    require(epk.getString("crv") == "P-256") { "Only P-256 curve is supported" }
+
+    val publicKey = toEcPublicKey(epk.getString("x"), epk.getString("y"))
+
+    val keyAgreement = KeyAgreement.getInstance("ECDH")
+    keyAgreement.init(privateKey)
+    keyAgreement.doPhase(publicKey, true)
+    val sharedSecret = keyAgreement.generateSecret()
+    val concatKdf = ConcatKeyDerivationFunction("SHA-256")
+
+    val algOctets = "A128GCM".toByteArray()
+    val keydatalen = 128
+
+    val apu = if (header.has("apu")) header.getString("apu").decodeBase64UrlNoPadding() else ByteArray(0)
+    val apv = if (header.has("apv")) header.getString("apv").decodeBase64UrlNoPadding() else ByteArray(0)
+
+    val derivedKey = concatKdf.kdf(
+        sharedSecret,
+        keydatalen,
+        intToBigEndianByteArray(algOctets.size) + algOctets,
+        intToBigEndianByteArray(apu.size) + apu,
+        intToBigEndianByteArray(apv.size) + apv,
+        intToBigEndianByteArray(keydatalen),
+        ByteArray(0)
+    )
+
+    val iv = ivB64.decodeBase64UrlNoPadding()
+    val ciphertext = ciphertextB64.decodeBase64UrlNoPadding()
+    val tag = tagB64.decodeBase64UrlNoPadding()
+
+    val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+    val secretKey = SecretKeySpec(derivedKey, "AES")
+
+    cipher.init(Cipher.DECRYPT_MODE, secretKey, GCMParameterSpec(128, iv))
+
+    cipher.updateAAD(headerB64.toByteArray())
+
+    // In Java/Android, the Cipher expects the ciphertext and authentication tag to be concatenated
+    val combinedCiphertextAndTag = ciphertext + tag
+    val plaintextBytes = cipher.doFinal(combinedCiphertextAndTag)
+
+    return String(plaintextBytes, Charsets.UTF_8)
 }

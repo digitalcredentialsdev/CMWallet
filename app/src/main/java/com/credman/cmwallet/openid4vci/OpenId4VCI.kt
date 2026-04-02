@@ -7,11 +7,14 @@ import android.util.Log
 import androidx.compose.ui.input.key.Key
 import com.credman.cmwallet.CmWalletApplication.Companion.TAG
 import com.credman.cmwallet.createJWTES256
+import com.credman.cmwallet.jweDecrypt
 import com.credman.cmwallet.jweSerialization
 import com.credman.cmwallet.loadECPrivateKey
 import com.credman.cmwallet.openid4vci.data.CredentialOffer
 import com.credman.cmwallet.openid4vci.data.CredentialRequest
 import com.credman.cmwallet.openid4vci.data.CredentialResponse
+import com.credman.cmwallet.openid4vci.data.CredentialResponseEncryptionInReuqest
+import com.credman.cmwallet.openid4vci.data.JwkKey
 import com.credman.cmwallet.openid4vci.data.NonceResponse
 import com.credman.cmwallet.openid4vci.data.OauthAuthorizationServer
 import com.credman.cmwallet.openid4vci.data.ParResponse
@@ -294,7 +297,7 @@ class OpenId4VCI(val credentialOfferJson: String) {
         val key = keys.firstOrNull{
             it.alg == "ECDH-ES"
         } ?: throw java.lang.UnsupportedOperationException("No supported encryption key")
-        return JSONObject(Json.encodeToString(key))
+        return JSONObject(json.encodeToString(key))
     }
     fun requireCredentialResponseEncryption(): Boolean = credentialOffer.issuerMetadata.credentialResponseEncryption?.encryptionRequired ?: false
 
@@ -304,7 +307,26 @@ class OpenId4VCI(val credentialOfferJson: String) {
         credentialRequest: CredentialRequest,
         nonce: String? = null,
     ): CredentialResponse {
-        Log.d(TAG, "Credential request: $credentialRequest")
+        var responseEncryptionKey: KeyPair? = null
+        val request: CredentialRequest = if (requireCredentialResponseEncryption()) {
+            Log.d(TAG, "Credential response encryption requested")
+            if (credentialOffer.issuerMetadata.credentialResponseEncryption!!.encValuesSupported.contains("A128GCM") &&
+                credentialOffer.issuerMetadata.credentialResponseEncryption.algValuesSupported.contains("ECDH-ES")) {
+                val kpg = KeyPairGenerator.getInstance("EC")
+                kpg.initialize(ECGenParameterSpec("secp256r1"))
+                responseEncryptionKey = kpg.genKeyPair()
+                credentialRequest.copy(
+                    credentialResponseEncryption = CredentialResponseEncryptionInReuqest(
+                        enc = "A128GCM",
+                        jwk = JwkKey.fromPublicKey(responseEncryptionKey.public, alg = "ECDH-ES")
+                    )
+                )
+            } else {
+                throw UnsupportedOperationException("Unsupported Credential Response encryption")
+            }
+        } else { credentialRequest }
+
+        Log.d(TAG, "Credential request: $request")
         val endpoint = credentialOffer.issuerMetadata.credentialEndpoint
         val md = MessageDigest.getInstance("SHA256")
         val accessTokenHash = md.digest(accessToken.toByteArray()).toBase64UrlNoPadding()
@@ -318,12 +340,12 @@ class OpenId4VCI(val credentialOfferJson: String) {
                 contentType(ContentType("application", "jwt"))
                 setBody(jweSerialization(
                     recipientKeyJwk = getCredentialRequestEncryptionKey(),
-                    plainText = json.encodeToJsonElement(credentialRequest).toString()
+                    plainText = json.encodeToJsonElement(request).toString()
                 ))
             } else {
                 contentType(ContentType.Application.Json)
                 setBody(
-                    json.encodeToJsonElement(credentialRequest)
+                    json.encodeToJsonElement(request)
                 )
             }
         }
@@ -338,7 +360,12 @@ class OpenId4VCI(val credentialOfferJson: String) {
         Log.d(TAG, "Credential response status: ${result.status}")
         Log.d(TAG, "Credential response: ${result.bodyAsText()}")
 
-        return result.body()
+        return if (responseEncryptionKey != null) {
+            val encryptedCredentialResponse = result.bodyAsText()
+            json.decodeFromString<CredentialResponse>(jweDecrypt(encryptedCredentialResponse, responseEncryptionKey.private))
+        } else {
+            result.body()
+        }
     }
 
     suspend fun createJwt(publicKey: PublicKey, privateKey: PrivateKey): String {

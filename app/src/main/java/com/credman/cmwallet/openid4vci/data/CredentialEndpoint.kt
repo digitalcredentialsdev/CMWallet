@@ -17,7 +17,14 @@ data class Proofs(
 data class CredentialRequest(
     @SerialName("credential_identifier") val credentialIdentifier: String? = null,
     @SerialName("credential_configuration_id") val credentialConfigurationId: String? = null,
-    @SerialName("proofs") val proofs: Proofs? = null
+    @SerialName("proofs") val proofs: Proofs? = null,
+    @SerialName("credential_response_encryption") val credentialResponseEncryption: CredentialResponseEncryptionInReuqest? = null
+)
+
+@Serializable
+data class CredentialResponseEncryptionInReuqest(
+    @SerialName("jwk") val jwk: JwkKey,
+    @SerialName("enc") val enc: String,
 )
 
 @Serializable

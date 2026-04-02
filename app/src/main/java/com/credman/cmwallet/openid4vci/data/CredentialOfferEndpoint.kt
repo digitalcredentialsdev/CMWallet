@@ -1,11 +1,17 @@
 package com.credman.cmwallet.openid4vci.data
 
+import com.credman.cmwallet.toBase64UrlNoPadding
+import com.credman.cmwallet.toFixedByteArray
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonContentPolymorphicSerializer
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import java.security.PublicKey
+import java.security.interfaces.ECPublicKey
 
 @Serializable
 data class GrantPreAuthorizedCode(
@@ -31,9 +37,34 @@ data class JwkKey(
     @SerialName("use") val use: String?,
     @SerialName("alg") val alg: String?,
     @SerialName("kid") val kid: String?,
+    @SerialName("crv") val crv: String?,
     @SerialName("x") val x: String?,
     @SerialName("y") val y: String?,
-)
+) {
+    companion object {
+        fun fromPublicKey(publicKey: PublicKey, alg: String?): JwkKey {
+            when (publicKey) {
+                is ECPublicKey -> {
+                    val x = publicKey.w.affineX.toFixedByteArray(32).toBase64UrlNoPadding()
+                    val y = publicKey.w.affineY.toFixedByteArray(32).toBase64UrlNoPadding()
+                    return JwkKey(
+                        kty = "EC",
+                        crv = "P-256",
+                        x = x,
+                        y = y,
+                        kid = null,
+                        use = null,
+                        alg = alg
+                    )
+                }
+
+                else -> {
+                    throw IllegalArgumentException("Only support EC Keys for now")
+                }
+            }
+        }
+    }
+}
 
 @Serializable
 data class Jwks(
