@@ -255,13 +255,33 @@ fun matchCredential(credential: JSONObject, credentialStore: JSONObject): List<M
                 } else {
                     return matchedCredentials
                 }
+            }
 
+            // Support for SD-JWT format in DCQL.
+            // We filter candidates by verifying if their 'vct' matches any of the requested 'vct_values'.
+            "dc+sd-jwt" -> {
+                val vctValues = meta.opt("vct_values") as JSONArray? ?: return matchedCredentials
+                val matched = JSONArray()
+                for (i in 0 until vctValues.length()) {
+                    val vct = vctValues.getString(i)
+                    if (candidatesByFormat.has(vct)) {
+                        val candidates = candidatesByFormat.getJSONArray(vct)
+                        for (j in 0 until candidates.length()) {
+                            matched.put(candidates.getJSONObject(j))
+                        }
+                    }
+                }
+                if (matched.length() == 0) {
+                    Log.i("DCQL", "No candidates matched vct_values for dc+sd-jwt")
+                    return matchedCredentials
+                }
+                Log.i("DCQL", "Matched ${matched.length()} candidates for dc+sd-jwt")
+                candidatesByMeta = matched
             }
 
             else -> return matchedCredentials
         }
     } else {
-        // TODO: fix the fact that doctype is required at the moment.
         return matchedCredentials
     }
 
@@ -297,6 +317,22 @@ fun matchCredential(credential: JSONObject, credentialStore: JSONObject): List<M
                                         )
                                     )
                                 }
+                            }
+                        }
+                        // For SD-JWT, we expect a 'path' in the claim.
+                        // We use the last element of the path as the claim name and check if it exists in the candidate's paths.
+                        "dc+sd-jwt" -> {
+                            require(claim.has("path")) { "sd-jwt claim must contain path" }
+                            val path = claim.getJSONArray("path")
+                            val claimName = path.getString(path.length() - 1)
+                            val paths = candidate.optJSONObject("paths")
+                            if (paths != null && paths.has(claimName)) {
+                                Log.d("DCQL", "Matched claim $claimName for dc+sd-jwt")
+                                matchedCredential.matchedClaims.add(
+                                    MatchedMDocClaim("", claimName)
+                                )
+                            } else {
+                                Log.d("DCQL", "Claim $claimName not found in candidate for dc+sd-jwt")
                             }
                         }
                     }
