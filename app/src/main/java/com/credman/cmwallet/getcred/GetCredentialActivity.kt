@@ -39,6 +39,7 @@ import com.credman.cmwallet.mdoc.webOriginOrAppOrigin
 import com.credman.cmwallet.openid4vci.data.CredentialConfigurationMDoc
 import com.credman.cmwallet.openid4vci.data.CredentialConfigurationSdJwtVc
 import com.credman.cmwallet.openid4vci.data.CredentialConfigurationUnknownFormat
+import com.credman.cmwallet.openid4vp.DelegateProposal
 import com.credman.cmwallet.openid4vp.OpenId4VP
 import com.credman.cmwallet.openid4vp.OpenId4VP.Companion.IDENTIFIERS_1_0
 import com.credman.cmwallet.openid4vp.OpenId4VP.Companion.IDENTIFIER_DRAFT_24
@@ -81,13 +82,27 @@ fun createOpenID4VPResponse(
                 val transactionDataHashes =
                     openId4VPRequest.generateDeviceSignedTransactionData(matchedCredential.dcqlId).deviceSignedTransactionData
 
-                credentialResponse =
+                // Check if the request contains delegate proposals (AP2 flow).
+                // If so, use presentWithDelegations to create a dSD-JWT chain.
+                // Otherwise, fall back to standard presentation.
+                credentialResponse = if (openId4VPRequest.delegateProposals.isNotEmpty()) {
+                    Log.d(TAG, "Creating response with delegations (AP2 flow)")
+                    sdJwtVc.presentWithDelegations(
+                        claimSets = claims,
+                        nonce = openId4VPRequest.nonce,
+                        aud = openId4VPRequest.getSdJwtKbAud(origin),
+                        transactionDataHashes = transactionDataHashes,
+                        delegateProposals = openId4VPRequest.delegateProposals
+                    )
+                } else {
+                    Log.d(TAG, "Creating standard presentation response")
                     sdJwtVc.present(
                         claims,
                         nonce = openId4VPRequest.nonce,
                         aud = openId4VPRequest.getSdJwtKbAud(origin),
                         transactionDataHashes = transactionDataHashes
                     )
+                }
             }
 
             is CredentialConfigurationMDoc -> {

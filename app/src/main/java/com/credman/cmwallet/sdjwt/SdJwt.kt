@@ -160,6 +160,177 @@ class SdJwt(
         val kbJwt = createJWTES256(kbHeader, kbPayload, holderKey)
         return sdJwt + kbJwt
     }
+
+    /**
+     * Produces a dSD-JWT chain for the HITL AP2 mandate flow.
+     *
+     * Structure (per dSD-JWT spec):
+     *   dpc_jwt ~ dpc_discs ~~ KB-SD-JWT ~ mandate_disc_1 ~ mandate_disc_2 ~ [sub_discs] ~
+     *
+     * - ONE KB-SD-JWT, signed by device key, whose [delegate_payload] is an array of
+     *   SHA-256 digests — one per mandate disclosure.
+     * - Each mandate object from [delegateProposals] becomes an array disclosure
+     *   base64url(["<salt>", <mandate_json>]) appended AFTER the KB-SD-JWT.
+     * - [sd_hash] in KB-SD-JWT covers the DPC SD-JWT only: issuer_jwt ~ dpc_discs ~
+     * - [_sd_alg] = "sha-256"; typ = "kb-sd-jwt+kb" (delegate payload contains cnf.jwk)
+     *
+     * Agent presentations (agent appends its own KB-JWT, revealing one mandate disc):
+     *   → Merchant:          dpc_jwt~dpc_discs~~KB-SD-JWT~checkout_disc~agent_KB-JWT
+     *   → Credential provider: dpc_jwt~dpc_discs~~KB-SD-JWT~payment_disc~agent_KB-JWT
+     */
+    @OptIn(ExperimentalSerializationApi::class)
+    fun presentWithDelegations(
+        claimSets: JSONArray?,
+        nonce: String,
+        aud: String,
+        transactionDataHashes: Map<String, List<ByteArray>>,
+        delegateProposals: List<com.credman.cmwallet.openid4vp.DelegateProposal>
+    ): String {
+        require(delegateProposals.isNotEmpty()) {
+            "Use present() when there are no delegate proposals"
+        }
+
+        android.util.Log.d("SdJwt", "presentWithDelegations started with ${delegateProposals.size} proposals")
+
+        // ── Step 1: select DPC disclosures ────────────────────────────────────────────
+        val selectedDisclosures = mutableListOf<String>()
+        if (claimSets == null) {
+            android.util.Log.d("SdJwt", "No claimSets provided, adding all disclosures")
+            selectedDisclosures.addAll(disclosures)
+        } else {
+            var matched = false
+            outer@ for (i in 0..<claimSets.length()) {
+                val claimSet = claimSets[i] as JSONArray
+                val ret = mutableListOf<String>()
+                var ok = true
+                for (claimIdx in 0 until claimSet.length()) {
+                    val claim = claimSet.getJSONObject(claimIdx)
+                    val path = claim.getJSONArray("path")
+                    var sd = verifiedResult.sdMap
+                    val sds = mutableListOf<JSONObject>()
+                    for (pathIdx in 0..<path.length()) {
+                        val currPath = path.getString(pathIdx)
+                        if (sd.has(currPath)) {
+                            sd = sd.getJSONObject(currPath)
+                            sds.add(JSONObject(sd.toString()))
+                        } else { ok = false; break }
+                    }
+                    if (!ok) break
+                    addDisclosuresToPresentation(sd, ret)
+                    if (sds.size > 1) {
+                        for (k in 0..<sds.size - 1) {
+                            val currSd = sds[k]
+                            if (currSd.has("_sd")) {
+                                val digest = currSd.getString("_sd")
+                                ret.add(verifiedResult.digestDisclosureMap[digest]!!)
+                            }
+                        }
+                    }
+                }
+                if (ok) {
+                    selectedDisclosures.addAll(ret)
+                    matched = true
+                    android.util.Log.d("SdJwt", "Matched claim set $i")
+                    break@outer
+                }
+            }
+            require(matched) { "Could not match against any claim sets." }
+        }
+
+        android.util.Log.d("SdJwt", "Selected ${selectedDisclosures.size} DPC disclosures")
+
+        // ── Step 2: sd_hash over DPC base (issuer_jwt ~ dpc_discs ~) ─────────────────
+        val dpcBase = (listOf(issuerJwt) + selectedDisclosures).joinToString("~", postfix = "~")
+        val sdHash = MessageDigest.getInstance("SHA-256")
+            .digest(dpcBase.encodeToByteArray())
+            .toBase64UrlNoPadding()
+        
+        android.util.Log.d("SdJwt", "Computed sd_hash: $sdHash")
+
+        // ── Step 3: create one mandate disclosure per proposal ────────────────────────
+        // Each disclosure: base64url(["<random_salt>", <mandate_json_object>])
+        val rng = java.security.SecureRandom()
+        val mandateDisclosures = delegateProposals.map { proposal ->
+            val saltBytes = ByteArray(16).also { rng.nextBytes(it) }
+            val salt = saltBytes.toBase64UrlNoPadding()
+            val discArr = JSONArray().put(salt).put(proposal.delegatePayload)
+            discArr.toString().toByteArray().toBase64UrlNoPadding()
+        }
+        
+        android.util.Log.d("SdJwt", "Created ${mandateDisclosures.size} mandate disclosures")
+
+        // ── Step 4: digest of each mandate disclosure → KB-SD-JWT delegate_payload ────
+        val mandateDigests = mandateDisclosures.map { disc ->
+            MessageDigest.getInstance("SHA-256")
+                .digest(disc.encodeToByteArray())
+                .toBase64UrlNoPadding()
+        }
+
+        // ── Step 5: build ONE KB-SD-JWT ───────────────────────────────────────────────
+        val hasCnf = delegateProposals.any { it.delegatePayload.has("cnf") }
+        val kbSdHeader = buildJsonObject {
+            put("typ", if (hasCnf) "kb-sd-jwt+kb" else "kb-sd-jwt")
+            put("alg", "ES256")
+        }
+        val kbSdPayload = buildJsonObject {
+            put("iat", Instant.now().epochSecond)
+            put("aud", aud)
+            put("nonce", nonce)
+            put("sd_hash", sdHash)
+            putJsonArray("delegate_payload") { mandateDigests.forEach { add(it) } }
+            put("_sd_alg", "sha-256")
+            if (transactionDataHashes.isNotEmpty()) {
+                for (entry in transactionDataHashes) {
+                    putJsonArray(entry.key) {
+                        entry.value.forEach { data -> add(data.toBase64UrlNoPadding()) }
+                    }
+                }
+            }
+        }
+        val kbSdJwt = createJWTES256(kbSdHeader, kbSdPayload, holderKey)
+        
+        android.util.Log.d("SdJwt", "Created KB-SD-JWT")
+
+        // ── Step 6: collect sub-disclosures (usually empty in our flow) ───────────────
+        val allSubDisclosures = delegateProposals.flatMap { it.delegateDisclosures }
+        
+        if (allSubDisclosures.isNotEmpty()) {
+            android.util.Log.d("SdJwt", "Adding ${allSubDisclosures.size} sub-disclosures")
+        }
+
+        // ── Step 7: assemble chain ─────────────────────────────────────────────────────
+        // As per the dSD-JWT proposal, separate the SD-JWT part and the KB-JWT part with a double tilde (~~).
+        // dpc_jwt ~ dpc_discs ~~ KB-SD-JWT ~ mandate_disc_1 ~ mandate_disc_2 ~ sub_discs ~
+        val sdJwtPart = (listOf(issuerJwt) + selectedDisclosures).joinToString("~")
+        val kbPart = (listOf(kbSdJwt) + mandateDisclosures + allSubDisclosures).joinToString("~")
+        
+        android.util.Log.d("SdJwt", "Assembled chain with double tilde separator")
+        
+        return "$sdJwtPart~~$kbPart~"
+    }
+
+
+    /** Converts an org.json value to a kotlinx.serialization JsonElement. */
+    private fun anyToJsonElement(v: Any?): kotlinx.serialization.json.JsonElement = when (v) {
+        null, JSONObject.NULL -> kotlinx.serialization.json.JsonNull
+        is Boolean -> kotlinx.serialization.json.JsonPrimitive(v)
+        is Int -> kotlinx.serialization.json.JsonPrimitive(v)
+        is Long -> kotlinx.serialization.json.JsonPrimitive(v)
+        is Double -> kotlinx.serialization.json.JsonPrimitive(v)
+        is Float -> kotlinx.serialization.json.JsonPrimitive(v)
+        is String -> kotlinx.serialization.json.JsonPrimitive(v)
+        is JSONObject -> {
+            val map = mutableMapOf<String, kotlinx.serialization.json.JsonElement>()
+            for (k in v.keys()) map[k] = anyToJsonElement(v.get(k))
+            kotlinx.serialization.json.JsonObject(map)
+        }
+        is JSONArray -> {
+            val list = (0 until v.length()).map { anyToJsonElement(v.get(it)) }
+            kotlinx.serialization.json.JsonArray(list)
+        }
+        else -> kotlinx.serialization.json.JsonPrimitive(v.toString())
+    }
+
 }
 
 class VerificationResult(

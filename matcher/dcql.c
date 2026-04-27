@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h> // ── ADDED TO FIX THE 'FREE' ERROR ──
 #include <string.h>
 
 #include "dcql.h"
@@ -24,6 +25,10 @@ cJSON* MatchCredential(cJSON* credential, cJSON* credential_store) {
     cJSON* inline_issuance = NULL;
     cJSON* matched_credentials = cJSON_CreateArray();
     char* format = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(credential, "format"));
+    char* req_id = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(credential, "id"));
+
+    // ── LOG 1 ──
+    printf("[DCQL_DEBUG] 1. MatchCredential called for target format: %s (id: %s)\n", format ? format : "NULL", req_id ? req_id : "NULL");
 
     // check for optional params
     cJSON* meta = cJSON_GetObjectItemCaseSensitive(credential, "meta");
@@ -35,6 +40,8 @@ cJSON* MatchCredential(cJSON* credential, cJSON* credential_store) {
     inline_issuance_candidates = cJSON_GetObjectItemCaseSensitive(inline_issuance_candidates, format);
 
     if (candidates == NULL && inline_issuance_candidates == NULL) {
+        // ── LOG 2 ──
+        printf("[DCQL_DEBUG] 2. Dropout: No candidate credentials found in store for format: %s\n", format ? format : "NULL");
         cJSON_AddItemReferenceToObject(result, "matched_creds", matched_credentials);
         cJSON_AddItemReferenceToObject(result, "inline_issuance", inline_issuance);
         return result;
@@ -47,7 +54,6 @@ cJSON* MatchCredential(cJSON* credential, cJSON* credential_store) {
             if (doctype_value_obj != NULL) {
                 char* doctype_value = cJSON_GetStringValue(doctype_value_obj);
                 candidates = cJSON_GetObjectItemCaseSensitive(candidates, doctype_value);
-                //printf("candidates %s\n", cJSON_Print(candidates));
 
                 if (inline_issuance_candidates != NULL) {
                     cJSON* inline_issuance_candidate;
@@ -67,14 +73,31 @@ cJSON* MatchCredential(cJSON* credential, cJSON* credential_store) {
                 }
             }
         } else if (strcmp(format, "dc+sd-jwt") == 0) {
+            // Handle SD-JWT format. We filter candidates based on requested VCT (Verifiable Credential Type) values.
             cJSON* vct_values_obj = cJSON_GetObjectItemCaseSensitive(meta, "vct_values");
             cJSON* cred_candidates = candidates;
             candidates = cJSON_CreateArray();
             cJSON* vct_value;
+
+            // ── LOG 3 ──
+            printf("[DCQL_DEBUG] 3. Filtering candidates by dc+sd-jwt VCTs...\n");
+
             cJSON_ArrayForEach(vct_value, vct_values_obj) {
-                cJSON* vct_candidates = cJSON_GetObjectItemCaseSensitive(cred_candidates, cJSON_GetStringValue(vct_value));
+                char* requested_vct = cJSON_GetStringValue(vct_value);
+                // ── LOG 3a ──
+                printf("[DCQL_DEBUG] 3a. Checking for requested VCT: %s\n", requested_vct ? requested_vct : "NULL");
+
+                cJSON* vct_candidates = cJSON_GetObjectItemCaseSensitive(cred_candidates, requested_vct);
+                if (vct_candidates == NULL) {
+                    // ── LOG 3b ──
+                    printf("[DCQL_DEBUG] 3b. Credential store does NOT have requested VCT key: %s\n", requested_vct ? requested_vct : "NULL");
+                }
+
                 cJSON* curr_candidate;
                 cJSON_ArrayForEach(curr_candidate, vct_candidates) {
+                    char* cand_id = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(curr_candidate, "id"));
+                    // ── LOG 3c ──
+                    printf("[DCQL_DEBUG] 3c. Candidate accepted by VCT: %s\n", cand_id ? cand_id : "NULL");
                     cJSON_AddItemReferenceToArray(candidates, curr_candidate);
                 }
             }
@@ -97,14 +120,20 @@ cJSON* MatchCredential(cJSON* credential, cJSON* credential_store) {
                     }
                 }
             }
-        } else  {
+        } else {
+            // ── LOG 2b ──
+            printf("[DCQL_DEBUG] 2b. Dropout: Unsupported format type %s\n", format ? format : "NULL");
             cJSON_AddItemReferenceToObject(result, "matched_creds", matched_credentials);
             cJSON_AddItemReferenceToObject(result, "inline_issuance", inline_issuance);
             return result;
         }
     }
 
-    if (candidates == NULL) {
+    int candidate_count = cJSON_GetArraySize(candidates);
+    // ── LOG 4 ──
+    printf("[DCQL_DEBUG] 4. Meta filtering completed. Total candidates passing format/VCT: %d\n", candidate_count);
+
+    if (candidates == NULL || candidate_count == 0) {
         cJSON_AddItemReferenceToObject(result, "matched_creds", matched_credentials);
         cJSON_AddItemReferenceToObject(result, "inline_issuance", inline_issuance);
         return result;
@@ -112,6 +141,9 @@ cJSON* MatchCredential(cJSON* credential, cJSON* credential_store) {
 
     // Match on the claims
     if (claims == NULL) {
+        // ── LOG 5 ──
+        printf("[DCQL_DEBUG] 5. No claims requested. Auto-matching every candidate.\n");
+
         // Match every candidate
         cJSON* candidate;
         cJSON_ArrayForEach(candidate, candidates) {
@@ -120,7 +152,6 @@ cJSON* MatchCredential(cJSON* credential, cJSON* credential_store) {
             cJSON_AddItemReferenceToObject(matched_credential, "display", cJSON_GetObjectItemCaseSensitive(candidate, "display"));
             cJSON* matched_claim_names = cJSON_CreateArray();
             cJSON* matched_claim_metadata = cJSON_CreateArray();
-            //printf("candidate %s\n", cJSON_Print(candidate));
             AddAllClaims(matched_claim_names, cJSON_GetObjectItemCaseSensitive(candidate, "paths"));
             cJSON_AddItemReferenceToObject(matched_credential, "matched_claim_names", matched_claim_names);
             cJSON_AddItemReferenceToObject(matched_credential, "matched_claim_metadata", matched_claim_metadata); // Empty array represents all matched
@@ -128,8 +159,15 @@ cJSON* MatchCredential(cJSON* credential, cJSON* credential_store) {
         }
     } else {
         if (claim_sets == NULL) {
+            // ── LOG 5 ──
+            printf("[DCQL_DEBUG] 5. Matching specific claims (no claim sets)...\n");
+
             cJSON* candidate;
             cJSON_ArrayForEach(candidate, candidates) {
+                char* cand_id = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(candidate, "id"));
+                // ── LOG 5a ──
+                printf("[DCQL_DEBUG] 5a. Evaluating Candidate ID: %s\n", cand_id ? cand_id : "NULL");
+
                 cJSON* matched_credential = cJSON_CreateObject();
                 cJSON_AddItemReferenceToObject(matched_credential, "id", cJSON_GetObjectItemCaseSensitive(candidate, "id"));
                 cJSON_AddItemReferenceToObject(matched_credential, "display", cJSON_GetObjectItemCaseSensitive(candidate, "display"));
@@ -138,9 +176,17 @@ cJSON* MatchCredential(cJSON* credential, cJSON* credential_store) {
 
                 cJSON* claim;
                 cJSON* candidate_claims = cJSON_GetObjectItemCaseSensitive(candidate, "paths");
+                int claims_matched_count = 0;
+
                 cJSON_ArrayForEach(claim, claims) {
                     cJSON* claim_values = cJSON_GetObjectItemCaseSensitive(claim, "values");
                     cJSON* paths = cJSON_GetObjectItemCaseSensitive(claim, "path");
+
+                    // ── LOG 5b ──
+                    char* path_string = cJSON_PrintUnformatted(paths);
+                    printf("[DCQL_DEBUG] 5b. Searching for path: %s\n", path_string ? path_string : "NULL");
+                    free(path_string);
+
                     cJSON* curr_path;
                     cJSON* curr_claim = candidate_claims;
                     int matched = 1;
@@ -149,29 +195,49 @@ cJSON* MatchCredential(cJSON* credential, cJSON* credential_store) {
                         if (cJSON_HasObjectItem(curr_claim, path_value)) {
                             curr_claim = cJSON_GetObjectItemCaseSensitive(curr_claim, path_value);
                         } else {
+                            // ── LOG 5c ──
+                            printf("[DCQL_DEBUG] 5c. Path segment missing in candidate: %s\n", path_value ? path_value : "NULL");
                             matched = 0;
                             break;
                         }
                     }
-                    if (matched != 0 && curr_claim != NULL && cJSON_HasObjectItem(curr_claim, "display")) {
-                        if (claim_values != NULL) {
-                            cJSON* v;
-                            cJSON_ArrayForEach(v, claim_values) {
-                                if (cJSON_Compare(v, cJSON_GetObjectItemCaseSensitive(curr_claim, "value"), cJSON_True)) {
-                                    cJSON_AddItemReferenceToArray(matched_claim_metadata, paths);
-                                    cJSON_AddItemReferenceToArray(matched_claim_names, cJSON_GetObjectItem(curr_claim, "display"));
-                                    break;
-                                }
-                            }
+
+                    // If the path was fully matched and the candidate has this claim
+                    if (matched != 0 && curr_claim != NULL) {
+                        if (!cJSON_HasObjectItem(curr_claim, "display")) {
+                            // ── LOG 5d ──
+                            printf("[DCQL_DEBUG] 5d. Claim path found but lacked a 'display' object child.\n");
                         } else {
-                            cJSON_AddItemReferenceToArray(matched_claim_metadata, paths);
-                            cJSON_AddItemReferenceToArray(matched_claim_names, cJSON_GetObjectItem(curr_claim, "display"));
+                            // If specific values are requested, check if candidate value matches any of them
+                            if (claim_values != NULL) {
+                                cJSON* v;
+                                cJSON_ArrayForEach(v, claim_values) {
+                                    if (cJSON_Compare(v, cJSON_GetObjectItemCaseSensitive(curr_claim, "value"), cJSON_True)) {
+                                        claims_matched_count++;
+                                        cJSON_AddItemReferenceToArray(matched_claim_metadata, paths);
+                                        cJSON_AddItemReferenceToArray(matched_claim_names, cJSON_GetObjectItem(curr_claim, "display"));
+                                        break;
+                                    }
+                                }
+                            } else {
+                                // No specific values requested, just match on presence of claim
+                                claims_matched_count++;
+                                cJSON_AddItemReferenceToArray(matched_claim_metadata, paths);
+                                cJSON_AddItemReferenceToArray(matched_claim_names, cJSON_GetObjectItem(curr_claim, "display"));
+                            }
                         }
                     }
                 }
                 cJSON_AddItemReferenceToObject(matched_credential, "matched_claim_names", matched_claim_names);
                 cJSON_AddItemReferenceToObject(matched_credential, "matched_claim_metadata", matched_claim_metadata);
+
+                // ── LOG 5e ──
+                printf("[DCQL_DEBUG] 5e. Candidate finished claim check. Matched %d of %d requested claims.\n",
+                       claims_matched_count, cJSON_GetArraySize(claims));
+
                 if (cJSON_GetArraySize(matched_claim_names) == cJSON_GetArraySize(claims)) {
+                    // ── LOG 5f ──
+                    printf("[DCQL_DEBUG] 5f. Candidate MATCHED and pushed to array! ID: %s\n", cand_id ? cand_id : "NULL");
                     cJSON_AddItemReferenceToArray(matched_credentials, matched_credential);
                 }
             }
@@ -250,6 +316,9 @@ cJSON* MatchCredential(cJSON* credential, cJSON* credential_store) {
 }
 
 cJSON* dcql_query(cJSON* query, cJSON* credential_store) {
+    // ── LOG 0 ──
+    printf("[DCQL_DEBUG] 0. dcql_query started.\n");
+
     cJSON* match_result = cJSON_CreateObject();
     cJSON* matched_credential_sets = cJSON_CreateArray();
     cJSON* candidate_matched_credentials = cJSON_CreateObject();
