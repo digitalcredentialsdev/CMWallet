@@ -268,8 +268,11 @@ class SdJwt(
 
         // ── Step 5: build ONE KB-SD-JWT ───────────────────────────────────────────────
         val hasCnf = delegateProposals.any { it.delegatePayload.has("cnf") }
+        android.util.Log.d("SdJwt", "hasCnf evaluated to: $hasCnf")
+        val typ = if (hasCnf) "kb-sd-jwt+kb" else "kb-sd-jwt"
+        android.util.Log.d("SdJwt", "Setting KB-SD-JWT typ to: $typ")
         val kbSdHeader = buildJsonObject {
-            put("typ", if (hasCnf) "kb-sd-jwt+kb" else "kb-sd-jwt")
+            put("typ", typ)
             put("alg", "ES256")
         }
         val kbSdPayload = buildJsonObject {
