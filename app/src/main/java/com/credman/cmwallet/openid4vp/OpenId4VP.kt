@@ -17,6 +17,14 @@ data class TransactionData(
     val data: JSONObject
 )
 
+data class DelegateProposal(
+    val encodedItem: String,      // original base64url item from transaction_data array
+    val format: String,            // e.g. "dc+sd-jwt"
+    val delegatePayload: JSONObject, // proposed JWT claims (includes vct, cnf.jwk, mandate fields, _sd if any)
+    val delegateDisclosures: List<String>, // pre-computed disclosure strings
+    val credentialIds: List<String>  // credential_ids this mandate is scoped to
+)
+
 class OpenId4VP(
     var requestJson: JSONObject,
     var clientId: String,
@@ -33,6 +41,7 @@ class OpenId4VP(
 
     val dcqlQuery: JSONObject
     val transactionData: List<TransactionData>
+    val delegateProposals: List<DelegateProposal>
     val issuanceOffer: JSONObject?
     val clientMedtadata: JSONObject?
     val responseMode: String?
@@ -99,6 +108,43 @@ class OpenId4VP(
             transactionData = tempList
         } else {
             transactionData = emptyList()
+        }
+
+        // Each mandate object in delegate_payload[] becomes one DelegateProposal.
+        // delegate_disclosures are item-level sub-disclosures (e.g. checkout_jwt value).
+        // Sub-disclosures are attached to the first proposal; wallet appends them after
+        // mandate disclosures in the chain. Usually empty for our flow.
+        delegateProposals = transactionData.filter {
+            it.type == "delegate"
+        }.flatMap { td ->
+            val payloadArr = td.data.optJSONArray("delegate_payload")
+                ?: return@flatMap emptyList<DelegateProposal>().also {
+                    android.util.Log.d("OpenId4VP", "No delegate_payload found in delegate transaction data")
+                }
+            val disclosuresArr = td.data.optJSONArray("delegate_disclosures")
+            val subDisclosures = if (disclosuresArr != null)
+                (0 until disclosuresArr.length()).map { disclosuresArr.getString(it) }
+            else
+                emptyList()
+            val credIdsArr = td.data.optJSONArray("credential_ids")
+            val credIds = if (credIdsArr != null)
+                (0 until credIdsArr.length()).map { credIdsArr.getString(it) }
+            else
+                emptyList()
+            val format = td.data.optString("format", "dc+sd-jwt")
+
+            android.util.Log.d("OpenId4VP", "Found ${payloadArr.length()} delegate proposals")
+
+            (0 until payloadArr.length()).map { i ->
+                DelegateProposal(
+                    encodedItem = td.encodedData,
+                    format = format,
+                    delegatePayload = payloadArr.getJSONObject(i),
+                    // Sub-disclosures attached to first proposal
+                    delegateDisclosures = if (i == 0) subDisclosures else emptyList(),
+                    credentialIds = credIds
+                )
+            }
         }
 
     }

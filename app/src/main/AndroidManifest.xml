@@ -24,6 +24,11 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".testap2.Ap2TestActivity"
+            android:exported="true"
+            android:label="AP2 E2E Test"
+            android:theme="@style/Theme.CMWallet" />
+        <activity
             android:name=".getcred.GetCredentialActivity"
             android:exported="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar">

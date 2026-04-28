@@ -1,5 +1,6 @@
 package com.credman.cmwallet.ui
 
+import android.content.Intent
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -36,6 +37,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.activity.compose.LocalActivity
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -45,15 +61,20 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.credman.cmwallet.MainActivity
-import com.credman.cmwallet.R
 import com.credman.cmwallet.data.model.CredentialItem
 import com.credman.cmwallet.data.model.CredentialKeySoftware
+import com.credman.cmwallet.R
+import com.credman.cmwallet.data.model.toPrivateKey
+import com.credman.cmwallet.decodeBase64
+import com.credman.cmwallet.testap2.Ap2TestActivity
+import kotlinx.coroutines.launch
 import com.credman.cmwallet.data.model.toPrivateKey
 import com.credman.cmwallet.decodeBase64
 import com.credman.cmwallet.openid4vci.data.CredentialConfigurationMDoc
 import com.credman.cmwallet.openid4vci.data.CredentialConfigurationSdJwtVc
 import com.credman.cmwallet.sdjwt.SdJwt
 import kotlin.io.encoding.ExperimentalEncodingApi
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,39 +83,90 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val openCredentialDialog = remember { mutableStateOf<CredentialItem?>(null) }
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(text = "CMWallet")
-                }
+
+    // Sidebar states
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet(
+                modifier = Modifier.width(280.dp).fillMaxHeight()
+            ) {
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = "Credential Wallet",
+                    modifier = Modifier.padding(16.dp),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+                HorizontalDivider()
+
+                // Sidebar Option to launch AP2 Activity
+                NavigationDrawerItem(
+                    label = { Text("Try out AP2") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        context.startActivity(Intent(context, Ap2TestActivity::class.java))
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+            }
+        }
+    ) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = { Text(text = "CMWallet") },
+                    navigationIcon = {
+                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                            // ── FIXED: Proper 3-lined Hamburger Menu Icon ──
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Menu"
+                            )
+                        }
+                    }
+                )
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier.padding(innerPadding),
+            ) {
+                HorizontalDivider(thickness = 2.dp)
+
+                // Helper text to guide users
+                Text(
+                    text = "Swipe from left or use top menu to find 'Try out AP2'",
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    color = Color.Gray
+                )
+
+                HorizontalDivider(thickness = 1.dp)
+                CredentialList(
+                    uiState.credentials,
+                    onCredentialClick = { cred ->
+                        openCredentialDialog.value = cred
+                    }
+                )
+            }
+        }
+        if (openCredentialDialog.value != null) {
+            CredentialDialog(
+                onDismissRequest = { openCredentialDialog.value = null },
+                onDeleteCredential = { id ->
+                    openCredentialDialog.value = null
+                    viewModel.deleteCredential(id)
+                },
+                credentialItem = openCredentialDialog.value!!
             )
         }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier.padding(innerPadding),
-        ) {
-            HorizontalDivider(thickness = 2.dp)
-            CredentialList(
-                uiState.credentials,
-                onCredentialClick = { cred ->
-                    openCredentialDialog.value = cred
-                }
-            )
-        }
-    }
-    if (openCredentialDialog.value != null) {
-        CredentialDialog(
-            onDismissRequest = {
-                openCredentialDialog.value = null
-            },
-            onDeleteCredential = {id ->
-                openCredentialDialog.value = null
-                viewModel.deleteCredential(id)
-            },
-            credentialItem = openCredentialDialog.value!!
-        )
     }
 }
 
