@@ -163,7 +163,7 @@ void report_matched_credential(uint32_t wasm_version, cJSON* matched_doc, cJSON*
                     AddFieldForStringIdEntry(id, claim_display, claim_value);
                 }
             }
-            if (wasm_version >= 5) {
+            if (wasm_version >= 5 && metadata_display_text != NULL) {
                 AddMetadataDisplayTextToEntrySet(matched_id, metadata_display_text, set_id, doc_idx);
             }
         }
@@ -195,7 +195,7 @@ void report_matched_credential_set(char* set_id, int curr_set_idx, cJSON *matche
     }
 }
 
-int main()
+int openid4vp_main()
 {
     uint32_t credentials_size;
     GetCredentialsSize(&credentials_size);
@@ -298,7 +298,7 @@ int main()
                     transaction_data = cJSON_Parse(transaction_data_json);
                     transaction_credential_ids = cJSON_GetObjectItem(transaction_data, "credential_ids");
                     char *transaction_data_type = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "type"));
-                    if (strcmp(transaction_data_type, "urn:eudi:sca:payment:1") == 0) {
+                    if (transaction_data_type != NULL && strcmp(transaction_data_type, "urn:eudi:sca:payment:1") == 0) {
                         cJSON *payload = cJSON_GetObjectItem(transaction_data, "payload");
                         merchant_name = cJSON_GetStringValue(cJSON_GetObjectItem(cJSON_GetObjectItem(payload, "payee"), "name"));
                         
@@ -316,7 +316,7 @@ int main()
                         printf("transaction amount %s\n", transaction_amount);
                         
                         additional_info = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "additional_info"));
-                    } else if (strcmp(transaction_data_type, "payment_details") == 0) {
+                    } else if (transaction_data_type != NULL && strcmp(transaction_data_type, "payment_details") == 0) {
                         merchant_name = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "payee_name"));
 
                         char *amount = cJSON_GetStringValue(cJSON_GetObjectItem(transaction_data, "payment_amount"));
@@ -347,7 +347,7 @@ int main()
                 cJSON_ArrayForEach(matched_option, first_matched_credential_set) {
                     cJSON *matched_credential_ids = cJSON_GetObjectItemCaseSensitive(matched_option, "matched_credential_ids");
                     int credential_set_size = cJSON_GetArraySize(matched_credential_ids);
-                    char set_id_buffer[26];
+                    char set_id_buffer[64];
                     
                     if (cJSON_HasObjectItem(matched_option, "set_id")) {
                         char *set_idx = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(matched_option, "set_id"));

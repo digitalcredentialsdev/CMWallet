@@ -43,6 +43,7 @@ int B64DecodeURL(char* input, char** output) {
         output_len--;
     }
 
+    buffer[output_len] = '\0';
 
     return output_len;
 }
