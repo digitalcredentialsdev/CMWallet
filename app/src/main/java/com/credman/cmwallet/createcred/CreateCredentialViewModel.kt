@@ -1,15 +1,13 @@
 package com.credman.cmwallet.createcred
 
 import android.net.Uri
-import android.os.Bundle
 import android.util.Base64
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.credentials.CreateCredentialResponse
-import androidx.credentials.CreateCustomCredentialResponse
-import androidx.credentials.DigitalCredential
+import androidx.credentials.CreateDigitalCredentialResponse
 import androidx.credentials.ExperimentalDigitalCredentialApi
 import androidx.credentials.provider.ProviderCreateCredentialRequest
 import androidx.lifecycle.ViewModel
@@ -409,16 +407,13 @@ class CreateCredentialViewModel : ViewModel() {
     }
 
     private fun onResponse(newEntryId: String) {
-        val testResponse = CreateCustomCredentialResponse(
-            type = DigitalCredential.TYPE_DIGITAL_CREDENTIAL,
-            data = Bundle().apply {
-                putString(
-                    "androidx.credentials.BUNDLE_KEY_RESPONSE_JSON",
-                    JSONObject().put("protocol", "openid4vci").put("data", JSONObject()).toString()
-                )
-            },
+        val ackResponse = CreateDigitalCredentialResponse(
+            JSONObject()
+                .put("protocol", "openid4vci")
+                .put("data", JSONObject())
+                .toString()
         )
-        uiState = uiState.copy(state = Result.Response(testResponse, newEntryId))
+        uiState = uiState.copy(state = Result.Response(ackResponse, newEntryId))
     }
 
     private fun onError(msg: String? = null) {
