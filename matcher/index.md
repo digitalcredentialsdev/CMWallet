@@ -6,6 +6,8 @@ The registry blob is a custom binary format:
 - **Icon Section**: Raw PNG bytes located between the header and the JSON metadata.
 - **Metadata Section**: UTF-8 encoded JSON string starting at the specified offset.
 
+The source of truth lives in the [Jetpack library](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:credentials/registry/registry-digitalcredentials-openid/src/main/java/androidx/credentials/registry/digitalcredentials/openid4vp/OpenId4VpRegistry.kt). Specifically, the current impl is compatible with [this commit](https://cs.android.com/androidx/platform/frameworks/support/+/androidx-main:credentials/registry/registry-digitalcredentials-openid/src/main/java/androidx/credentials/registry/digitalcredentials/openid4vp/OpenId4VpRegistry.kt;drc=c9d1a56029af57bab736319f1612e3f09953010b).
+
 ## 2. Registry JSON Schema
 Root structure: `{"credentials": { ... }}`
 
