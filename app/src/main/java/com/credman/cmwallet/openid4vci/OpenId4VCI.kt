@@ -177,8 +177,9 @@ class OpenId4VCI(val credentialOfferJson: String) {
     /** Returns null if par endpoint isn't specified in the authorization server metadata. */
     @OptIn(ExperimentalUuidApi::class)
     suspend fun requestParEndpoint(): ParResponse? {
+        val challengeAndDpopNonce = requestChallengeFromEndpoint()
         val clientAttestation = getClientAttestationJwt()
-        val clientAttestationPop = getClientAttestationJwt()
+        val clientAttestationPop = generateClientAttestationPopJwt(challengeAndDpopNonce?.first?.attestationChallenge)
 
         val parEndpoint = credentialOffer.authorizationServerMetadata?.mtlsEndpointAliases?.pushedAuthorizationRequestEndpoint ?:
             credentialOffer.authorizationServerMetadata?.pushedAuthorizationRequestEndpoint ?: return null
