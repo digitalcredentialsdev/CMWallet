@@ -65,7 +65,7 @@ class CreateCredentialActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         if (savedInstanceState == null) {
             Log.d(TAG, "New CreateCredentialActivity")
-            val request = toRequest(intent)
+            val request = PendingIntentHandler.retrieveProviderCreateCredentialRequest(intent)
             if (request == null) {
                 Log.e(TAG, "[CreateCredentialActivity] Got empty request!")
                 finish()
@@ -231,67 +231,6 @@ class CreateCredentialActivity : ComponentActivity() {
         )
         setResult(RESULT_OK, resultData)
         finish()
-    }
-
-    /**
-     * Eventually this should be replaced as a single call
-     * val request = PendingIntentHandler.retrieveProviderCreateCredentialRequest(intent)
-     */
-    fun toRequest(intent: Intent): ProviderCreateCredentialRequest? {
-        val tmpRequestInto = DisplayInfo("userId")
-        if (Build.VERSION.SDK_INT >= 34) {
-            val request = intent.getParcelableExtra(
-                CredentialProviderService.EXTRA_CREATE_CREDENTIAL_REQUEST,
-                android.service.credentials.CreateCredentialRequest::class.java
-            ) ?: return null
-            return try {
-                ProviderCreateCredentialRequest(
-                    callingRequest =
-                    CreateCredentialRequest.createFrom(
-                        request.type,
-                        request.data.apply {
-                            putBundle(
-                                DisplayInfo.BUNDLE_KEY_REQUEST_DISPLAY_INFO,
-                                tmpRequestInto.toBundle(),
-                            )
-                        },
-                        request.data,
-                        requireSystemProvider = false,
-                        request.callingAppInfo.origin
-                    ),
-                    callingAppInfo =
-                    CallingAppInfo.create(
-                        request.callingAppInfo.packageName,
-                        request.callingAppInfo.signingInfo,
-                        request.callingAppInfo.origin
-                    ),
-                    biometricPromptResult = null
-                )
-            } catch (e: IllegalArgumentException) {
-                return null
-            }
-        } else {
-            val requestBundle = intent.getBundleExtra(
-                "android.service.credentials.extra.CREATE_CREDENTIAL_REQUEST"
-            ) ?: return null
-            val requestDataBundle = requestBundle.getBundle(
-                "androidx.credentials.provider.extra.CREATE_REQUEST_CREDENTIAL_DATA"
-            ) ?: Bundle()
-            requestDataBundle.putBundle(
-                DisplayInfo.BUNDLE_KEY_REQUEST_DISPLAY_INFO,
-                tmpRequestInto.toBundle(),
-            )
-            requestBundle.putBundle(
-                "androidx.credentials.provider.extra.CREATE_REQUEST_CREDENTIAL_DATA",
-                requestDataBundle
-            )
-            return try {
-                ProviderCreateCredentialRequest.fromBundle(requestBundle)
-            } catch (e: Exception) {
-                Log.e(TAG, "Parsing error", e)
-                null
-            }
-        }
     }
 
     @Composable
