@@ -67,8 +67,8 @@ pub fn issuance_main(credman: &mut impl CredmanApi) -> Result<(), Box<dyn std::e
                 credman.add_string_id_entry(
                     &matcher_data.entry_id,
                     icon,
-                    matcher_data.title.as_deref().unwrap_or(""),
-                    matcher_data.subtitle.as_deref().unwrap_or(""),
+                    &matcher_data.title,
+                    &matcher_data.subtitle,
                     "",
                     "",
                 );

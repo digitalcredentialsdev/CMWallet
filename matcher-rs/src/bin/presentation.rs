@@ -1,4 +1,4 @@
-use matcher_rs::{credman::CredmanApiImpl, issuance::issuance_main};
+use matcher_rs::{credman::CredmanApiImpl, openid4vp::openid4vp_main};
 
 #[cfg(target_arch = "wasm32")]
 #[global_allocator]
@@ -7,7 +7,7 @@ static ALLOCATOR: matcher_rs::simple_allocator::SimpleAllocator =
 
 fn main() {
     matcher_rs::logger::init();
-    issuance_main(&mut CredmanApiImpl {}).unwrap();
+    openid4vp_main(&mut CredmanApiImpl {}).unwrap();
 }
 
 // Credman expects this as the entry point, but it isn't there if the target is wasm32-unknown-unknown.
