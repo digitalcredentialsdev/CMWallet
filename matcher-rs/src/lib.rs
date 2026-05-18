@@ -6,3 +6,4 @@ pub mod issuance_matcher;
 pub mod json_value;
 pub mod logger;
 pub mod openid4vci;
+pub mod openid4vp_models;
