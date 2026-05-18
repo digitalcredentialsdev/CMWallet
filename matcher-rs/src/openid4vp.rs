@@ -159,4 +159,76 @@ mod tests {
         let err = parse_protocol_request_data(&pr).unwrap_err();
         assert!(err.to_string().contains("Missing unsigned request data"));
     }
+
+    use crate::test_utils::*;
+
+    macro_rules! define_test {
+        ($func_name:ident, $test_name:expr) => {
+            #[test]
+            fn $func_name() {
+                run_openid4vp_test($test_name, None);
+            }
+        };
+    }
+
+    define_test!(tc07_mdoc_match, "TC07_MdocMatch");
+    define_test!(tc08_mdoc_mismatch, "TC08_MdocMismatch");
+    define_test!(tc09_sdjwt_match, "TC09_SdjwtMatch");
+    define_test!(tc10_sdjwt_mismatch, "TC10_SdjwtMismatch");
+    define_test!(tc11_inline_issuance_fallback, "TC11_InlineIssuanceFallback");
+    define_test!(tc12_missing_format, "TC12_MissingFormat");
+    define_test!(tc13_return_all_claims, "TC13_ReturnAllClaims");
+    define_test!(tc14_match_specific_claims, "TC14_MatchSpecificClaims");
+    define_test!(tc15_match_nested_claims, "TC15_MatchNestedClaims");
+    define_test!(tc16_fail_missing_claims, "TC16_FailMissingClaims");
+    define_test!(tc17_match_claim_values_bool, "TC17_MatchClaimValuesBool");
+    define_test!(tc18_fail_claim_values_bool, "TC18_FailClaimValuesBool");
+    define_test!(tc19_match_claim_values_int, "TC19_MatchClaimValuesInt");
+    define_test!(tc20_fail_claim_values_int, "TC20_FailClaimValuesInt");
+    define_test!(tc21_match_first_claim_set, "TC21_MatchFirstClaimSet");
+    define_test!(tc22_match_second_claim_set, "TC22_MatchSecondClaimSet");
+    define_test!(tc23_fail_all_claim_sets, "TC23_FailAllClaimSets");
+    define_test!(tc24_dcql_query_single, "TC24_DcqlQuerySingle");
+    define_test!(tc25_dcql_query_set_match, "TC25_DcqlQuerySetMatch");
+    define_test!(
+        tc26_dcql_query_set_fail_required,
+        "TC26_DcqlQuerySetFailRequired"
+    );
+    define_test!(
+        tc27_dcql_query_set_fail_optional,
+        "TC27_DcqlQuerySetFailOptional"
+    );
+    define_test!(
+        tc28_dcql_query_complex_overlapping_sets,
+        "TC28_DcqlQueryComplexOverlappingSets"
+    );
+    define_test!(
+        tc29_dcql_query_openid4vp_spec_example,
+        "TC29_DcqlQueryOpenID4VPSpecExample"
+    );
+    define_test!(tc30_parse_v1_unsigned, "TC30_ParseV1Unsigned");
+    define_test!(tc31_parse_v1_signed, "TC31_ParseV1Signed");
+    define_test!(tc32_extract_payment_sca1, "TC32_ExtractPaymentSca1");
+    define_test!(tc33_extract_payment_details, "TC33_ExtractPaymentDetails");
+    define_test!(tc34_extract_payment_generic, "TC34_ExtractPaymentGeneric");
+    define_test!(tc35_wasm_add_entry_to_set, "TC35_WasmAddEntryToSet");
+    define_test!(tc36_wasm_payment_v2, "TC36_WasmPaymentV2");
+    define_test!(tc38_dcql_cartesian_product, "TC38_DcqlCartesianProduct");
+    define_test!(
+        tc39_dcql_complex_cartesian_product,
+        "TC39_DcqlComplexCartesianProduct"
+    );
+
+    #[test]
+    fn tc37_wasm_metadata_text() {
+        let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+        let testdata_dir = std::path::PathBuf::from(manifest_dir).join("testdata");
+        let mut registry_json =
+            std::fs::read_to_string(testdata_dir.join("registry.json")).unwrap();
+        let target = "\"title\": \"John's Driving License\"";
+        if let Some(pos) = registry_json.find(target) {
+            registry_json.insert_str(pos, "\"metadata_display_text\": \"Verified Member\", ");
+        }
+        run_openid4vp_test("TC37_WasmMetadataText", Some(&registry_json));
+    }
 }
