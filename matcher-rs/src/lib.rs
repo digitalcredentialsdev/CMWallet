@@ -1,6 +1,7 @@
 pub mod base64url;
 pub mod bindings;
 pub mod credman;
+pub mod dcql;
 pub mod issuance;
 pub mod issuance_matcher;
 pub mod json_value;
