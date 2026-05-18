@@ -10,3 +10,5 @@ pub mod openid4vci;
 pub mod openid4vp;
 pub mod openid4vp_models;
 pub mod reporter;
+#[cfg(test)]
+pub mod test_utils;
