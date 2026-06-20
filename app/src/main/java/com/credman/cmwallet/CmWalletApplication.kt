@@ -76,7 +76,6 @@ class CmWalletApplication : Application() {
         ).allowMainThreadQueries().fallbackToDestructiveMigration().build()
         credentialRepo = CredentialRepository()
 
-        val openId4VPDraft24Matcher = loadOpenId4VPDraft24Matcher()
         val openId4VP1_0Matcher = loadOpenId4VP1_0Matcher()
         val testCredentialsJson = loadTestCredentialsNew().decodeToString()
 
@@ -135,10 +134,6 @@ class CmWalletApplication : Application() {
         stream.read(data)
         stream.close()
         return data
-    }
-
-    private fun loadOpenId4VPDraft24Matcher(): ByteArray {
-        return readAsset("openid4vp.wasm")
     }
 
     private fun loadOpenId4VP1_0Matcher(): ByteArray {

@@ -194,6 +194,26 @@ fun jwsDeserialization(jws: String): Pair<JSONObject, JSONObject> {
     return Pair(header, JSONObject(payload))
 }
 
+fun jwsMultisignedDeserialization(jwsJson: JSONObject): Pair<JSONObject, JSONObject> {
+    val signatures = jwsJson.getJSONArray("signatures")
+    val payloadStr = jwsJson.getString("payload")
+    var validResult: Pair<JSONObject, JSONObject>? = null
+    var lastException: Exception? = null
+    for (i in 0 until signatures.length()) {
+        try {
+            val sigObj = signatures.getJSONObject(i)
+            val protectedHeader = sigObj.getString("protected")
+            val sig = sigObj.getString("signature")
+            validResult = jwsDeserialization("$protectedHeader.$payloadStr.$sig")
+            break
+        } catch (e: Exception) {
+            lastException = e
+        }
+    }
+    requireNotNull(validResult) { "No valid signature found in multisigned request: ${lastException?.message}" }
+    return validResult
+}
+
 fun toEcPublicKey(x: String, y: String): PublicKey {
     val kf = KeyFactory.getInstance("EC")
     val parameters = AlgorithmParameters.getInstance("EC")

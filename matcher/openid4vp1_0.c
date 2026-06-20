@@ -12,7 +12,7 @@
 
 #define PROTOCOL_OPENID4VP_1_0_UNSIGNED "openid4vp-v1-unsigned"
 #define PROTOCOL_OPENID4VP_1_0_SIGNED "openid4vp-v1-signed"
-// TODO: #define PROTOCOL_OPENID4VP_1_0_MULTISIGNED "openid4vp-v1-multisigned"
+#define PROTOCOL_OPENID4VP_1_0_MULTISIGNED "openid4vp-v1-multisigned"
 
 cJSON *GetDCRequestJson()
 {
@@ -195,7 +195,7 @@ void report_matched_credential_set(char* set_id, int curr_set_idx, cJSON *matche
     }
 }
 
-int openid4vp_main()
+int main()
 {
     uint32_t credentials_size;
     GetCredentialsSize(&credentials_size);
@@ -241,7 +241,7 @@ int openid4vp_main()
         // printf("Request %s\n", cJSON_Print(request));
 
         char *protocol = cJSON_GetStringValue(cJSON_GetObjectItem(request, "protocol"));
-        if (strcmp(protocol, PROTOCOL_OPENID4VP_1_0_UNSIGNED) == 0 || strcmp(protocol, PROTOCOL_OPENID4VP_1_0_SIGNED) == 0)
+        if (strcmp(protocol, PROTOCOL_OPENID4VP_1_0_UNSIGNED) == 0 || strcmp(protocol, PROTOCOL_OPENID4VP_1_0_SIGNED) == 0 || strcmp(protocol, PROTOCOL_OPENID4VP_1_0_MULTISIGNED) == 0)
         {
             // We have an OpenID4VP request
             cJSON *data_json;
@@ -273,6 +273,19 @@ int openid4vp_main()
                 char *decoded_request_json;
                 int decoded_request_json_len = B64DecodeURL(payload_start, &decoded_request_json);
                 data_json = cJSON_Parse(decoded_request_json);
+            }
+            else if (strcmp(protocol, PROTOCOL_OPENID4VP_1_0_MULTISIGNED) == 0)
+            {
+                cJSON *multisigned_request = cJSON_GetObjectItem(data_json, "request");
+                cJSON *jws_json = multisigned_request;
+                cJSON *payload_obj = cJSON_GetObjectItem(jws_json, "payload");
+                if (payload_obj != NULL && cJSON_IsString(payload_obj))
+                {
+                    char *payload_string = cJSON_GetStringValue(payload_obj);
+                    char *decoded_request_json;
+                    int decoded_request_json_len = B64DecodeURL(payload_string, &decoded_request_json);
+                    data_json = cJSON_Parse(decoded_request_json);
+                }
             }
             cJSON *query = cJSON_GetObjectItem(data_json, "dcql_query");
             if (cJSON_HasObjectItem(data_json, "offer"))

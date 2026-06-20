@@ -7,6 +7,7 @@ import com.credman.cmwallet.decodeBase64UrlNoPadding
 import com.credman.cmwallet.ecJwkThumbprintSha256
 import com.credman.cmwallet.jweSerialization
 import com.credman.cmwallet.jwsDeserialization
+import com.credman.cmwallet.jwsMultisignedDeserialization
 import org.json.JSONObject
 import java.security.MessageDigest
 
@@ -39,12 +40,16 @@ class OpenId4VP(
     var encryptionJwk: JSONObject? = null
 
     init {
-        // TODO: support multisigned request
-        // If the request is signed
-        if (protocolIdentifier == IDENTIFIER_1_0_SIGNED || requestJson.has("request")) {
-            val signedRequest = requestJson.getString("request")
-            requestJson = jwsDeserialization(signedRequest).second
-            clientId = requestJson.getString("client_id")
+        // If the request is signed or multisigned
+        if (protocolIdentifier == IDENTIFIER_1_0_SIGNED || protocolIdentifier == IDENTIFIER_1_0_MULTISIGNED) {
+            val request = requestJson.get("request")
+            val (header, payload) = if (protocolIdentifier == IDENTIFIER_1_0_MULTISIGNED) {
+                jwsMultisignedDeserialization(request as JSONObject)
+            } else {
+                jwsDeserialization(request as String)
+            }
+            requestJson = payload
+            clientId = if (header.has("client_id")) header.getString("client_id") else requestJson.getString("client_id")
         }
 
         // Parse required params
