@@ -23,10 +23,14 @@ apps) through the **OpenID4VP** standard.
 CMWallet is built on Jetpack Compose, using Room for storage and Ktor for networking.
 
 To learn about handling requests for credentials from other applications, or **Verifiers**,
-see [Credential Presentation](#1-credential-presentation).
+see [Credential Presentation](#1-credential-presentation). Learn more on
+the [Android developer
+website on displaying credentials](https://developer.android.com/identity/digital-credentials/credential-holder/credential-holder).
 
 To learn about handling requests to store credentials from credential **issuers**,
-see [Credential Issuance](#2-credential-issuance).
+see [Credential Issuance](#2-credential-issuance). Learn more on
+the [Android developer
+website on handling issuance](https://developer.android.com/identity/digital-credentials/credential-holder/issue-credential).
 
 ### 1. Credential Presentation
 
@@ -46,25 +50,26 @@ invoked, and then the credential will be presented to the verifier:
   metadata, Credential Manager runs the wallet's compiled WebAssembly (WASM) matching module (e.g.,
   `openid4vp1_0.wasm`) in an offline, secure system sandbox. The matcher evaluates the verifier's
   query against the stored credentials without revealing any private user details to the calling
-  app. Credential Manager comes with a default matcher if none are specified.
-* **Holder invocation**: If a matching credential is found, Android displays the card to the user.
-  Clicking the card invokes the holder and launches `GetCredentialActivity`. CMWallet launches an
-  additional `BiometricPrompt` during invocation for additional user consent.
-* **Presentation Assembly**: The wallet extracts the requested claims, builds a cryptographically
-  secure **Session Transcript** to bind the response to the specific connection, signs the response
-  using the private key stored in secure hardware, packages the payload, and returns it to the
-  calling verifier.
+  app. Credential Manager comes with a robust matcher that supports OpenID4VP, including the sd-jwt
+  VC and the mdoc credential types, by default.
+* **Holder invocation**: If matching credential(s) are found, Android displays a credential selector
+  with the matched credentials to the user. The user selects the credential they want, which then
+  invokes the holder and launches the holder activity. CMWallet launches an additional
+  `BiometricPrompt` during invocation for additional user consent.
+* **Presentation Assembly**: The wallet extracts the requested claims, signs the response using the
+  private key stored in secure hardware, packages the payload, and returns it to the calling
+  verifier.
 
 ### 2. Credential Issuance
 
 Handles credential issuance requests from issuers. When a user initiates getting a credential from
-an issuer by scanning a QR code or opening a link, the issuer can trigger a system intent that
-launches the credential creation and storage process:
+an issuer by scanning a QR code or opening a link, the issuer calls the Android Credential Manager
+API that launches the credential creation and storage process:
 
 ```
 [Issuer app] ──► Triggers system intent: CREATE_CREDENTIAL ──► calls Credential Manater's CreateCredentialActivity
                                                                                                  │
-[Room DB] ◄── Save issued credential ◄── Hardware-backed attestation process ◄── Request credential from Issuer 
+       Save issued credential ◄── Hardware-backed attestation process ◄── Request credential from Issuer 
 ```
 
 * **Issuer triggers intent**: The issuer triggers Android's `CREATE_CREDENTIAL` system intent,
