@@ -1,10 +1,12 @@
 package com.credman.cmwallet.pnv
 
+import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import android.util.Log
 import androidx.credentials.provider.CallingAppInfo
+import com.credman.cmwallet.CmWalletApplication
 import com.credman.cmwallet.CmWalletApplication.Companion.TAG
 import com.credman.cmwallet.CmWalletApplication.Companion.computeClientId
 import com.credman.cmwallet.createJWTES256
@@ -22,6 +24,7 @@ import com.credman.cmwallet.openid4vp.OpenId4VP
 import com.credman.cmwallet.openid4vp.OpenId4VP.Companion.IDENTIFIERS_1_0
 import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.TEST_PNV_1_GET_PHONE_NUMBER
 import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.TEST_PNV_1_VERIFY_PHONE_NUMBER
+import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.TEST_PNV_2_GET_PHONE_NUMBER
 import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.TEST_PNV_2_VERIFY_PHONE_NUMBER
 import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.VCT_GET_PHONE_NUMBER
 import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.VCT_VERIFY_PHONE_NUMBER
@@ -88,6 +91,13 @@ data class PnvTokenRegistry(
     }
 
     companion object {
+        private const val PNV_PREFS = "pnv_profile"
+        private const val KEY_PHONE_NUMBER = "phone_number"
+        private const val KEY_CARRIER_HINT = "carrier_hint"
+        private const val KEY_ANDROID_CARRIER_HINT = "android_carrier_hint"
+        private const val KEY_SUBSCRIPTION_HINT_1 = "subscription_hint_1"
+        private const val KEY_SUBSCRIPTION_HINT_2 = "subscription_hint_2"
+
         const val VCT_GET_PHONE_NUMBER = "number-verification/device-phone-number/ts43"
         const val VCT_VERIFY_PHONE_NUMBER = "number-verification/verify/ts43"
         const val PNV_CRED_FORMAT = "dc-authorization+sd-jwt"
@@ -104,42 +114,122 @@ data class PnvTokenRegistry(
         internal const val SHARED_ATTRIBUTE_DISPLAY_NAME = "shared_attribute_display_name"
         internal const val ISS_ALLOWLIST = "iss_allowlist"
 
+        data class EditablePnvProfile(
+            val phoneNumberHint: String,
+            val carrierHint: String,
+            val androidCarrierHint: String,
+            val subscriptionHint1: Int,
+            val subscriptionHint2: Int,
+        )
+
+        fun defaultProfile() = EditablePnvProfile(
+            phoneNumberHint = "+447386537913",
+            carrierHint = "23415",
+            androidCarrierHint = "3",
+            subscriptionHint1 = 1,
+            subscriptionHint2 = 2,
+        )
+
+        fun loadEditableProfile(context: Context): EditablePnvProfile {
+            val prefs = context.getSharedPreferences(PNV_PREFS, Context.MODE_PRIVATE)
+            val defaults = defaultProfile()
+            return EditablePnvProfile(
+                phoneNumberHint = prefs.getString(KEY_PHONE_NUMBER, defaults.phoneNumberHint) ?: defaults.phoneNumberHint,
+                carrierHint = prefs.getString(KEY_CARRIER_HINT, defaults.carrierHint) ?: defaults.carrierHint,
+                androidCarrierHint = prefs.getString(KEY_ANDROID_CARRIER_HINT, defaults.androidCarrierHint) ?: defaults.androidCarrierHint,
+                subscriptionHint1 = prefs.getInt(KEY_SUBSCRIPTION_HINT_1, defaults.subscriptionHint1),
+                subscriptionHint2 = prefs.getInt(KEY_SUBSCRIPTION_HINT_2, defaults.subscriptionHint2),
+            )
+        }
+
+        fun saveEditableProfile(context: Context, profile: EditablePnvProfile) {
+            context.getSharedPreferences(PNV_PREFS, Context.MODE_PRIVATE)
+                .edit()
+                .putString(KEY_PHONE_NUMBER, profile.phoneNumberHint)
+                .putString(KEY_CARRIER_HINT, profile.carrierHint)
+                .putString(KEY_ANDROID_CARRIER_HINT, profile.androidCarrierHint)
+                .putInt(KEY_SUBSCRIPTION_HINT_1, profile.subscriptionHint1)
+                .putInt(KEY_SUBSCRIPTION_HINT_2, profile.subscriptionHint2)
+                .apply()
+        }
+
         val TEST_PNV_1_GET_PHONE_NUMBER = PnvTokenRegistry(
             tokenId = "pnv_1",
             vct = VCT_GET_PHONE_NUMBER,
-            title = "Terrific Telecom",
-            subtitle = "+1 (650) 215-4321",
-            providerConsent = "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with \${CALLER_DISPLAY_NAME}",
+            title = "Vodafone UK",
+            subtitle = "+44 7386 537913",
+            providerConsent = "CMWallet will enable your carrier (Vodafone UK) to share your phone number with \${CALLER_DISPLAY_NAME}",
             subscriptionHint = 1,
-            carrierHint = "310250",
+            carrierHint = "23415",
             androidCarrierHint = "3",
-            phoneNumberHint = "+16502154321",
+            phoneNumberHint = "+447386537913",
             iss = "https://example.terrific-telecom.dev",
             icon = "iVBORw0KGgoAAAANSUhEUgAAAA4AAAAWCAYAAADwza0nAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAACBSURBVHgB7ZTBDUVQEEXvff8VoITfC0YZatABHWiH6IUOaICHBCuReXbEWd1kcmZmMRmGIinhSpABFBDoJpqccSKtA/7wY7C71FQ1NUaUyKIg4Ba8MbiJ3YPnqvcnfuI7xAfdqr0qXjU9FTXTGUnca//NIYGdoflla1BbDsPIqZgBHcEomi+uUHMAAAAASUVORK5CYII=",
             phoneNumberAttributeDisplayName = "Phone number",
-            supportedAggregatorIssNames = null,
+            supportedAggregatorIssNames = setOf(
+                "developer.vodafone.com",
+                "https://developer.vodafone.com",
+                "https://developer.vodafone.com/"
+            ),
             verifierTermsPrefix = "Provider Terms:\n",
 //            verifierTermsPrefix = null,
         )
         val TEST_PNV_1_VERIFY_PHONE_NUMBER = TEST_PNV_1_GET_PHONE_NUMBER.copy(
+            tokenId = "pnv_1_verify",
             vct = VCT_VERIFY_PHONE_NUMBER,
         )
-        val TEST_PNV_2_VERIFY_PHONE_NUMBER = PnvTokenRegistry(
+        val TEST_PNV_2_GET_PHONE_NUMBER = PnvTokenRegistry(
             tokenId = "pnv_2",
-            vct = VCT_VERIFY_PHONE_NUMBER,
-            title = "Work Number",
-            subtitle = "Timely Telecom",
-            providerConsent = "CMWallet will enable your carrier (Timely Telecom) to share your phone number with \${CALLER_DISPLAY_NAME}",
+            vct = VCT_GET_PHONE_NUMBER,
+            title = "Vodafone UK (SIM 2)",
+            subtitle = "+44 7386 537913",
+            providerConsent = "CMWallet will enable your carrier (Vodafone UK) to share your phone number with \${CALLER_DISPLAY_NAME}",
             subscriptionHint = 2,
-            carrierHint = "380250",
+            carrierHint = "23415",
             androidCarrierHint = "3",
-            phoneNumberHint = "+16502157890",
+            phoneNumberHint = "+447386537913",
             iss = "https://example.timely-telecom.dev",
             icon = "iVBORw0KGgoAAAANSUhEUgAAAA4AAAAWCAYAAADwza0nAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAACBSURBVHgB7ZTBDUVQEEXvff8VoITfC0YZatABHWiH6IUOaICHBCuReXbEWd1kcmZmMRmGIinhSpABFBDoJpqccSKtA/7wY7C71FQ1NUaUyKIg4Ba8MbiJ3YPnqvcnfuI7xAfdqr0qXjU9FTXTGUnca//NIYGdoflla1BbDsPIqZgBHcEomi+uUHMAAAAASUVORK5CYII=",
             phoneNumberAttributeDisplayName = "Phone number",
-            supportedAggregatorIssNames = null,
+            supportedAggregatorIssNames = setOf(
+                "developer.vodafone.com",
+                "https://developer.vodafone.com",
+                "https://developer.vodafone.com/"
+            ),
             verifierTermsPrefix = "Provider Terms:\n"
         )
+        val TEST_PNV_2_VERIFY_PHONE_NUMBER = TEST_PNV_2_GET_PHONE_NUMBER.copy(
+            tokenId = "pnv_2_verify",
+            vct = VCT_VERIFY_PHONE_NUMBER,
+        )
+
+        fun getConfiguredTokens(context: Context): List<PnvTokenRegistry> {
+            val profile = loadEditableProfile(context)
+            val sim1 = TEST_PNV_1_GET_PHONE_NUMBER.copy(
+                subtitle = profile.phoneNumberHint,
+                phoneNumberHint = profile.phoneNumberHint,
+                carrierHint = profile.carrierHint,
+                androidCarrierHint = profile.androidCarrierHint,
+                subscriptionHint = profile.subscriptionHint1,
+            )
+            val sim1Verify = sim1.copy(
+                tokenId = "pnv_1_verify",
+                vct = VCT_VERIFY_PHONE_NUMBER,
+            )
+            val sim2 = TEST_PNV_2_GET_PHONE_NUMBER.copy(
+                subtitle = profile.phoneNumberHint,
+                phoneNumberHint = profile.phoneNumberHint,
+                carrierHint = profile.carrierHint,
+                androidCarrierHint = profile.androidCarrierHint,
+                subscriptionHint = profile.subscriptionHint2,
+            )
+            val sim2Verify = sim2.copy(
+                tokenId = "pnv_2_verify",
+                vct = VCT_VERIFY_PHONE_NUMBER,
+            )
+
+            return listOf(sim1, sim1Verify, sim2, sim2Verify)
+        }
 
         fun buildRegistryDatabase(items: List<PnvTokenRegistry>): ByteArray {
             val out = ByteArrayOutputStream()
@@ -271,13 +361,17 @@ fun maybeHandlePnv(
     origin: String, // Either the web origin or the calling app sha
     callingAppInfo: CallingAppInfo
 ): DigitalCredentialResult? {
-    if (selectedID != TEST_PNV_1_GET_PHONE_NUMBER.tokenId && selectedID != TEST_PNV_2_VERIFY_PHONE_NUMBER.tokenId) {
+    val configuredTokens = PnvTokenRegistry.getConfiguredTokens(CmWalletApplication.appContext)
+    val tokenById = configuredTokens.associateBy { it.tokenId }
+    val validTokenIds = tokenById.keys
+    
+    if (selectedID !in validTokenIds) {
         return null
-    } else if (selectedID == TEST_PNV_1_GET_PHONE_NUMBER.tokenId) {
-        Log.d(TAG, "Selected number: ${TEST_PNV_1_GET_PHONE_NUMBER.title}")
-    } else {
-        Log.d(TAG, "Selected number: ${TEST_PNV_2_VERIFY_PHONE_NUMBER.title}")
     }
+    
+    val selectedToken = tokenById[selectedID] ?: return null
+    
+    Log.d(TAG, "Selected PNV token: ${selectedToken.title} (${selectedToken.vct})")
     val digitalCredentialOptions = DigitalCredentialRequestOptions.createFrom(requestJson)
     val requestProtocol = DigitalCredentialRequestOptions.getRequestProtocolAtIndex(
         digitalCredentialOptions, providerIdx
@@ -302,11 +396,7 @@ fun maybeHandlePnv(
         throw IllegalStateException("Could not find a valid vct value for pnv")
     }
 
-    val selectedCred = when (selectedID) {
-        TEST_PNV_1_GET_PHONE_NUMBER.tokenId -> if (vct == TEST_PNV_1_GET_PHONE_NUMBER.vct) TEST_PNV_1_GET_PHONE_NUMBER else TEST_PNV_1_VERIFY_PHONE_NUMBER
-        TEST_PNV_2_VERIFY_PHONE_NUMBER.tokenId -> TEST_PNV_2_VERIFY_PHONE_NUMBER
-        else -> return null
-    }
+    val selectedCred = selectedToken
 
     val credAuthJwt = dcqlObject.getJSONObject("meta").getString("credential_authorization_jwt")
     val (credAuthJwtHeader, credAuthJwtpayload) = jwsDeserialization(credAuthJwt)
