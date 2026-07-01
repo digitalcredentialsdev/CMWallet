@@ -143,19 +143,6 @@ sealed class CredentialConfiguration {
 }
 
 @Serializable
-data class MDocClaimDisplay(
-    @SerialName("name") val name: String?,
-    @SerialName("locale") val locale: String?,
-)
-
-@Serializable
-data class MDocClaim(
-    @SerialName("mandatory") val mandatory: Boolean?,
-    @SerialName("value_type") val valueType: String?,
-    @SerialName("display") val display: List<MDocClaimDisplay>?,
-)
-
-@Serializable
 data class CredentialConfigurationMDoc(
     @SerialName("format") override val format: String,
     @SerialName("scope") override val scope: String?,
@@ -164,7 +151,6 @@ data class CredentialConfigurationMDoc(
     @SerialName("proof_types_supported") override val proofTypesSupported: Map<String, CredentialConfigurationProofType>?,
     @SerialName("credential_metadata") override val credentialMetadata: CredentialMetadata?,
     @SerialName("doctype") val doctype: String,
-    @SerialName("claims") val claims: List<Claim>?,
 ) : CredentialConfiguration()
 
 @Serializable
@@ -189,7 +175,6 @@ data class CredentialConfigurationSdJwtVc(
     @SerialName("proof_types_supported") override val proofTypesSupported: Map<String, CredentialConfigurationProofType>?,
     @SerialName("credential_metadata") override val credentialMetadata: CredentialMetadata?,
     @SerialName("vct") val vct: String,
-    @SerialName("claims") val claims: List<Claim>?,
 ) : CredentialConfiguration()
 
 @Serializable
@@ -205,6 +190,7 @@ data class CredentialConfigurationUnknownFormat(
 @Serializable
 data class CredentialMetadata(
     @SerialName("display") val display: List<CredentialConfigurationMetadataDisplay>?,
+    @SerialName("claims") val claims: List<Claim>?,
 )
 
 object CredentialConfigurationSerializer :

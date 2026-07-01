@@ -47,7 +47,8 @@ for cred in database:
                     mdoc.add_data_item(namespace, element, base64.urlsafe_b64decode(value["value"]))
                 else:
                     mdoc.add_data_item(namespace, element, value["value"])
-        cred["config"]["claims"] = claims
+        cred["config"]["credential_metadata"] = {}
+        cred["config"]["credential_metadata"]["claims"] = claims
         device_private_key = ec.generate_private_key(ec.SECP256R1())
         device_public_key = device_private_key.public_key()
         issuer_signed = base64.urlsafe_b64encode(
@@ -65,7 +66,8 @@ for cred in database:
         vct = cred_config["vct"]
         claims = []
         build_claims_for_display(claims, cred["paths"], [])
-        cred["config"]["claims"] = claims
+        cred["config"]["credential_metadata"] = {}
+        cred["config"]["credential_metadata"]["claims"] = claims
         user_claims = build_claims(cred["paths"])
         user_claims["vct"] = vct
         device_private_key = ec.generate_private_key(ec.SECP256R1())

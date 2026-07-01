@@ -182,7 +182,7 @@ class CredentialRepository {
             val currPath = path.toMutableList() // Make a copy
             currPath.add(key)
             if (v is JSONObject) {
-                val displayName = displayConfig?.claims?.firstOrNull{
+                val displayName = displayConfig?.credentialMetadata?.claims?.firstOrNull{
                     JSONArray(it.path) == currPath
                 }?.display?.first()?.name ?: currPath.joinToString(separator = ".")
                 claims.add(
@@ -202,7 +202,7 @@ class CredentialRepository {
                     currPath
                 )
             } else {
-                val displayName = displayConfig?.claims?.firstOrNull{
+                val displayName = displayConfig?.credentialMetadata?.claims?.firstOrNull{
                     JSONArray(it.path) == currPath
                 }?.display?.first()?.name ?: currPath.joinToString(separator = ".")
                 claims.add(
@@ -249,9 +249,9 @@ class CredentialRepository {
                     if (mdoc.issuerSignedNamespaces.isNotEmpty()) {
                         mdoc.issuerSignedNamespaces.forEach { (namespace, elements) ->
                             elements.forEach { (element, value) ->
-                                val displayName = item.config.claims?.firstOrNull{
+                                val displayName = item.config.credentialMetadata?.claims?.firstOrNull{
                                     it.path[0] == namespace && it.path[1] == element
-                                }?.display?.first()?.name!!
+                                }?.display?.first()?.name ?: element
                                 val namespaceData = mdoc.issuerSignedNamespaces[namespace]?.get(element)
                                 mdocFields.add(
                                     MdocField(
