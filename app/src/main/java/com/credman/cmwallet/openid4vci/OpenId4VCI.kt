@@ -68,6 +68,7 @@ import java.time.Instant
 import java.security.cert.Certificate
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalUuidApi::class)
 class OpenId4VCI(val credentialOfferJson: String) {
@@ -104,6 +105,7 @@ class OpenId4VCI(val credentialOfferJson: String) {
     private val json = Json {
         explicitNulls = false
         ignoreUnknownKeys = true
+        isLenient = true
     }
     val credentialOffer: CredentialOffer = json.decodeFromString(credentialOfferJson)
     private val authServerCache = mutableMapOf<String, OauthAuthorizationServer>()
@@ -126,14 +128,33 @@ class OpenId4VCI(val credentialOfferJson: String) {
         kp = kpg.genKeyPair()
     }
 
+    private suspend fun <T> executeNetworkCall(endpointName: String, url: String, block: suspend () -> T): T {
+        try {
+            Log.d(TAG, "Starting HTTP request [$endpointName] to URL: $url")
+            return block()
+        } catch (e: Exception) {
+            Log.e(TAG, "HTTP Network Error during VCI [$endpointName] at URL: $url. Error: ${e.javaClass.simpleName} - ${e.message}", e)
+            println("VCI Network Error [$endpointName] at $url: ${e.message}")
+            throw e
+        }
+    }
+
     suspend fun requestAuthServerMetadata(server: String): OauthAuthorizationServer {
         if (credentialOffer.authorizationServerMetadata != null) {
             delay(50)
             return credentialOffer.authorizationServerMetadata
         }
         if (server !in authServerCache) {
-            authServerCache[server] =
-                httpClient.get("$server/.well-known/oauth-authorization-server").body()
+            val serverUri = server.toUri()
+            val path = serverUri.path?.removeSuffix("/") ?: ""
+            val url = if (path.isEmpty() || path == "/") {
+                "${serverUri.scheme}://${serverUri.authority}/.well-known/oauth-authorization-server"
+            } else {
+                "${serverUri.scheme}://${serverUri.authority}/.well-known/oauth-authorization-server$path"
+            }
+            authServerCache[server] = executeNetworkCall("OAuth AS Metadata", url) {
+                httpClient.get(url).body()
+            }
         }
         return authServerCache[server]!!
     }
@@ -141,7 +162,7 @@ class OpenId4VCI(val credentialOfferJson: String) {
     fun authServerIdentifier(): String = if (credentialOffer.issuerMetadata.authorizationServers == null) {
         credentialOffer.issuerMetadata.credentialIssuer
     } else {
-        "Can't do this yet"
+        credentialOffer.issuerMetadata.authorizationServers[0]
     }
 
     suspend fun authEndpoint(authServer: String): String {
@@ -150,8 +171,11 @@ class OpenId4VCI(val credentialOfferJson: String) {
 
     /* Returns Nonce response, and dpop nonce from header if present (https://openid.github.io/OpenID4VCI/openid-4-verifiable-credential-issuance-1_1-wg-draft.html#name-nonce-endpoint). */
     suspend fun requestNonceFromEndpoint(): Pair<NonceResponse, String?> {
-        require(credentialOffer.issuerMetadata.nonceEndpoint != null) { "nonce_endpoint must be set when requesting a nonce" }
-        val result = httpClient.post(credentialOffer.issuerMetadata.nonceEndpoint)
+        val nonceUrl = credentialOffer.issuerMetadata.nonceEndpoint
+        require(nonceUrl != null) { "nonce_endpoint must be set when requesting a nonce" }
+        val result = executeNetworkCall("Nonce Endpoint", nonceUrl) {
+            httpClient.post(credentialOffer.issuerMetadata.nonceEndpoint)
+        }
         val dpopNonce = result.headers.get("dpop-nonce")
         Log.d(TAG, "Dpop nonce from nonce endpoint: ${dpopNonce}")
         return Pair(result.body(), dpopNonce)
@@ -168,7 +192,9 @@ class OpenId4VCI(val credentialOfferJson: String) {
         val challengeEndpoint = requestAuthServerMetadata(
             authServerIdentifier()
         ).challengeEndpoint ?: return null
-        val result = httpClient.post(challengeEndpoint)
+        val result = executeNetworkCall("Challenge Endpoint", challengeEndpoint) {
+            httpClient.post(challengeEndpoint)
+        }
         val dpopNonce = result.headers.get("dpop-nonce")
         Log.d(TAG, "Dpop nonce from AS challenge endpoint: ${dpopNonce}")
         return Pair(result.body(), dpopNonce)
@@ -181,30 +207,34 @@ class OpenId4VCI(val credentialOfferJson: String) {
         val clientAttestation = getClientAttestationJwt()
         val clientAttestationPop = generateClientAttestationPopJwt(challengeAndDpopNonce?.first?.attestationChallenge)
 
-        val parEndpoint = credentialOffer.authorizationServerMetadata?.mtlsEndpointAliases?.pushedAuthorizationRequestEndpoint ?:
+        val parEndpoint = (credentialOffer.authorizationServerMetadata?: requestAuthServerMetadata(
+            authServerIdentifier()
+        )).mtlsEndpointAliases?.pushedAuthorizationRequestEndpoint ?:
             credentialOffer.authorizationServerMetadata?.pushedAuthorizationRequestEndpoint ?: return null
         val credId = credentialOffer.credentialConfigurationIds.first()
         val md = MessageDigest.getInstance("SHA256")
         val codeChallenge = md.digest(codeVerifier.toByteArray()).toBase64UrlNoPadding()
 
-        val result = httpClient.submitForm(
-            url = parEndpoint,
-            formParameters = parameters {
-                append("client_id", WALLET_CLIENT_ID)
-                append("response_type", "code")
-                append("state", Uuid.random().toString())
-                append(
-                    "issuer_state",
-                    credentialOffer.grants!!.authorizationCode!!.issuerState ?: ""
-                )
-                append("redirect_uri", "http://localhost")
-                append("scope", credId)
-                append("code_challenge", codeChallenge)
-                append("code_challenge_method", "S256")
+        val result = executeNetworkCall("PAR Endpoint", parEndpoint) {
+            httpClient.submitForm(
+                url = parEndpoint,
+                formParameters = parameters {
+                    append("client_id", WALLET_CLIENT_ID)
+                    append("response_type", "code")
+                    append("state", Uuid.random().toString())
+                    append(
+                        "issuer_state",
+                        credentialOffer.grants!!.authorizationCode!!.issuerState ?: ""
+                    )
+                    append("redirect_uri", "http://localhost")
+                    append("scope", credId)
+                    append("code_challenge", codeChallenge)
+                    append("code_challenge_method", "S256")
+                }
+            ) {
+                header("oauth-client-attestation", clientAttestation)
+                header("oauth-client-attestation-pop", clientAttestationPop)
             }
-        ) {
-            header("oauth-client-attestation", clientAttestation)
-            header("oauth-client-attestation-pop", clientAttestationPop)
         }
 
         if (result.status == HttpStatusCode.BadRequest) {
@@ -279,24 +309,26 @@ class OpenId4VCI(val credentialOfferJson: String) {
 
         val clientAttestation = getClientAttestationJwt()
         val clientAttestationPop = generateClientAttestationPopJwt(challengeAndDpopNonce?.first?.attestationChallenge)
-        val dpop = generateDpopJwt("POST", endpoint, challengeAndDpopNonce?.second)
+        val dpop = generateDpopJwt("POST", endpoint, dpopNonce?: challengeAndDpopNonce?.second)
 
-        val result = httpClient.submitForm(
-            url = endpoint,
-            formParameters = parameters {
-                json.encodeToJsonElement(tokenRequest).jsonObject.forEach { key, element ->
-                    when (element) {
-                        is JsonPrimitive -> append(key, element.jsonPrimitive.content)
-                        is JsonArray ->  append(key, element.jsonArray.toString())
-                        is JsonObject -> append(key, element.jsonObject.toString())
-                        else -> {}
+        val result = executeNetworkCall("Token Endpoint", endpoint) {
+            httpClient.submitForm(
+                url = endpoint,
+                formParameters = parameters {
+                    json.encodeToJsonElement(tokenRequest).jsonObject.forEach { key, element ->
+                        when (element) {
+                            is JsonPrimitive -> append(key, element.jsonPrimitive.content)
+                            is JsonArray ->  append(key, element.jsonArray.toString())
+                            is JsonObject -> append(key, element.jsonObject.toString())
+                            else -> {}
+                        }
                     }
                 }
+            ) {
+                header("oauth-client-attestation", clientAttestation)
+                header("oauth-client-attestation-pop", clientAttestationPop)
+                header("dpop", dpop)
             }
-        ) {
-            header("oauth-client-attestation", clientAttestation)
-            header("oauth-client-attestation-pop", clientAttestationPop)
-            header("dpop", dpop)
         }
 
         Log.d(TAG, "Token response ${result.bodyAsText()}")
@@ -358,21 +390,23 @@ class OpenId4VCI(val credentialOfferJson: String) {
         val accessTokenHash = md.digest(accessToken.toByteArray()).toBase64UrlNoPadding()
         val dpop = generateDpopJwt("POST", endpoint, dpopNonce, accessTokenHash)
 
-        val result = httpClient.post(endpoint) {
-            header(HttpHeaders.Authorization, "Dpop $accessToken")
-            header("dpop", dpop)
+        val result = executeNetworkCall("Credential Endpoint", endpoint) {
+            httpClient.post(endpoint) {
+                header(HttpHeaders.Authorization, "Dpop $accessToken")
+                header("dpop", dpop)
 
-            if (requireCredentialRequestEncryption()) {
-                contentType(ContentType("application", "jwt"))
-                setBody(jweSerialization(
-                    recipientKeyJwk = getCredentialRequestEncryptionKey(),
-                    plainText = json.encodeToJsonElement(request).toString()
-                ))
-            } else {
-                contentType(ContentType.Application.Json)
-                setBody(
-                    json.encodeToJsonElement(request)
-                )
+                if (requireCredentialRequestEncryption()) {
+                    contentType(ContentType("application", "jwt"))
+                    setBody(jweSerialization(
+                        recipientKeyJwk = getCredentialRequestEncryptionKey(),
+                        plainText = json.encodeToJsonElement(request).toString()
+                    ))
+                } else {
+                    contentType(ContentType.Application.Json)
+                    setBody(
+                        json.encodeToJsonElement(request)
+                    )
+                }
             }
         }
 
