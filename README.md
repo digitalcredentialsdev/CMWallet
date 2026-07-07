@@ -58,6 +58,7 @@ invoked, and then the credential will be presented to the verifier:
 * **Presentation Assembly**: The wallet extracts the requested claims, signs the response using the
   private key stored in secure hardware, packages the payload, and returns it to the calling
   verifier.
+
 Additional features: 
 
 * **Multi-credential presentation**: Credential Manager supports requesting multiple credentials (e.g. age + payment) in a single request.
