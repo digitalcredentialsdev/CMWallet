@@ -28,8 +28,7 @@ the [Android developer
 website on displaying credentials](https://developer.android.com/identity/digital-credentials/credential-holder/credential-holder).
 
 To learn about handling requests to store credentials from credential **issuers**,
-see [Credential Issuance](#2-credential-issuance). Learn more on
-the [Android developer
+see [Credential Issuance](#2-credential-issuance). Learn more on the [Android developer
 website on handling issuance](https://developer.android.com/identity/digital-credentials/credential-holder/issue-credential).
 
 ### 1. Credential Presentation
@@ -43,7 +42,7 @@ invoked, and then the credential will be presented to the verifier:
 ```
 [Holder(wallet) app] ──► Registers metadata with Credential Manager
                                                                    
-[Verifier app] ──► Requests digital credential claim(s) ──► Credential Manager matches claims and displays options to user ──► User selects credential ──► Holder is invoked ──► Holder returns signed presentation to verifier
+[Verifier app] ──► Requests digital credential(s) ──► Credential Manager matches credentials and displays options to user ──► User selects credential(s) ──► Holder is invoked ──► Holder returns signed presentation to verifier
 ```
 
 * **Matchers (WASM matching)**: In order to match a verifier's requested claims with registered
@@ -59,26 +58,37 @@ invoked, and then the credential will be presented to the verifier:
 * **Presentation Assembly**: The wallet extracts the requested claims, signs the response using the
   private key stored in secure hardware, packages the payload, and returns it to the calling
   verifier.
+Additional features: 
+
+* **Multi-credential presentation**: Credential Manager supports requesting multiple credentials (e.g. age + payment) in a single request.
+* **User-friendly UI**: The credential selector UI automatically adapts to different use cases, such as verification or payment confirmation, displaying the most appropriate layout for the request.
 
 ### 2. Credential Issuance
 
-Handles credential issuance requests from issuers. When a user initiates getting a credential from
-an issuer by scanning a QR code or opening a link, the issuer calls the Android Credential Manager
-API that launches the credential creation and storage process:
+Normally a user can trigger credential issuance in two ways:
 
-```
-[Issuer app] ──► Triggers system intent: CREATE_CREDENTIAL ──► calls Credential Manater's CreateCredentialActivity
-                                                                                                 │
-       Save issued credential ◄── Hardware-backed attestation process ◄── Request credential from Issuer 
-```
+* Issuer-initiated flow: the user triggers a request to issue a VDC from an issuer application or
+  website. For example, a website may offer its users an option to "Add your passport to your
+  wallet". The issuer calls the [Credential Manager issuance API](https://developer.android.com/identity/digital-credentials/credential-issuer/issue-credentials)
+  to make an OpenID4VCI Credential Offer request. To handle such requests, a wallet must first
+  integrate with Credential Manager to register its metadata. Credential Manager will display
+  relevant options for a user to select. After the user selects a wallet option, the wallet
+  application will be invoked and can proceed with the steps needed to complete the issuance.
+
+* Wallet-initiated flow: the user requests to add a VDC from their wallet application. For example,
+  a wallet may offer a button to "Add your passport". In this case, the wallet maintains its
+  supported issuer list and metadata. It does not need to integrate with the Android Credential
+  Manager to complete this function.
+
+CMWallet supports the issuer initiated flow, allowing arbitrary types of credentials in the SD-JWT
+VC or mdoc format.
 
 * **Issuer triggers intent**: The issuer triggers Android's `CREATE_CREDENTIAL` system intent,
   launching `CreateCredentialActivity`.
 * **Progress bottom sheet**: The wallet displays a Compose bottom sheet showing a progress bar while
   it parses the Credential Offer.
-* **Key Generation and Attestation**: The wallet generates a secure cryptographic EC P-256 key pair
-  in the phone's hardware-backed **Android KeyStore**. It creates a signed **DPoP Proof** and an *
-  *Android Keystore Key Attestation** to prove the key is tied to a genuine physical device.
+* **Key Generation and Attestation**: CMWallet supports [Android key attestation](https://developer.android.com/identity/digital-credentials/credential-issuer/keystore-attestation) for credential
+binding keys. It provides a direct Android hardware backed key attestation and is the recommended key proof approach on Android.
 * **Hardware-backed attestation process**: The wallet sends the key proofs to the issuer's endpoint
   and receives the signed credential payload (in mDoc or sd-jwt format)
 * **Saving the credential**: The wallet decrypts the signed credential payload if it is encrypted,
@@ -104,7 +114,23 @@ CMWallet/
 │       ├── sdjwt/                       # sd-jwt VC format presentation and verification
 │       └── cbor/                        # CBOR encoding helpers
 ├── matcher/                             # C implementation of wasm matcher
-└── matcher-rs/                          # Rust implementation of wasm matcher
+├── matcher-rs/                          # Rust implementation of wasm matcher
+├── testdata/                            # Offline test credential generator & key material
+│   ├── create_database.py               # Python script to sign & generate mdoc and SD-JWT test credentials
+│   ├── helpers.py                       # Utilities for parsing SD-JWT claim paths and display metadata
+│   ├── database_in.json                 # Raw unsigned input credentials (claims, namespaces, and display info)
+│   ├── database.json                    # Output database containing signed test credentials & device keys
+│   ├── ds_cert_mdoc.pem                 # Document Signer (DS) certificate for mdoc test credentials
+│   ├── ds_private_key_mdoc.pem          # Private key for signing mdoc test credentials
+│   ├── ds_cert_sdjwt.pem                # Document Signer (DS) certificate for SD-JWT test credentials
+│   ├── ds_private_key_sdjwt.json        # JWK private key for signing SD-JWT test credentials
+│   ├── issuer_cert_mdoc.pem             # Issuer Root CA certificate for mdoc
+│   ├── issuer_cert_sdjwt.pem            # Issuer Root CA certificate for SD-JWT
+│   ├── issuer_private_key_mdoc.pem      # Issuer root private key for mdoc
+│   ├── issuer_private_key_sdjwt.json    # Issuer root private key for SD-JWT
+│   └── issuance_wallet_attestation_cert.pem # Certificate used for wallet client attestation
+│   ├── README.md                        # Instructions for building and deploying test database
+
 ```
 
 ### Detailed Directory Mapping
