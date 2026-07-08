@@ -22,13 +22,11 @@ apps) through the **OpenID4VP** standard.
 
 CMWallet is built on Jetpack Compose, using Room for storage and Ktor for networking.
 
-To learn about handling requests for credentials from other applications, or **Verifiers**,
-see [Credential Presentation](#1-credential-presentation). Learn more on
+CMWallet handles requests for credential presentation from **Verifiers** following
 the [Android developer
 website on displaying credentials](https://developer.android.com/identity/digital-credentials/credential-holder/credential-holder).
 
-To learn about handling requests to store credentials from credential **issuers**,
-see [Credential Issuance](#2-credential-issuance). Learn more on the [Android developer
+CMWallet handles requests to store credentials from **issuers** following the [Android developer
 website on handling issuance](https://developer.android.com/identity/digital-credentials/credential-holder/issue-credential).
 
 ### 1. Credential Presentation
@@ -40,9 +38,9 @@ user to select. After the user selects a credential, the corresponding holder ap
 invoked, and then the credential will be presented to the verifier:
 
 ```
-[Holder(wallet) app] ──► Registers metadata with Credential Manager
+[Holder(wallet) app] ──► Registers presentation metadata with Credential Manager
                                                                    
-[Verifier app] ──► Requests digital credential(s) ──► Credential Manager matches credentials and displays options to user ──► User selects credential(s) ──► Holder is invoked ──► Holder returns signed presentation to verifier
+[Verifier app / website] ──► Requests digital credential(s) ──► Credential Manager matches credentials and displays options to user ──► User selects credential(s) ──► Holder is invoked ──► Holder returns signed presentation to verifier
 ```
 
 * **Matchers (WASM matching)**: In order to match a verifier's requested claims with registered
@@ -84,16 +82,17 @@ Normally a user can trigger credential issuance in two ways:
 CMWallet supports the issuer initiated flow, allowing arbitrary types of credentials in the SD-JWT
 VC or mdoc format.
 
-* **Issuer triggers intent**: The issuer triggers Android's `CREATE_CREDENTIAL` system intent,
-  launching `CreateCredentialActivity`.
-* **Progress bottom sheet**: The wallet displays a Compose bottom sheet showing a progress bar while
-  it parses the Credential Offer.
+The credential issuance flow works similar to the presentation flow: 
+
+```
+[Holder(wallet) app] ──► Registers issuance metadata with Credential Manager
+                                                                   
+[Issuer app / website] ──► Requests credential issuance ──► Credential Manager matches and displays holder options to user ──► User selects holder ──► Holder is invoked ──► Holder completes the issuance operation
+```
+
 * **Key Generation and Attestation**: CMWallet supports [Android key attestation](https://developer.android.com/identity/digital-credentials/credential-issuer/keystore-attestation) for credential
 binding keys. It provides a direct Android hardware backed key attestation and is the recommended key proof approach on Android.
-* **Hardware-backed attestation process**: The wallet sends the key proofs to the issuer's endpoint
-  and receives the signed credential payload (in mDoc or sd-jwt format)
-* **Saving the credential**: The wallet decrypts the signed credential payload if it is encrypted,
-  and persists it in the Room Database.
+* **Asynchronous issuance fulfillment**: Unlike presentation fulfillment, where the holder always returns a completed presentation result to the caller, issuance fulfillment involves multiple server interactions and sometimes a user verification process that can take hours to complete. Therefore, the holder may return a default response indicating the successful receipt of the issuance request. This does not necessarily mean that the issuance has completed; instead, it signals to the calling issuer that they can transition the user to an appropriate next step in the UI.
 
 ---
 
@@ -211,14 +210,6 @@ CMWallet/
 
 ## The WASM Query Matchers (`/matcher` and `/matcher-rs`)
 
-Credential matching does not happen directly in the main wallet app code. Instead:
+These folders contain the source code for the default WASM matchers, which support all OpenID4VP and OpenID4VCI use cases.
 
-1. Matcher code is written in C/C++ (`matcher/`) or Rust (`matcher-rs/`).
-2. It implements DCQL parser rules and format-specific validation.
-3. It compiles directly to a WebAssembly binary target in `build.sh`
-4. The resulting `.wasm` files are placed in `app/src/main/assets/`.
-5. When a request arrives, Credential Manager loads these WASM binaries into an isolated system
-   sandbox for query matching.
-
-Note that matches are not required to be separately defined; Credential Manager already includes a
-default matcher.
+Note that the Credential Manager API already includes these default matchers, so you will most likely not need to create any custom matchers yourself.
