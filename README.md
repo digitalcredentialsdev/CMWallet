@@ -52,7 +52,7 @@ invoked, and then the credential will be presented to the verifier:
 * **Holder invocation**: If matching credential(s) are found, Android displays a credential selector
   with the matched credentials to the user. The user selects the credential they want, which then
   invokes the holder and launches the holder activity. CMWallet launches an additional
-  `BiometricPrompt` during invocation for additional user consent.
+  `BiometricPrompt` during invocation for additional user authentication.
 * **Presentation Assembly**: The wallet extracts the requested claims, signs the response using the
   private key stored in secure hardware, packages the payload, and returns it to the calling
   verifier.
