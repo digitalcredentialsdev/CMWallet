@@ -436,3 +436,15 @@ TEST_CASE("TC37_WasmMetadataText") {
     
     RunTest("TC37_WasmMetadataText", registry_with_meta);
 }
+
+TEST_CASE("TC39_MatchMostPreferredSupportedProtocolAvailable") {
+    json reg = json::parse(ReadFileToString("testdata/registry.json"));
+    reg["supported_protocols"] = {"openid4vp-v1-signed", "openid4vp-v1-unsigned"};
+    RunTest("TC39_MatchMostPreferredSupportedProtocolAvailable", reg.dump());
+}
+
+TEST_CASE("TC40_NoMatchIfNoRequestsForSupportedProtocols") {
+    json reg = json::parse(ReadFileToString("testdata/registry.json"));
+    reg["supported_protocols"] = {"openid4vp-v1-signed"};
+    RunTest("TC40_NoMatchIfNoRequestsForSupportedProtocols", reg.dump());
+}
