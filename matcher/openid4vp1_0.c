@@ -210,8 +210,13 @@ static int process_request(
     char *additional_info = NULL;
 
     char *protocol = cJSON_GetStringValue(cJSON_GetObjectItem(request, "protocol"));
+    if (protocol == NULL)
+    {
+        return 0;
+    }
     if (strcmp(protocol, PROTOCOL_OPENID4VP_1_0_UNSIGNED) == 0 || strcmp(protocol, PROTOCOL_OPENID4VP_1_0_SIGNED) == 0 || strcmp(protocol, PROTOCOL_OPENID4VP_1_0_MULTISIGNED) == 0)
     {
+        int matched = 0;
         // We have an OpenID4VP request
         cJSON *data_json;
         if (is_modern_request)
@@ -324,6 +329,7 @@ static int process_request(
 
         int matched_credential_sets_size = cJSON_GetArraySize(matched_credential_sets);
         if (matched_credential_sets_size > 0) { // Some credential(s) matched
+            matched = 1;
             cJSON *first_matched_credential_set = cJSON_GetArrayItem(matched_credential_sets, 0);
             cJSON *matched_option;
             cJSON_ArrayForEach(matched_option, first_matched_credential_set) {
@@ -372,6 +378,7 @@ static int process_request(
 
         cJSON *inline_issuance = cJSON_GetObjectItemCaseSensitive(matched_result, "inline_issuance");
         if (inline_issuance != NULL) {
+            matched = 1;
             char *cred_id = cJSON_GetStringValue(cJSON_GetObjectItem(inline_issuance, "id"));
             char *title = cJSON_GetStringValue(cJSON_GetObjectItem(inline_issuance, "title"));
             char *subtitle = cJSON_GetStringValue(cJSON_GetObjectItem(inline_issuance, "subtitle"));
@@ -385,6 +392,7 @@ static int process_request(
                 AddInlineIssuanceEntry(cred_id, creds_blob + icon_start_int, icon_len, title, subtitle);
             }
         }
+        return matched;
     }
 
     return 0;
@@ -429,11 +437,33 @@ int openid4vp_main()
     }
     int requests_size = cJSON_GetArraySize(requests);
 
-    for (int i = 0; i < requests_size; i++)
+    cJSON *supported_protocols = cJSON_GetObjectItem(creds, "supported_protocols");
+    int supported_protocols_size = (supported_protocols != NULL && cJSON_IsArray(supported_protocols))
+                                   ? cJSON_GetArraySize(supported_protocols) : 0;
+    printf("supported_protocols size: %d\n", supported_protocols_size);
+    for (int p = 0; p < supported_protocols_size; p++)
     {
-        cJSON *request = cJSON_GetArrayItem(requests, i);
-        // printf("Request %s\n", cJSON_Print(request));
-        (void)process_request(request, i, credential_store, wasm_version, creds_blob, is_modern_request);
+        cJSON *item = cJSON_GetArrayItem(supported_protocols, p);
+        char *target_protocol = cJSON_GetStringValue(item);
+        if (target_protocol == NULL)
+        {
+            continue;
+        }
+
+        for (int i = 0; i < requests_size; i++)
+        {
+            cJSON *request = cJSON_GetArrayItem(requests, i);
+            char *protocol = cJSON_GetStringValue(cJSON_GetObjectItem(request, "protocol"));
+            if (protocol != NULL && strcmp(protocol, target_protocol) == 0)
+            {
+                if (process_request(request, i, credential_store, wasm_version, creds_blob, is_modern_request) == 1)
+                {
+                    // If there are multiple requests of the same preferred protocol,
+                    // we only process the first request that yields a match.
+                    return 0;
+                }
+            }
+        }
     }
 
     return 0;
