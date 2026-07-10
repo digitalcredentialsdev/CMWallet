@@ -440,6 +440,16 @@ int openid4vp_main()
     cJSON *supported_protocols = cJSON_GetObjectItem(creds, "supported_protocols");
     int supported_protocols_size = (supported_protocols != NULL && cJSON_IsArray(supported_protocols))
                                    ? cJSON_GetArraySize(supported_protocols) : 0;
+    // Remove this block that's temporary in place while the Jetpack API ships
+    if (supported_protocols_size == 0)
+    {
+        supported_protocols = cJSON_CreateArray();
+        cJSON_AddItemToArray(supported_protocols, cJSON_CreateString("openid4vp-v1-signed"));
+        cJSON_AddItemToArray(supported_protocols, cJSON_CreateString("openid4vp-v1-unsigned"));
+        cJSON_AddItemToArray(supported_protocols, cJSON_CreateString("openid4vp-v1-multisigned"));
+        supported_protocols_size = 3;
+    }
+    
     printf("supported_protocols size: %d\n", supported_protocols_size);
     for (int p = 0; p < supported_protocols_size; p++)
     {
