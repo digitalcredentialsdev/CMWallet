@@ -87,12 +87,12 @@ class CmWalletApplication : Application() {
         applicationScope.launch(Dispatchers.IO) {
             credentialRepo.credentialRegistryDatabase.collect { openid4vpRegistry ->
                 Log.i(TAG, "Credentials changed $openid4vpRegistry")
-//                registryManager.registerCredentials(openid4vpRegistry)
-                registryManager.registerCredentials(object : DigitalCredentialRegistry(
-                    id = openid4vpRegistry.id,
-                    credentials = openid4vpRegistry.credentials,
-                    matcher = openId4VP1_0Matcher
-                ) {})
+                registryManager.registerCredentials(openid4vpRegistry)
+//                registryManager.registerCredentials(object : DigitalCredentialRegistry(
+//                    id = openid4vpRegistry.id,
+//                    credentials = openid4vpRegistry.credentials,
+//                    matcher = openId4VP1_0Matcher
+//                ) {})
 
                 // Phone number verification demo
                 credentialRepo.registerPhoneNumberVerification(
