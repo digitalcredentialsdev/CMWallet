@@ -1,6 +1,7 @@
 package com.credman.cmwallet
 
 import android.app.Application
+import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.core.graphics.drawable.toBitmap
@@ -27,6 +28,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 
 class CmWalletApplication : Application() {
     companion object {
+        lateinit var appContext: Context
         lateinit var database: CredentialDatabase
         lateinit var credentialRepo: CredentialRepository
 
@@ -56,6 +58,7 @@ class CmWalletApplication : Application() {
     @OptIn(ExperimentalDigitalCredentialApi::class, ExperimentalEncodingApi::class)
     override fun onCreate() {
         super.onCreate()
+        appContext = applicationContext
         TrustedTime.createClient(this).addOnSuccessListener {
             trustedTimeClient = it
         }.addOnFailureListener {
@@ -96,6 +99,7 @@ class CmWalletApplication : Application() {
 
                 // Phone number verification demo
                 credentialRepo.registerPhoneNumberVerification(
+                    appContext,
                     registryManager,
                     loadPhoneNumberMatcher()
                 )
