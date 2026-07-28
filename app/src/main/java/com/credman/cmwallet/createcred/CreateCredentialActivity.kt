@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
@@ -121,7 +122,7 @@ class CreateCredentialActivity : ComponentActivity() {
                         )
                     }
                     Box(
-                        modifier = Modifier.fillMaxWidth().height(500.dp)
+                        modifier = Modifier.fillMaxWidth().wrapContentHeight()
                     ) {
                         AuthWebView(
                             url = uiState.authServer.url,
@@ -288,7 +289,9 @@ class CreateCredentialActivity : ComponentActivity() {
         redirectUrl: String,
         onDone: (String) -> Unit
     ) {
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth().wrapContentHeight()
+        ) {
             item {
                 AndroidView(factory = {
                     WebView(it).apply {
@@ -296,7 +299,7 @@ class CreateCredentialActivity : ComponentActivity() {
                         settings.javaScriptEnabled = true
                         this.layoutParams = ViewGroup.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT
+                            ViewGroup.LayoutParams.WRAP_CONTENT
                         )
                         this.webViewClient = object : WebViewClient() {
                             override fun shouldOverrideUrlLoading(
