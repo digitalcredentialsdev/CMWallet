@@ -3045,188 +3045,108 @@
     ]
   },
   {
-    "id": "dpc_v3_2_sdjwt",
+    "id": "dpc_v1_draft_sdjwt",
     "paths": {
-      "card_last_four": {
-        "value": "4444",
-        "display": "Last Four Digits of the Card Number",
-        "display_value": "4444",
-        "_sd": true
-      },
-      "card_art_url": {
-        "value": "https://pocketbank.example/card.png",
-        "display": "Card Art",
-        "_sd": true
-      },
-      "card_network_code": {
-        "value": "ACME",
-        "display": "Card Network Code",
-        "_sd": true
-      },
-      "card_cobadged_network_code": {
-        "value": "LASER",
-        "display": "Card Co-badged Network Code",
-        "_sd": true
-      },
-      "card_bin": {
-        "value": "990001",
-        "display": "Card Identifier (BIN)",
-        "_sd": true
-      },
-      "card_id": {
-        "value": "5d8f7e9c0a12",
-        "display": "Card Identifier (ID)",
-        "_sd": true
-      },
-      "card_par": {
-        "value": "9900ABC123XYZ789LMNOPQRSTUVWX",
-        "display": "Card Identifier (PAR)",
-        "_sd": true
-      },
-      "credential_id": {
-        "value": "b3f1c8a2-6d4e-4f9a-9e3d-8a7c2f1b9d34",
-        "display": "Credential ID",
-        "_sd": true
-      },
-      "iss": {
-        "value": "https://digital-credentials.dev",
-        "_sd": false
-      },
-      "iat": {
-        "value": 1683000000,
-        "_sd": false
-      },
-      "exp": {
-        "value": 1883000000,
-        "_sd": false
-      }
+        "network": {
+            "value": "Example Network",
+            "display": "Network",
+            "_sd": true
+        },
+        "card_id": {
+            "value": "card-8c3f2d1a",
+            "display": "Card Identifier (ID)",
+            "_sd": true
+        },
+        "credential_id": {
+            "value": "urn:uuid:9f2b7a2e-3b74-4a0d-9b1a-0e6a91f5d2c8",
+            "display": "Credential ID",
+            "_sd": true
+        },
+        "iss": {
+            "value": "https://digital-credentials.dev",
+            "_sd": false
+        },
+        "iat": {
+            "value": 1683000000,
+            "_sd": false
+        },
+        "exp": {
+            "value": 1883000000,
+            "_sd": false
+        }
     },
     "config": {
-      "format": "dc+sd-jwt",
-      "vct": "com.emvco.dpc",
-      "cryptographic_binding_methods_supported": [
-        "jwk"
-      ],
-      "credential_signing_alg_values_supported": [
-        "ES256"
-      ],
-      "display": [
-        {
-          "name": "Pocket Bank SkyFly ACME Credit",
-          "locale": "en-US",
-          "description": "Pocket Bank SkyFly ACME Credit"
+        "format": "dc+sd-jwt",
+        "vct": "com.emvco.dpc.card",
+        "cryptographic_binding_methods_supported": [
+            "jwk"
+        ],
+        "credential_signing_alg_values_supported": [
+            "ES256"
+        ],
+        "display": [
+            {
+                "name": "Digital Bank Credit Card **** 5544",
+                "locale": "en-US",
+                "description": "Digital Bank Credit Card **** 5544"
+            }
+        ],
+        "credential_metadata": {
+            "claims": [
+                {
+                    "path": [
+                        "Network"
+                    ],
+                    "display": [
+                        {
+                            "locale": "en-US",
+                            "name": "Network"
+                        }
+                    ]
+                },
+                {
+                    "path": [
+                        "card_id"
+                    ],
+                    "display": [
+                        {
+                            "locale": "en-US",
+                            "name": "Card Identifier (ID)"
+                        }
+                    ]
+                },
+                {
+                    "path": [
+                        "credential_id"
+                    ],
+                    "display": [
+                        {
+                            "locale": "en-US",
+                            "name": "Credential ID"
+                        }
+                    ]
+                },
+                {
+                    "path": [
+                        "iss"
+                    ]
+                },
+                {
+                    "path": [
+                        "iat"
+                    ]
+                },
+                {
+                    "path": [
+                        "exp"
+                    ]
+                }
+            ]
         }
-      ],
-      "credential_metadata": {
-        "claims": [
-          {
-            "path": [
-              "card_last_four"
-            ],
-            "display": [
-              {
-                "locale": "en-US",
-                "name": "Last Four Digits of the Card Number"
-              }
-            ]
-          },
-          {
-            "path": [
-              "card_art_url"
-            ],
-            "display": [
-              {
-                "locale": "en-US",
-                "name": "Card Art"
-              }
-            ]
-          },
-          {
-            "path": [
-              "card_network_code"
-            ],
-            "display": [
-              {
-                "locale": "en-US",
-                "name": "Card Network Code"
-              }
-            ]
-          },
-          {
-            "path": [
-              "card_cobadged_network_code"
-            ],
-            "display": [
-              {
-                "locale": "en-US",
-                "name": "Card Co-badged Network Code"
-              }
-            ]
-          },
-          {
-            "path": [
-              "card_bin"
-            ],
-            "display": [
-              {
-                "locale": "en-US",
-                "name": "Card Identifier (BIN)"
-              }
-            ]
-          },
-          {
-            "path": [
-              "card_id"
-            ],
-            "display": [
-              {
-                "locale": "en-US",
-                "name": "Card Identifier (ID)"
-              }
-            ]
-          },
-          {
-            "path": [
-              "card_par"
-            ],
-            "display": [
-              {
-                "locale": "en-US",
-                "name": "Card Identifier (PAR)"
-              }
-            ]
-          },
-          {
-            "path": [
-              "credential_id"
-            ],
-            "display": [
-              {
-                "locale": "en-US",
-                "name": "Credential ID"
-              }
-            ]
-          },
-          {
-            "path": [
-              "iss"
-            ]
-          },
-          {
-            "path": [
-              "iat"
-            ]
-          },
-          {
-            "path": [
-              "exp"
-            ]
-          }
-        ]
-      }
     },
     "displayData": {
-      "title": "Pocket Bank SkyFly ACME Credit"
+        "title": "Digital Bank Credit Card **** 5544",
+        "icon": "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"
     },
     "credentials": [
       {

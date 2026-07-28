@@ -64,6 +64,7 @@ for cred in database:
         print(device_key)
     elif cred_format == "dc+sd-jwt":
         vct = cred_config["vct"]
+        print("Creating {}".format(vct))
         claims = []
         build_claims_for_display(claims, cred["paths"], [])
         cred["config"]["credential_metadata"] = {}
