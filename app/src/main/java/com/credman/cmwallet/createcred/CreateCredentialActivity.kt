@@ -294,6 +294,7 @@ class CreateCredentialActivity : ComponentActivity() {
                     WebView(it).apply {
                         clearCache(true)
                         settings.javaScriptEnabled = true
+                        settings.domStorageEnabled = true
                         this.layoutParams = ViewGroup.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT
