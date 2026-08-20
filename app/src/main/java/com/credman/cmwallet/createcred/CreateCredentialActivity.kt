@@ -16,11 +16,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -102,13 +101,14 @@ class CreateCredentialActivity : ComponentActivity() {
             onDismissRequest = {
                 this@CreateCredentialActivity.finish()
             },
+            modifier = Modifier.statusBarsPadding(),
             sheetState = sheetState
         ) {
             val credentials = uiState.credentialsToSave
 
             if (uiState.authServer != null) {
                 Column(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Row(
@@ -122,7 +122,7 @@ class CreateCredentialActivity : ComponentActivity() {
                         )
                     }
                     Box(
-                        modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                        modifier = Modifier.fillMaxWidth().weight(1f)
                     ) {
                         AuthWebView(
                             url = uiState.authServer.url,
@@ -289,40 +289,38 @@ class CreateCredentialActivity : ComponentActivity() {
         redirectUrl: String,
         onDone: (String) -> Unit
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth().wrapContentHeight()
+        Column(
+            modifier = Modifier.fillMaxSize()
         ) {
-            item {
-                AndroidView(factory = {
-                    WebView(it).apply {
-                        clearCache(true)
-                        settings.javaScriptEnabled = true
-                        this.layoutParams = ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT
-                        )
-                        this.webViewClient = object : WebViewClient() {
-                            override fun shouldOverrideUrlLoading(
-                                view: WebView?,
-                                request: WebResourceRequest?
-                            ): Boolean {
+            AndroidView(modifier = Modifier.fillMaxSize(), factory = {
+                WebView(it).apply {
+                    clearCache(true)
+                    settings.javaScriptEnabled = true
+                    this.layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
+                    this.webViewClient = object : WebViewClient() {
+                        override fun shouldOverrideUrlLoading(
+                            view: WebView?,
+                            request: WebResourceRequest?
+                        ): Boolean {
 
-                                request?.let {
+                            request?.let {
 
-                                    if (request.url.toString().startsWith("$redirectUrl/")) {
-                                        request.url.getQueryParameter("code")?.let { code ->
-                                            onDone(code)
-                                        }
+                                if (request.url.toString().startsWith("$redirectUrl/")) {
+                                    request.url.getQueryParameter("code")?.let { code ->
+                                        onDone(code)
                                     }
                                 }
-                                return super.shouldOverrideUrlLoading(view, request)
                             }
+                            return super.shouldOverrideUrlLoading(view, request)
                         }
                     }
-                }, update = {
-                    it.loadUrl(url)
-                })
-            }
+                }
+            }, update = {
+                it.loadUrl(url)
+            })
         }
     }
 }
