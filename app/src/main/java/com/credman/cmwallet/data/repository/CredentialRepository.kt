@@ -1,6 +1,7 @@
 package com.credman.cmwallet.data.repository
 
 import android.graphics.BitmapFactory
+import android.content.Context
 import android.util.Log
 import androidx.credentials.DigitalCredential
 import androidx.credentials.ExperimentalDigitalCredentialApi
@@ -91,12 +92,8 @@ class CredentialRepository {
     }
 
     @OptIn(ExperimentalDigitalCredentialApi::class)
-    suspend fun registerPhoneNumberVerification(registryManager: RegistryManager, pnvMatcher: ByteArray) {
-        val testPhoneNumberTokens = listOf(
-            PnvTokenRegistry.TEST_PNV_1_GET_PHONE_NUMBER,
-            PnvTokenRegistry.TEST_PNV_1_VERIFY_PHONE_NUMBER,
-            PnvTokenRegistry.TEST_PNV_2_VERIFY_PHONE_NUMBER
-        )
+    suspend fun registerPhoneNumberVerification(context: Context, registryManager: RegistryManager, pnvMatcher: ByteArray) {
+        val testPhoneNumberTokens = PnvTokenRegistry.getConfiguredTokens(context)
 
         registryManager.registerCredentials(
             request = object : RegisterCredentialsRequest(
