@@ -66,6 +66,7 @@ void report_matched_credential(uint32_t wasm_version, cJSON* matched_doc, cJSON*
         }
         char *metadata = cJSON_PrintUnformatted(metadata_object);
 
+        int paymentEntryMatched = 0;
         if (transaction_credential_ids != NULL)
         {
             printf("transaction cred ids %s\n", cJSON_Print(transaction_credential_ids));
@@ -75,6 +76,7 @@ void report_matched_credential(uint32_t wasm_version, cJSON* matched_doc, cJSON*
                 printf("comparing cred id %s with transaction cred id %s.\n", cJSON_Print(matched_credential_id), cJSON_Print(transaction_credential_id));
                 if (cJSON_Compare(transaction_credential_id, matched_credential_id, cJSON_True))
                 {
+                    paymentEntryMatched = 1;
                     cJSON* c_display = cJSON_GetObjectItem(cJSON_GetObjectItem(c, "display"), "verification");
                     char *title = cJSON_GetStringValue(cJSON_GetObjectItem(c_display, "title"));
                     char *subtitle = cJSON_GetStringValue(cJSON_GetObjectItem(c_display, "subtitle"));
@@ -104,10 +106,9 @@ void report_matched_credential(uint32_t wasm_version, cJSON* matched_doc, cJSON*
                         AddPaymentEntry(matched_id, merchant_name, title, subtitle, creds_blob + icon_start_int, icon_len, transaction_amount, NULL, 0, NULL, 0);
                     }
                 }
-                break;
             }
         }
-        else
+        if (paymentEntryMatched == 0)
         {
             cJSON* c_display = cJSON_GetObjectItem(cJSON_GetObjectItem(c, "display"), "verification");
             char *title = cJSON_GetStringValue(cJSON_GetObjectItem(c_display, "title"));
