@@ -125,6 +125,11 @@ __attribute__((import_module("credman_v5"), import_name("AddMetadataDisplayTextT
 #endif
 void AddMetadataDisplayTextToEntrySet(const char *cred_id, const char *metadata_display_text, const char *set_id, int set_index);
 
+#if defined(__wasm__)
+__attribute__((import_module("credman_v7"), import_name("SetDelegationTypeForEntryInSet")))
+#endif
+void SetDelegationTypeForEntryInSet(const char* cred_id, int delegation_type, const char* set_id, int set_index);
+
 #ifdef __cplusplus
 }
 #endif

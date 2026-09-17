@@ -177,6 +177,7 @@ MatchCredential(cJSON *credential, cJSON *credential_store)
             cJSON_AddItemReferenceToObject(matched_credential, "aggregator_consent", aggregator_consent);
             cJSON_AddItemReferenceToObject(matched_credential, "aggregator_policy_text", aggregator_policy_text);
             cJSON_AddItemReferenceToObject(matched_credential, "aggregator_policy_url", aggregator_policy_url);
+            cJSON_AddItemReferenceToObject(matched_credential, "delegation_type", cJSON_GetObjectItemCaseSensitive(candidate, "delegation_type"));
             cJSON *matched_claim_names = cJSON_CreateArray();
             // printf("candidate %s\n", cJSON_Print(candidate));
             cJSON_AddItemReferenceToArray(matched_claim_names, cJSON_GetObjectItemCaseSensitive(candidate, "shared_attribute_display_name"));
@@ -217,6 +218,7 @@ MatchCredential(cJSON *credential, cJSON *credential_store)
                 cJSON_AddItemReferenceToObject(matched_credential, "aggregator_consent", aggregator_consent);
                 cJSON_AddItemReferenceToObject(matched_credential, "aggregator_policy_text", aggregator_policy_text);
                 cJSON_AddItemReferenceToObject(matched_credential, "aggregator_policy_url", aggregator_policy_url);
+                cJSON_AddItemReferenceToObject(matched_credential, "delegation_type", cJSON_GetObjectItemCaseSensitive(candidate, "delegation_type"));
                 cJSON *matched_claim_names = cJSON_CreateArray();
                 cJSON_AddItemReferenceToArray(matched_claim_names, cJSON_GetObjectItemCaseSensitive(candidate, "shared_attribute_display_name"));
 
@@ -411,7 +413,6 @@ cJSON *dcql_query(cJSON *query, cJSON *credential_store)
             cJSON_ArrayForEach(matched_credential, credentials) {
                 cJSON_AddItemReferenceToArray(matched_cred_ids, cJSON_GetObjectItemCaseSensitive(matched_credential, "id"));
             }
-            char set_id_buffer[16];
             cJSON_AddItemReferenceToObject(single_matched_credential_set, "matched_credential_ids", matched_cred_ids);
             cJSON* curr_matched_credential_sets = cJSON_CreateArray(); // For consistency with the credential_sets case
             cJSON_AddItemReferenceToArray(curr_matched_credential_sets, single_matched_credential_set);
@@ -440,29 +441,37 @@ cJSON *dcql_query(cJSON *query, cJSON *credential_store)
             cJSON* curr_matched_credential_sets = cJSON_CreateArray();
             cJSON* options = cJSON_GetObjectItemCaseSensitive(credential_set, "options");
             cJSON* option;
-            int credential_set_matched = 0;
             int option_idx = 0;
             cJSON_ArrayForEach(option, options) {
                 cJSON* matched_cred_ids = cJSON_CreateArray();
+                cJSON* matched_indices = cJSON_CreateArray();
                 cJSON* cred_id;
-                credential_set_matched = 1;
+                int cred_idx = 0;
                 cJSON_ArrayForEach(cred_id, option) {
-                    if (cJSON_GetObjectItemCaseSensitive(candidate_matched_credentials, cJSON_GetStringValue(cred_id)) == NULL) {
-                        credential_set_matched = 0;
-                        break;
-                    }  // Remove for multi-provider support
-                    cJSON_AddItemReferenceToArray(matched_cred_ids, cred_id);
+                    if (cJSON_GetObjectItemCaseSensitive(candidate_matched_credentials, cJSON_GetStringValue(cred_id)) != NULL) {
+                        cJSON_AddItemReferenceToArray(matched_cred_ids, cred_id);
+                        cJSON_AddItemToArray(matched_indices, cJSON_CreateNumber(cred_idx));
+                    }
+                    ++cred_idx;
                 }
-                if (credential_set_matched != 0) {
+                int option_length = cJSON_GetArraySize(option);
+                int matched_count = cJSON_GetArraySize(matched_cred_ids);
+                if (matched_count > 0) {
                     cJSON* cred_set_info = cJSON_CreateObject();
-                    char set_id_buffer[4];
-                    char option_id_buffer[4];
-                    int chars_written = sprintf(set_id_buffer, "%d", set_idx);
-                    chars_written = sprintf(option_id_buffer, "%d", option_idx);
+                    char set_id_buffer[16];
+                    char option_id_buffer[16];
+                    sprintf(set_id_buffer, "%d", set_idx);
+                    sprintf(option_id_buffer, "%d", option_idx);
                     cJSON_AddStringToObject(cred_set_info, "set_id", set_id_buffer);
                     cJSON_AddStringToObject(cred_set_info, "option_id", option_id_buffer);
                     cJSON_AddItemReferenceToObject(cred_set_info, "matched_credential_ids", matched_cred_ids);
+                    cJSON_AddNumberToObject(cred_set_info, "option_length", option_length);
+                    cJSON_AddItemToObject(cred_set_info, "matched_indices", matched_indices);
+                    cJSON_AddBoolToObject(cred_set_info, "is_partial", matched_count < option_length);
                     cJSON_AddItemReferenceToArray(curr_matched_credential_sets, cred_set_info);
+                } else {
+                    cJSON_Delete(matched_cred_ids);
+                    cJSON_Delete(matched_indices);
                 }
                 ++option_idx;
             }

@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 #include <string>
 #include <vector>
 #include <map>
@@ -7,39 +6,40 @@
 #include <nlohmann/json.hpp>
 #include <doctest/doctest.h>
 
-struct StringIdEntry
+struct EntryInSet
 {
-    std::string id;
+    std::string cred_id;
     std::string icon;
     std::string title;
     std::string subtitle;
     std::string disclaimer;
     std::string warning;
+    std::string metadata;
+    std::string set_id;
+    int set_index = 0;
+    int delegation_type = 0;
     std::string secondary_disclaimer;
     std::string url_display_text;
     std::string url_value;
     std::vector<std::pair<std::string, std::string>> fields;
 };
 
-struct PaymentEntry
+struct EntrySet
 {
-    std::string id;
-    std::string merchant_name;
-    std::string payment_method_name;
-    std::string payment_method_subtitle;
-    std::string payment_method_icon;
-    std::string transaction_amount;
-    std::string bank_icon;
-    std::string payment_provider_icon;
+    std::string set_id;
+    int set_length = 0;
 };
 
 struct TestCredmanState
 {
-    std::string request_buffer, credentials_buffer;
-    std::vector<StringIdEntry> string_id_entries;
-    std::vector<PaymentEntry> payment_entries;
+    std::string request_buffer;
+    std::string credentials_buffer;
+    uint32_t wasm_version = 7;
+    std::vector<EntrySet> entry_sets;
+    std::vector<EntryInSet> entries;
 
     static TestCredmanState &instance();
+    void reset();
 };
 
 doctest::String toString(const TestCredmanState &state);
@@ -48,8 +48,7 @@ struct TestCredmanStateGuard
 {
     ~TestCredmanStateGuard()
     {
-        TestCredmanState::instance().string_id_entries.clear();
-        TestCredmanState::instance().payment_entries.clear();
+        TestCredmanState::instance().reset();
     }
 };
 
@@ -62,10 +61,20 @@ public:
     RequestGenerator &with_android_carrier_hint(const std::vector<int> &hints);
     RequestGenerator &with_subscription_hint(const std::vector<int> &hints);
     RequestGenerator &with_vct_values(const std::vector<std::string> &values);
+    RequestGenerator &with_user_verification(const std::string &uv);
+    RequestGenerator &with_user_verification_hint_claim();
+    RequestGenerator &with_credential_sets(const nlohmann::json &sets);
+    RequestGenerator &add_credential(const nlohmann::json &cred);
     std::string build();
+    nlohmann::json &json_data();
 
 private:
     nlohmann::json request_json_;
 };
+
+std::string getTestDataPath(const std::string &relative_path);
+std::string readFileToString(const std::string &file_path);
+std::string makeRegistryBlob(const nlohmann::json &registry_json);
+nlohmann::json loadDefaultRegistryJson();
 
 extern TestCredmanState testCredmanState;

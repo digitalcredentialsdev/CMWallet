@@ -5,6 +5,9 @@
 
 #include <string.h>
 #include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <sstream>
 
 using json = nlohmann::json;
 
@@ -12,6 +15,51 @@ TestCredmanState &TestCredmanState::instance()
 {
     static TestCredmanState state;
     return state;
+}
+
+void TestCredmanState::reset()
+{
+    request_buffer.clear();
+    credentials_buffer.clear();
+    wasm_version = 7;
+    entry_sets.clear();
+    entries.clear();
+}
+
+std::string getTestDataPath(const std::string &relative_path)
+{
+    std::filesystem::path source_path = __FILE__;
+    std::filesystem::path source_dir = source_path.parent_path();
+    return (source_dir / relative_path).string();
+}
+
+std::string readFileToString(const std::string &file_path)
+{
+    std::ifstream input_file(file_path, std::ios::binary);
+    if (!input_file.is_open())
+    {
+        return "";
+    }
+    std::ostringstream ss;
+    ss << input_file.rdbuf();
+    return ss.str();
+}
+
+std::string makeRegistryBlob(const nlohmann::json &registry_json)
+{
+    std::string json_str = registry_json.dump();
+    std::string blob;
+    int offset = 4;
+    blob.resize(4 + json_str.size());
+    memcpy(blob.data(), &offset, 4);
+    memcpy(blob.data() + 4, json_str.data(), json_str.size());
+    return blob;
+}
+
+nlohmann::json loadDefaultRegistryJson()
+{
+    std::string content = readFileToString(getTestDataPath("data/pnv_registry.json"));
+    return json::parse(content);
 }
 
 RequestGenerator::RequestGenerator()
@@ -87,9 +135,41 @@ RequestGenerator &RequestGenerator::with_vct_values(const std::vector<std::strin
     return *this;
 }
 
+RequestGenerator &RequestGenerator::with_user_verification(const std::string &uv)
+{
+    request_json_["requests"][0]["data"]["user_verification"] = uv;
+    return *this;
+}
+
+RequestGenerator &RequestGenerator::with_user_verification_hint_claim()
+{
+    nlohmann::json claim = {
+        {"path", {"user_verification_hint"}}
+    };
+    request_json_["requests"][0]["data"]["dcql_query"]["credentials"][0]["claims"].push_back(claim);
+    return *this;
+}
+
+RequestGenerator &RequestGenerator::with_credential_sets(const nlohmann::json &sets)
+{
+    request_json_["requests"][0]["data"]["dcql_query"]["credential_sets"] = sets;
+    return *this;
+}
+
+RequestGenerator &RequestGenerator::add_credential(const nlohmann::json &cred)
+{
+    request_json_["requests"][0]["data"]["dcql_query"]["credentials"].push_back(cred);
+    return *this;
+}
+
 std::string RequestGenerator::build()
 {
     return request_json_.dump(4);
+}
+
+nlohmann::json &RequestGenerator::json_data()
+{
+    return request_json_;
 }
 
 extern "C"
@@ -109,101 +189,120 @@ extern "C"
     }
     void GetWasmVersion(uint32_t *version)
     {
-        *version = -1;
+        *version = TestCredmanState::instance().wasm_version;
     }
     void GetRequestSize(uint32_t *size)
     {
-        *size = (uint32_t)TestCredmanState::instance().request_buffer.size();
+        *size = (uint32_t)TestCredmanState::instance().request_buffer.size() + 1;
     }
     void GetRequestBuffer(void *buffer)
     {
-        memcpy(buffer, TestCredmanState::instance().request_buffer.data(), TestCredmanState::instance().request_buffer.size());
+        memcpy(buffer, TestCredmanState::instance().request_buffer.c_str(), TestCredmanState::instance().request_buffer.size() + 1);
     }
 
-    void AddStringIdEntry(char *cred_id, char *icon, size_t icon_len, char *title, char *subtitle, char *disclaimer, char *warning)
+    void AddEntrySet(const char *set_id, int set_length)
     {
-        if (!cred_id)
-            return;
-        StringIdEntry entry;
-        entry.id = cred_id;
-        if (icon)
+        EntrySet s;
+        s.set_id = set_id ? set_id : "";
+        s.set_length = set_length;
+        TestCredmanState::instance().entry_sets.push_back(s);
+    }
+
+    void AddEntryToSet(const char *cred_id, const char *icon, size_t icon_len, const char *title, const char *subtitle, const char *disclaimer, const char *warning, const char *metadata, const char *set_id, int set_index)
+    {
+        EntryInSet entry;
+        entry.cred_id = cred_id ? cred_id : "";
+        if (icon && icon_len > 0)
             entry.icon = std::string(icon, icon_len);
-        if (title)
-            entry.title = title;
-        if (subtitle)
-            entry.subtitle = subtitle;
-        if (disclaimer)
-            entry.disclaimer = disclaimer;
-        if (warning)
-            entry.warning = warning;
-        TestCredmanState::instance().string_id_entries.push_back(entry);
+        entry.title = title ? title : "";
+        entry.subtitle = subtitle ? subtitle : "";
+        entry.disclaimer = disclaimer ? disclaimer : "";
+        entry.warning = warning ? warning : "";
+        entry.metadata = metadata ? metadata : "";
+        entry.set_id = set_id ? set_id : "";
+        entry.set_index = set_index;
+        TestCredmanState::instance().entries.push_back(entry);
     }
 
-    void SetAdditionalDisclaimerAndUrlForVerificationEntry(char *cred_id, char *secondary_disclaimer, char *url_display_text, char *url_value)
+    void SetDelegationTypeForEntryInSet(const char *cred_id, int delegation_type, const char *set_id, int set_index)
     {
-        if (!cred_id)
-            return;
-        auto &entries = TestCredmanState::instance().string_id_entries;
-        auto it = std::find_if(entries.begin(), entries.end(), [&](const StringIdEntry &entry)
-                               { return entry.id == cred_id; });
-        if (it != entries.end())
+        auto &entries = TestCredmanState::instance().entries;
+        for (auto &e : entries)
         {
-            if (secondary_disclaimer)
-                it->secondary_disclaimer = secondary_disclaimer;
-            if (url_display_text)
-                it->url_display_text = url_display_text;
-            if (url_value)
-                it->url_value = url_value;
+            if (e.cred_id == (cred_id ? cred_id : "") &&
+                e.set_id == (set_id ? set_id : "") &&
+                e.set_index == set_index)
+            {
+                e.delegation_type = delegation_type;
+            }
         }
     }
 
-    void AddFieldForStringIdEntry(char *cred_id, char *field_display_name, char *field_display_value)
+    void AddFieldToEntrySet(const char *cred_id, const char *field_display_name, const char *field_display_value, const char *set_id, int set_index)
     {
-        if (!cred_id)
-            return;
-        auto &entries = TestCredmanState::instance().string_id_entries;
-        auto it = std::find_if(entries.begin(), entries.end(), [&](const StringIdEntry &entry)
-                               { return entry.id == cred_id; });
-        if (it != entries.end())
+        auto &entries = TestCredmanState::instance().entries;
+        for (auto &e : entries)
         {
-            it->fields.emplace_back(
-                field_display_name ? field_display_name : "",
-                field_display_value ? field_display_value : "");
+            if (e.cred_id == (cred_id ? cred_id : "") &&
+                e.set_id == (set_id ? set_id : "") &&
+                e.set_index == set_index)
+            {
+                e.fields.emplace_back(field_display_name ? field_display_name : "", field_display_value ? field_display_value : "");
+            }
         }
     }
 
-    void AddPaymentEntry(char *cred_id, char *merchant_name, char *payment_method_name, char *payment_method_subtitle, char *payment_method_icon, size_t payment_method_icon_len, char *transaction_amount, char *bank_icon, size_t bank_icon_len, char *payment_provider_icon, size_t payment_provider_icon_len)
+    void SetAdditionalDisclaimerAndUrlForVerificationEntryInCredentialSet(const char *cred_id, const char *secondary_disclaimer, const char *url_display_text, const char *url_value, const char *set_id, int set_index)
     {
-        if (!cred_id)
-            return;
-        PaymentEntry entry;
-        entry.id = cred_id;
-        if (merchant_name)
-            entry.merchant_name = merchant_name;
-        if (payment_method_name)
-            entry.payment_method_name = payment_method_name;
-        if (payment_method_subtitle)
-            entry.payment_method_subtitle = payment_method_subtitle;
-        if (payment_method_icon)
-            entry.payment_method_icon = std::string(payment_method_icon, payment_method_icon_len);
-        if (transaction_amount)
-            entry.transaction_amount = transaction_amount;
-        if (bank_icon)
-            entry.bank_icon = std::string(bank_icon, bank_icon_len);
-        if (payment_provider_icon)
-            entry.payment_provider_icon = std::string(payment_provider_icon, payment_provider_icon_len);
-        TestCredmanState::instance().payment_entries.push_back(entry);
+        auto &entries = TestCredmanState::instance().entries;
+        for (auto &e : entries)
+        {
+            if (e.cred_id == (cred_id ? cred_id : "") &&
+                e.set_id == (set_id ? set_id : "") &&
+                e.set_index == set_index)
+            {
+                if (secondary_disclaimer) e.secondary_disclaimer = secondary_disclaimer;
+                if (url_display_text) e.url_display_text = url_display_text;
+                if (url_value) e.url_value = url_value;
+            }
+        }
     }
+
+    void AddMetadataDisplayTextToEntrySet(const char *cred_id, const char *metadata_display_text, const char *set_id, int set_index)
+    {
+        (void)cred_id; (void)metadata_display_text; (void)set_id; (void)set_index;
+    }
+
+    // Unused stubs required to satisfy credentialmanager.h declarations
+    void AddEntry(long long, const char *, size_t, const char *, const char *, const char *, const char *) {}
+    void AddField(long long, const char *, const char *) {}
+    void AddStringIdEntry(const char *, const char *, size_t, const char *, const char *, const char *, const char *) {}
+    void AddFieldForStringIdEntry(const char *, const char *, const char *) {}
+    void AddPaymentEntry(const char *, const char *, const char *, const char *, const char *, size_t, const char *, const char *, size_t, const char *, size_t) {}
+    void AddPaymentEntryToSet(const char *, const char *, const char *, const char *, const char *, size_t, const char *, const char *, size_t, const char *, size_t, const char *, const char *, int) {}
+    void AddPaymentEntryToSetV2(const char *, const char *, const char *, const char *, const char *, size_t, const char *, const char *, size_t, const char *, size_t, const char *, const char *, const char *, int) {}
+    void AddInlineIssuanceEntry(const char *, const char *, size_t, const char *, const char *) {}
+    void SetAdditionalDisclaimerAndUrlForVerificationEntry(const char *, const char *, const char *, const char *) {}
+    void GetCallingAppInfo(CallingAppInfo *) {}
+    void SelfDeclarePackageInfo(const char *, const char *, size_t) {}
 }
 
 doctest::String toString(const TestCredmanState &state)
 {
     doctest::String s;
-    s += "string_id_entries:\n";
-    for (const auto &entry : state.string_id_entries)
+    s += "entries count: ";
+    s += std::to_string(state.entries.size()).c_str();
+    s += "\n";
+    for (const auto &entry : state.entries)
     {
         s += "  id: ";
-        s += entry.id.c_str();
+        s += entry.cred_id.c_str();
+        s += " set_id: ";
+        s += entry.set_id.c_str();
+        s += " set_idx: ";
+        s += std::to_string(entry.set_index).c_str();
+        s += " del_type: ";
+        s += std::to_string(entry.delegation_type).c_str();
         s += "\n";
     }
     return s;

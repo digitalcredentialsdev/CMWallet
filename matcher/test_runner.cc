@@ -217,6 +217,7 @@ void AddFieldForStringIdEntry(const char*, const char*, const char*) {}
 void AddPaymentEntry(const char*, const char*, const char*, const char*, const char*, size_t, const char*, const char*, size_t, const char*, size_t) {}
 void SetAdditionalDisclaimerAndUrlForVerificationEntry(const char*, const char*, const char*, const char*) {}
 void SetAdditionalDisclaimerAndUrlForVerificationEntryInCredentialSet(const char*, const char*, const char*, const char*, const char*, int) {}
+void SetDelegationTypeForEntryInSet(const char*, int, const char*, int) {}
 void GetCallingAppInfo(CallingAppInfo*) {}
 void SelfDeclarePackageInfo(const char*, const char*, size_t) {}
 }
