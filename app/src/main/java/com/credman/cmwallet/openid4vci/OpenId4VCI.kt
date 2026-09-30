@@ -452,13 +452,17 @@ class OpenId4VCI(val credentialOfferJson: String) {
 
     suspend fun createKeyProofs(credentialConfigurationId: String): ProofCreationResult {
         val proofTypesSupported = credentialOffer.issuerMetadata.credentialConfigurationsSupported[credentialConfigurationId]?.proofTypesSupported!!
-        return if (proofTypesSupported.containsKey("android_keystore_attestation")) {
-            createAndroidAttestationProofJwt()
-        } else if (proofTypesSupported.containsKey("jwt")) {
-            createProofJwt()
-        } else {
-            throw UnsupportedOperationException("Can handle proof types $proofTypesSupported")
+        if (proofTypesSupported.containsKey("android_keystore_attestation")) {
+            try {
+                return createAndroidAttestationProofJwt()
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to create Android KeyStore attestation proof", e)
+            }
         }
+        if (proofTypesSupported.containsKey("jwt")) {
+            return createProofJwt()
+        }
+        throw UnsupportedOperationException("Could not create key proof. Cannot handle proof types $proofTypesSupported")
     }
 
     private suspend fun createAndroidAttestationProofJwt(): ProofCreationResult {
