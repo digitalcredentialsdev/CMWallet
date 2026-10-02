@@ -1,5 +1,6 @@
 package com.credman.cmwallet.data.repository
 
+import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.credentials.DigitalCredential
@@ -11,9 +12,9 @@ import androidx.credentials.registry.digitalcredentials.openid4vp.OpenId4VpRegis
 import androidx.credentials.registry.digitalcredentials.sdjwt.SdJwtClaim
 import androidx.credentials.registry.digitalcredentials.sdjwt.SdJwtEntry
 import androidx.credentials.registry.digitalcredentials.sdjwt.SdJwtInlineIssuanceEntry
-import androidx.credentials.registry.provider.RegisterCredentialsRequest
 import androidx.credentials.registry.provider.RegistryManager
 import androidx.credentials.registry.provider.digitalcredentials.DigitalCredentialEntry
+import androidx.credentials.registry.provider.digitalcredentials.DigitalCredentialRegistry
 import androidx.credentials.registry.provider.digitalcredentials.InlineIssuanceEntry
 import androidx.credentials.registry.provider.digitalcredentials.VerificationEntryDisplayProperties
 import androidx.credentials.registry.provider.digitalcredentials.VerificationFieldDisplayProperties
@@ -45,7 +46,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.io.encoding.ExperimentalEncodingApi
 
-class CredentialRepository {
+class CredentialRepository(private val context: Context) {
     //val json = Json { classDiscriminatorMode = ClassDiscriminatorMode.NONE }
 
     var privAppsJson = "{}"
@@ -99,11 +100,10 @@ class CredentialRepository {
         )
 
         registryManager.registerCredentials(
-            request = object : RegisterCredentialsRequest(
-                DigitalCredential.TYPE_DIGITAL_CREDENTIAL,
-                "openid4vp1.0-pnv",
-                PnvTokenRegistry.buildRegistryDatabase(testPhoneNumberTokens),
-                pnvMatcher
+            request = object : DigitalCredentialRegistry(
+                id = "openid4vp1.0-pnv",
+                credentials = PnvTokenRegistry.buildRegistryDatabase(testPhoneNumberTokens),
+                matcher = pnvMatcher
             ) {}
         )
     }
@@ -288,7 +288,8 @@ class CredentialRepository {
                 is CredentialConfigurationUnknownFormat -> TODO()
             }
         }
-        return OpenId4VpRegistry(
+        return OpenId4VpRegistry.create(
+            context = context,
             credentialEntries = credentialEntries,
             inlineIssuanceEntries = emptyList(),
 //                listOf(
