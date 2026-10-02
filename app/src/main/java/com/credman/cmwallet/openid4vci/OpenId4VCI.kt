@@ -392,7 +392,7 @@ class OpenId4VCI(val credentialOfferJson: String) {
 
         val result = executeNetworkCall("Credential Endpoint", endpoint) {
             httpClient.post(endpoint) {
-                header(HttpHeaders.Authorization, "Dpop $accessToken")
+                header(HttpHeaders.Authorization, "DPoP $accessToken")
                 header("dpop", dpop)
 
                 if (requireCredentialRequestEncryption()) {
