@@ -1,16 +1,21 @@
 package com.credman.cmwallet.createcred
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.service.credentials.CredentialProviderService
 import android.util.Log
 import android.view.ViewGroup
+import android.webkit.PermissionRequest
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -61,6 +66,21 @@ import com.credman.cmwallet.ui.theme.CMWalletTheme
 @Suppress("RestrictedApi")
 class CreateCredentialActivity : ComponentActivity() {
     private val viewModel: CreateCredentialViewModel by viewModels()
+
+    private val pendingWebPermissionRequests = mutableListOf<PermissionRequest>()
+
+    private val cameraPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        pendingWebPermissionRequests.forEach { request ->
+            if (granted) {
+                request.grant(arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
+            } else {
+                request.deny()
+            }
+        }
+        pendingWebPermissionRequests.clear()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -301,6 +321,35 @@ class CreateCredentialActivity : ComponentActivity() {
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT
                         )
+                        this.webChromeClient = object : WebChromeClient() {
+                            override fun onPermissionRequest(request: PermissionRequest) {
+                                val pageWantsCamera =
+                                    PermissionRequest.RESOURCE_VIDEO_CAPTURE in request.resources
+                                val appHoldsCameraPermission = checkSelfPermission(
+                                    Manifest.permission.CAMERA
+                                ) == PackageManager.PERMISSION_GRANTED
+                                val permissionDialogAlreadyShowing =
+                                    pendingWebPermissionRequests.isNotEmpty()
+
+                                when {
+                                    !pageWantsCamera -> {
+                                        Log.d(TAG, "[AuthWebView] Denying ${request.resources.joinToString()} for ${request.origin}")
+                                        request.deny()
+                                    }
+                                    appHoldsCameraPermission -> {
+                                        Log.d(TAG, "[AuthWebView] Granting camera to ${request.origin}")
+                                        request.grant(arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
+                                    }
+                                    else -> {
+                                        Log.d(TAG, "[AuthWebView] Asking for camera permission on behalf of ${request.origin}")
+                                        pendingWebPermissionRequests += request
+                                        if (!permissionDialogAlreadyShowing) {
+                                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         this.webViewClient = object : WebViewClient() {
                             override fun shouldOverrideUrlLoading(
                                 view: WebView?,
