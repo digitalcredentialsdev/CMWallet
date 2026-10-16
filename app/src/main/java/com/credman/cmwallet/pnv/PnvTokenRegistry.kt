@@ -21,10 +21,15 @@ import com.credman.cmwallet.loadECPrivateKey
 import com.credman.cmwallet.openid4vp.OpenId4VP
 import com.credman.cmwallet.openid4vp.OpenId4VP.Companion.IDENTIFIERS_1_0
 import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.TEST_PNV_1_GET_PHONE_NUMBER
+import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.TEST_PNV_1_GET_PHONE_NUMBER_C11N
 import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.TEST_PNV_1_VERIFY_PHONE_NUMBER
+import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.TEST_PNV_1_VERIFY_PHONE_NUMBER_C11N
 import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.TEST_PNV_2_VERIFY_PHONE_NUMBER
+import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.TEST_PNV_2_VERIFY_PHONE_NUMBER_C11N
 import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.VCT_GET_PHONE_NUMBER
+import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.VCT_GET_PHONE_NUMBER_C11N
 import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.VCT_VERIFY_PHONE_NUMBER
+import com.credman.cmwallet.pnv.PnvTokenRegistry.Companion.VCT_VERIFY_PHONE_NUMBER_C11N
 import com.credman.cmwallet.toBase64UrlNoPadding
 import com.credman.cmwallet.toJWK
 import kotlinx.serialization.json.add
@@ -70,6 +75,8 @@ data class PnvTokenRegistry(
     val phoneNumberAttributeDisplayName: String, // Should be localized
     val supportedAggregatorIssNames: Set<String>?, // If null, allow all and do not perform filtering
     val verifierTermsPrefix: String?,
+    val dedupId: String? = null,
+    val rank: Int = 0,
 ) {
     /** Converts this TS43 entry to the more generic SD-JWT registry item(s). */
     private fun toSdJwtRegistryItems(): SdJwtRegistryItem {
@@ -90,10 +97,14 @@ data class PnvTokenRegistry(
     companion object {
         const val VCT_GET_PHONE_NUMBER = "number-verification/device-phone-number/ts43"
         const val VCT_VERIFY_PHONE_NUMBER = "number-verification/verify/ts43"
+        const val VCT_GET_PHONE_NUMBER_C11N = "number-verification/device-phone-number/google-pnv-cache"
+        const val VCT_VERIFY_PHONE_NUMBER_C11N = "number-verification/verify/google-pnv-cache"
         const val PNV_CRED_FORMAT = "dc-authorization+sd-jwt"
 
         internal const val CREDENTIALS = "credentials"
         internal const val ID = "id"
+        internal const val DEDUP_ID = "dedupId"
+        internal const val RANK = "rank"
         internal const val TITLE = "title"
         internal const val SUBTITLE = "subtitle"
         internal const val DISCLAIMER = "disclaimer"
@@ -107,7 +118,7 @@ data class PnvTokenRegistry(
         val TEST_PNV_1_GET_PHONE_NUMBER = PnvTokenRegistry(
             tokenId = "pnv_1",
             vct = VCT_GET_PHONE_NUMBER,
-            title = "Terrific Telecom",
+            title = "Terrific Telecom (from Telephony)",
             subtitle = "+1 (650) 215-4321",
             providerConsent = "CMWallet will enable your carrier (Terrific Telecom) to share your phone number with \${CALLER_DISPLAY_NAME}",
             subscriptionHint = 1,
@@ -120,6 +131,8 @@ data class PnvTokenRegistry(
             supportedAggregatorIssNames = null,
             verifierTermsPrefix = "Provider Terms:\n",
 //            verifierTermsPrefix = null,
+            dedupId = "sim1",
+            rank = 0
         )
         val TEST_PNV_1_VERIFY_PHONE_NUMBER = TEST_PNV_1_GET_PHONE_NUMBER.copy(
             vct = VCT_VERIFY_PHONE_NUMBER,
@@ -127,7 +140,7 @@ data class PnvTokenRegistry(
         val TEST_PNV_2_VERIFY_PHONE_NUMBER = PnvTokenRegistry(
             tokenId = "pnv_2",
             vct = VCT_VERIFY_PHONE_NUMBER,
-            title = "Work Number",
+            title = "Work Number (from Telephony)",
             subtitle = "Timely Telecom",
             providerConsent = "CMWallet will enable your carrier (Timely Telecom) to share your phone number with \${CALLER_DISPLAY_NAME}",
             subscriptionHint = 2,
@@ -138,7 +151,29 @@ data class PnvTokenRegistry(
             icon = "iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAA6lJREFUeAHNWdtR20AUvRbhNXxEHSAqwKkAUwFQAaYC7A8eAx+yfmCAYRAV4FRgd2BRAUoFKB04PwxPO+coK0d4ZLSSsdGZ2ZEsrXbP3rt7Xy5JThwcHFRwWe33+5VSqVTGvaka0cXzAFc2H+9vz87OPMmBUpbOtVrNnJ+fr+F2lxODBCf3Xl9f/be3tz+u63ajfrOzs5ZhGMtqARVF3kNzQDbQnVOLoCLWwO02JnRBpnl5eflbMgASt3Cx0SpZiKYS3N/fr0ECNok9Pz9fR1LKCxLFWNsYswoJN05PT39KXoIYzMVlY2ZmZuvk5MSXT4SSaAetDUnWJQtBpdIWboOnp6f6uFIbBdu2zcfHxxtI1IJ21pPm+Zb04dzcHFfmY2U7MkE4jkNCW9hGTSWQ9dSPqFa0lkwZJIl5r4afG/Efh4eHVVw2oNaJSi4Ji4uLNF+bPJTx54M9GNu062nHnwvBvuFqTdFDgP718/Pz9kedjo6OyrCpHezHlWg/xiVIU9LUsU3oZ2cgR1hoN2mdlKVwsR/t6Fl4SJT0aPHTN+n/CQWL0TL0GL+PsbUWBFVf42Tfw5I4lGIkQTL2srigEUTu2WQM8GTTKcCS0J0OVFzhOykIIG16l/CwGIxKwLg7rvQIjLHCNuo95mqI3jgBSPrkZoDcmvxz3tOAnaEvD8yqwViOIZMUDBDcLUM17kGr1+tlCp2mAaqYwgsJvry8BDIFQCIN3b4LCws8zSYJmpOKVoYBT6JtKWhuaDsNKThIsMv4TwoGxoo0fyHBpaWl71IwPDw8WLgEJOgjgihLwYD9Z4ki6NHeSMEAgnQgPgn+Uol30UAX7Bkq4y8fHx8vS0Ggwj/z4uLiNjQzDG9grKtSHIThH29CggwSJcw2v97cRMGzqPAvjKhptfGiqYJEHWtPz2MyUhZ9BJr9qhILngeeBL7PwWGp7e3tpR4Y9KtnmJDo6vhhJb1tiQnpXU6h6jC7SDt/TMs/R1DVjDsuBD57UK9554vxgrWYNjpeyZSBOVkCacfJjQRE3UFLTRM/C8izm9DeXdK7xNoM9uMWUr8OPmohid6ZlLqpVszlQnLLLB4l9Ukrv1HVm6JRbcgKVhFQCG0ptWYrv8WBU81CIw0n90ZzXKJDZeQGxrv+qL9uZcCSHOXbhDGqJMYSC1Tq6GydTEX0OFEGk4oss6+AeU28iA4pMeCkTV1TwUg5Txk5E8E4oHpOHP0FYak2+BtCNea2HrJGn45fcuAvCI/mU6uwlKQAAAAASUVORK5CYII=",
             phoneNumberAttributeDisplayName = "Phone number",
             supportedAggregatorIssNames = null,
-            verifierTermsPrefix = "Provider Terms:\n"
+            verifierTermsPrefix = "Provider Terms:\n",
+            dedupId = "sim2",
+            rank = 0
+        )
+
+        // Should be safe to assume tokenId will be different from C11n as Telephony generates this
+        // using a OGI-TS43-SubscriptionEncryptionKey
+        val TEST_PNV_1_GET_PHONE_NUMBER_C11N = TEST_PNV_1_GET_PHONE_NUMBER.copy(
+            tokenId = "pnv_1_from_c11n",
+            title = "Terrific Telecom (from C11n)",
+            vct = VCT_GET_PHONE_NUMBER_C11N,
+            providerConsent = "Google will share your device’s phone number with \${CALLER_DISPLAY_NAME}",
+            rank = 1
+        )
+        val TEST_PNV_1_VERIFY_PHONE_NUMBER_C11N = TEST_PNV_1_GET_PHONE_NUMBER_C11N.copy(
+            vct = VCT_VERIFY_PHONE_NUMBER_C11N,
+        )
+        val TEST_PNV_2_VERIFY_PHONE_NUMBER_C11N = TEST_PNV_2_VERIFY_PHONE_NUMBER.copy(
+            tokenId = "pnv_2_from_c11n",
+            title = "Work Number (from C11n)",
+            vct = VCT_VERIFY_PHONE_NUMBER_C11N,
+            providerConsent = "Google will share your device’s phone number with \${CALLER_DISPLAY_NAME}",
+            rank = 1
         )
 
         fun buildRegistryDatabase(items: List<PnvTokenRegistry>): ByteArray {
@@ -179,6 +214,8 @@ data class PnvTokenRegistry(
                     credJson.put(ISS_ALLOWLIST, issAllowlist)
                 }
                 credJson.put(ID, sdJwtRegistryItem.id)
+                credJson.putOpt(DEDUP_ID, item.dedupId)
+                credJson.putOpt(RANK, item.rank)
                 credJson.put(TITLE, sdJwtRegistryItem.displayData.title)
                 credJson.putOpt(SUBTITLE, sdJwtRegistryItem.displayData.subtitle)
                 credJson.putOpt(DISCLAIMER, sdJwtRegistryItem.displayData.description)
@@ -271,10 +308,17 @@ fun maybeHandlePnv(
     origin: String, // Either the web origin or the calling app sha
     callingAppInfo: CallingAppInfo
 ): DigitalCredentialResult? {
-    if (selectedID != TEST_PNV_1_GET_PHONE_NUMBER.tokenId && selectedID != TEST_PNV_2_VERIFY_PHONE_NUMBER.tokenId) {
+    if (selectedID != TEST_PNV_1_GET_PHONE_NUMBER.tokenId
+        && selectedID != TEST_PNV_2_VERIFY_PHONE_NUMBER.tokenId
+        && selectedID != TEST_PNV_1_GET_PHONE_NUMBER_C11N.tokenId
+        && selectedID != TEST_PNV_2_VERIFY_PHONE_NUMBER_C11N.tokenId) {
         return null
     } else if (selectedID == TEST_PNV_1_GET_PHONE_NUMBER.tokenId) {
         Log.d(TAG, "Selected number: ${TEST_PNV_1_GET_PHONE_NUMBER.title}")
+    } else if (selectedID == TEST_PNV_1_GET_PHONE_NUMBER_C11N.tokenId) {
+        Log.d(TAG, "Selected number: ${TEST_PNV_1_GET_PHONE_NUMBER_C11N.title} (C11n)")
+    } else if (selectedID == TEST_PNV_2_VERIFY_PHONE_NUMBER_C11N.tokenId) {
+        Log.d(TAG, "Selected number: ${TEST_PNV_2_VERIFY_PHONE_NUMBER_C11N.title} (C11n)")
     } else {
         Log.d(TAG, "Selected number: ${TEST_PNV_2_VERIFY_PHONE_NUMBER.title}")
     }
@@ -295,7 +339,8 @@ fun maybeHandlePnv(
     val vct = dcqlObject.getJSONObject("meta").getJSONArray("vct_values").let {
         for (i in 0..<it.length()) {
             val currVct = it.getString(i)
-            if (currVct == VCT_GET_PHONE_NUMBER || currVct == VCT_VERIFY_PHONE_NUMBER) {
+            if (currVct == VCT_GET_PHONE_NUMBER || currVct == VCT_VERIFY_PHONE_NUMBER
+                || currVct == VCT_GET_PHONE_NUMBER_C11N || currVct == VCT_VERIFY_PHONE_NUMBER_C11N) {
                 return@let currVct
             }
         }
@@ -305,6 +350,8 @@ fun maybeHandlePnv(
     val selectedCred = when (selectedID) {
         TEST_PNV_1_GET_PHONE_NUMBER.tokenId -> if (vct == TEST_PNV_1_GET_PHONE_NUMBER.vct) TEST_PNV_1_GET_PHONE_NUMBER else TEST_PNV_1_VERIFY_PHONE_NUMBER
         TEST_PNV_2_VERIFY_PHONE_NUMBER.tokenId -> TEST_PNV_2_VERIFY_PHONE_NUMBER
+        TEST_PNV_1_GET_PHONE_NUMBER_C11N.tokenId -> if (vct == TEST_PNV_1_GET_PHONE_NUMBER_C11N.vct) TEST_PNV_1_GET_PHONE_NUMBER_C11N else TEST_PNV_1_VERIFY_PHONE_NUMBER_C11N
+        TEST_PNV_2_VERIFY_PHONE_NUMBER_C11N.tokenId -> TEST_PNV_2_VERIFY_PHONE_NUMBER_C11N
         else -> return null
     }
 

@@ -130,6 +130,14 @@ __attribute__((import_module("credman_v7"), import_name("SetDelegationTypeForEnt
 #endif
 void SetDelegationTypeForEntryInSet(const char* cred_id, int delegation_type, const char* set_id, int set_index);
 
+#if defined(__wasm__)
+__attribute__((import_module("credman_v10"),
+               import_name("SetDedupIdAndRankForEntryInSet")))
+#endif
+void SetDedupIdAndRankForEntryInSet(const char* cred_id, const char* dedup_id,
+                                     int rank, const char* set_id,
+                                     int set_index);
+
 #ifdef __cplusplus
 }
 #endif

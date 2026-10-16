@@ -9,7 +9,6 @@ import androidx.credentials.ExperimentalDigitalCredentialApi
 import androidx.credentials.provider.CallingAppInfo
 import androidx.credentials.registry.provider.RegisterCreationOptionsRequest
 import androidx.credentials.registry.provider.RegistryManager
-import androidx.credentials.registry.provider.digitalcredentials.DigitalCredentialRegistry
 import androidx.room.Room
 import com.credman.cmwallet.data.repository.CredentialRepository
 import com.credman.cmwallet.data.room.CredentialDatabase
@@ -87,12 +86,19 @@ class CmWalletApplication : Application() {
         applicationScope.launch(Dispatchers.IO) {
             credentialRepo.credentialRegistryDatabase.collect { openid4vpRegistry ->
                 Log.i(TAG, "Credentials changed $openid4vpRegistry")
+                // Use below to use custom mDL builder with dedupId and rank fields
+                // credentialRepo.registerMdocCredentials(
+                //     registryManager = registryManager,
+                //     mdocMatcher = loadOpenId4VP1_0Matcher()
+                // )
+
+                // The original registration using Jetpack
                 registryManager.registerCredentials(openid4vpRegistry)
-//                registryManager.registerCredentials(object : DigitalCredentialRegistry(
-//                    id = openid4vpRegistry.id,
-//                    credentials = openid4vpRegistry.credentials,
-//                    matcher = openId4VP1_0Matcher
-//                ) {})
+                // registryManager.registerCredentials(object : DigitalCredentialRegistry(
+                //     id = openid4vpRegistry.id,
+                //     credentials = openid4vpRegistry.credentials,
+                //     matcher = openId4VP1_0Matcher
+                // ) {})
 
                 // Phone number verification demo
                 credentialRepo.registerPhoneNumberVerification(
@@ -137,7 +143,7 @@ class CmWalletApplication : Application() {
     }
 
     private fun loadOpenId4VP1_0Matcher(): ByteArray {
-        return readAsset("openid4vp1_0.wasm")
+        return readAsset("openid4vp1_0_dedup.wasm")
     }
 
     private fun buildIssuanceData(): ByteArray {
@@ -160,11 +166,12 @@ class CmWalletApplication : Application() {
     }
 
     private fun loadPhoneNumberMatcher(): ByteArray {
-        return readAsset("pnv.wasm")
+        return readAsset("pnv_dedup.wasm")
     }
 
     private fun loadTestCredentialsNew(): ByteArray {
-        return readAsset("databasenew.json")
+        // contains my dupe mDL1
+        return readAsset("databasenew_dedup.json")
     }
 
     private fun loadAppsJson(): ByteArray {

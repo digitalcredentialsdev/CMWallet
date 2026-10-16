@@ -12,6 +12,7 @@ import androidx.credentials.registry.digitalcredentials.openid4vp.OpenId4VpRegis
 import androidx.credentials.registry.digitalcredentials.sdjwt.SdJwtClaim
 import androidx.credentials.registry.digitalcredentials.sdjwt.SdJwtEntry
 import androidx.credentials.registry.digitalcredentials.sdjwt.SdJwtInlineIssuanceEntry
+import androidx.credentials.registry.provider.RegisterCredentialsRequest
 import androidx.credentials.registry.provider.RegistryManager
 import androidx.credentials.registry.provider.digitalcredentials.DigitalCredentialEntry
 import androidx.credentials.registry.provider.digitalcredentials.DigitalCredentialRegistry
@@ -32,11 +33,13 @@ import com.credman.cmwallet.openid4vci.OpenId4VCI
 import com.credman.cmwallet.openid4vci.data.CredentialConfigurationMDoc
 import com.credman.cmwallet.openid4vci.data.CredentialConfigurationSdJwtVc
 import com.credman.cmwallet.openid4vci.data.CredentialConfigurationUnknownFormat
+import com.credman.cmwallet.mdoc.MdocTokenRegistry
 import com.credman.cmwallet.pnv.PnvTokenRegistry
 import com.credman.cmwallet.sdjwt.SdJwt
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import org.json.JSONArray
@@ -104,6 +107,43 @@ class CredentialRepository(private val context: Context) {
                 id = "openid4vp1.0-pnv",
                 credentials = PnvTokenRegistry.buildRegistryDatabase(testPhoneNumberTokens),
                 matcher = pnvMatcher
+            ) {}
+        )
+
+        val testPhoneNumberTokensC11n = listOf(
+            PnvTokenRegistry.TEST_PNV_1_GET_PHONE_NUMBER_C11N,
+            PnvTokenRegistry.TEST_PNV_1_VERIFY_PHONE_NUMBER_C11N,
+            PnvTokenRegistry.TEST_PNV_2_VERIFY_PHONE_NUMBER_C11N,
+        )
+
+        // Comment out below to let the other app register
+        registryManager.registerCredentials(
+            request = object : DigitalCredentialRegistry(
+                id = "openid4vp1.0-pnv-c11n",
+                credentials = PnvTokenRegistry.buildRegistryDatabase(testPhoneNumberTokensC11n),
+                matcher = pnvMatcher,
+                intentAction = RegistryManager.ACTION_GET_CREDENTIAL
+            ) {}
+        )
+    }
+
+    /**
+     * Registers mDoc credentials (e.g. mDL) using the custom [MdocTokenRegistry] builder,
+     * injecting dedupId and rank directly without requiring changes to the Jetpack library.
+     */
+    @OptIn(ExperimentalDigitalCredentialApi::class)
+    suspend fun registerMdocCredentials(
+        registryManager: RegistryManager,
+        mdocMatcher: ByteArray,
+        registryId: String = "openid4vp1.0-mdoc",
+        items: List<CredentialItem>? = null
+    ) {
+        val credItems = items ?: credentials.first()
+        registryManager.registerCredentials(
+            request = object : DigitalCredentialRegistry(
+                id = registryId,
+                credentials = MdocTokenRegistry.buildRegistryDatabase(credItems),
+                matcher = mdocMatcher
             ) {}
         )
     }

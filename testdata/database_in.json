@@ -323,7 +323,348 @@
     },
     "displayData": {
       "title": "Jon's Driving License",
-      "subtitle": "Utopia DMV"
+      "subtitle": "Utopia DMV",
+      "dedupId": "mDL1",
+      "rank": 0
+    },
+    "credentials": [
+      {
+        "credential": "ompuYW1lU3BhY2VzoXFvcmcuaXNvLjE4MDEzLjUuMZHYGFhUpGhkaWdlc3RJRABmcmFuZG9tUCT8Bzr7g0DEID52tcagpp9xZWxlbWVudElkZW50aWZpZXJrZmFtaWx5X25hbWVsZWxlbWVudFZhbHVlZVNtaXRo2BhYUaRoZGlnZXN0SUQBZnJhbmRvbVAufEwhzFcWjfRovirG9C2pcWVsZW1lbnRJZGVudGlmaWVyamdpdmVuX25hbWVsZWxlbWVudFZhbHVlY0pvbtgYWE-kaGRpZ2VzdElEAmZyYW5kb21QzzJwNCjIm2Rw6tg6LajOyHFlbGVtZW50SWRlbnRpZmllcmthZ2Vfb3Zlcl8yMWxlbGVtZW50VmFsdWX12BhYT6RoZGlnZXN0SUQDZnJhbmRvbVASzE2joQjalm3BK9xscYBWcWVsZW1lbnRJZGVudGlmaWVya2FnZV9vdmVyXzE4bGVsZW1lbnRWYWx1ZfXYGFhYpGhkaWdlc3RJRARmcmFuZG9tUDWPOyPJlDJQfNRXK5aQhINxZWxlbWVudElkZW50aWZpZXJqYmlydGhfZGF0ZWxlbGVtZW50VmFsdWVqMTk4OC0wOS0wMdgYWFikaGRpZ2VzdElEBWZyYW5kb21QIhTL8axu5qsqYBvqNznOenFlbGVtZW50SWRlbnRpZmllcmppc3N1ZV9kYXRlbGVsZW1lbnRWYWx1ZWoyMDIyLTAxLTAx2BhYWaRoZGlnZXN0SUQGZnJhbmRvbVCemUYeffFD83jIs9YUui_YcWVsZW1lbnRJZGVudGlmaWVya2V4cGlyeV9kYXRlbGVsZW1lbnRWYWx1ZWoyMDI2LTAxLTAx2BhYVaRoZGlnZXN0SUQHZnJhbmRvbVCOzzyicekO8lN2ifMaDSXccWVsZW1lbnRJZGVudGlmaWVyb2lzc3VpbmdfY291bnRyeWxlbGVtZW50VmFsdWViVVPYGFhkpGhkaWdlc3RJRAhmcmFuZG9tUGdKTWWd_nQSxeSn0Mm5CQNxZWxlbWVudElkZW50aWZpZXJxaXNzdWluZ19hdXRob3JpdHlsZWxlbWVudFZhbHVlb0dvdGhhbSBDaXR5IERNVtgYWFukaGRpZ2VzdElECWZyYW5kb21QW2Po7W-fFZpo5qRvpqccC3FlbGVtZW50SWRlbnRpZmllcm9kb2N1bWVudF9udW1iZXJsZWxlbWVudFZhbHVlaDkwMDAxMjM02BhYZ6RoZGlnZXN0SUQKZnJhbmRvbVD1NOgvN6dKnQfRkYCqnbKCcWVsZW1lbnRJZGVudGlmaWVycHJlc2lkZW50X2FkZHJlc3NsZWxlbWVudFZhbHVlczEyMyBTdCwgR290aGFtIENpdHnYGFhcpGhkaWdlc3RJRAtmcmFuZG9tUEv-2sLH1ZfEng8uih2ITDJxZWxlbWVudElkZW50aWZpZXJtcmVzaWRlbnRfY2l0eWxlbGVtZW50VmFsdWVrR290aGFtIENpdHnYGFhhpGhkaWdlc3RJRAxmcmFuZG9tUP7H0Jx525FewkEJ3KfpdCNxZWxlbWVudElkZW50aWZpZXJucmVzaWRlbnRfc3RhdGVsZWxlbWVudFZhbHVlb0dvdGhhbSBEaXN0cmljdNgYWF2kaGRpZ2VzdElEDWZyYW5kb21Q5YgVq-H1HsREl-VO-8Xjw3FlbGVtZW50SWRlbnRpZmllcnRyZXNpZGVudF9wb3N0YWxfY29kZWxlbGVtZW50VmFsdWVlOTQwNDPYGFkBq6RoZGlnZXN0SUQOZnJhbmRvbVCwjD8rCy_khdPHYyOShl9RcWVsZW1lbnRJZGVudGlmaWVyaHBvcnRyYWl0bGVsZW1lbnRWYWx1ZVkBXf_Y_-AAEEpGSUYAAQEAAAEAAQAA_9sAQwABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB_9sAQwEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB_8AAEQgAAQABAwEiAAIRAQMRAf_EAB8AAAEFAQEBAQEBAAAAAAAAAAECAwQFBgcICQoL_8QAjEAAgEDAwIGIgIAAAAAAAAAYEAgMFAwQHAQIECAkKERUWH_8QAIBEAAgECBAYBAQAAAAAAAAAAAQIDEQQAIQUSIEFRYf8QAIhEAAgICAQMEAgAAAAAAAAAAARECAwASITEFQVEjYXH_2gAMAwEAAhEDEQA_AP3J_gP4j_DiP_r9X_oB_wA9K__bYGFicpGhkaWdlc3RJRA9mcmFuZG9tUPn-9mUuIuy7LUA1o8xLnmRxZWxlbWVudElkZW50aWZpZXJyZHJpdmluZ19wcml2aWxlZ2VzbGVsZW1lbnRWYWx1ZYGjdXZlaGljbGVfY2F0ZWdvcnlfY29kZWFBamlzc3VlX2RhdGVqMjAyMC0xMC0xMGtleHBpcnlfZGF0ZWoyMDI4LTEwLTEw2BhYXaRoZGlnZXN0SUQQZnJhbmRvbVAdGoQiXbkUrl1RCe4euBjvcWVsZW1lbnRJZGVudGlmaWVydnVuX2Rpc3Rpbmd1aXNoaW5nX3NpZ25sZWxlbWVudFZhbHVlY1VTQWppc3N1ZXJBdXRohEOhASahGCFZAsYwggLCMIICZ6ADAgECAhQmHeOvnThUDhQIYc_HXdwhoKl5hTAKBggqhkjOPQQDAjB5MQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEcMBoGA1UECgwTRGlnaXRhbCBDcmVkZW50aWFsczEfMB0GA1UEAwwWZGlnaXRhbGNyZWRlbnRpYWxzLmRldjAeFw0yNjA1MTQwMTAxNTdaFw0yODA1MTMwMTAxNTdaMHkxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlhMRYwFAYDVQQHDA1Nb3VudGFpbiBWaWV3MRwwGgYDVQQKDBNEaWdpdGFsIENyZWRlbnRpYWxzMR8wHQYDVQQDDBZkaWdpdGFsY3JlZGVudGlhbHMuZGV2MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE63k2K-LX85fDUAR9g-HjYizjVWs2D2pox1i7Ddxq-GwJr5pdXQ2ZOXYSw1onkZaYygAPyKTAAWzNiEh42AXjaaOBzDCByTAdBgNVHQ4EFgQU3_5qWhLpwGLEvJinJdLZcPd6YCgwHwYDVR0jBBgwFoAUok_0idl8Ruhuo4bZR0jOzL7cz_UwNAYDVR0fBC0wKzApoCegJYYjaHR0cHM6Ly9kaWdpdGFsLWNyZWRlbnRpYWxzLmRldi9jcmwwKgYDVR0SBCMwIYYfaHR0cHM6Ly9kaWdpdGFsLWNyZWRlbnRpYWxzLmRldjAOBgNVHQ8BAf8EBAMCB4AwFQYDVR0lAQH_BAswCQYHKIGMXQUBAjAKBggqhkjOPQQDAgNJADBGAiEAuqX6eUI5KW7pBhJ6Z-QeUDEGsVu7-DAmUcM1OGdfzKECIQCOEqtg4g5TVgY7W6lmCxd2XFHV0Oa9HGcniWktmDoDZ1kDpNgYWQOfpmd2ZXJzaW9uYzEuMG9kaWdlc3RBbGdvcml0aG1nU0hBLTI1Nmdkb2NUeXBldW9yZy5pc28uMTgwMTMuNS4xLm1ETGx2YWx1ZURpZ2VzdHOhcW9yZy5pc28uMTgwMTMuNS4xsQBYILRNT6se7ehEgXztfnacKMjfb2RNjITj4JvYod8BELMLAVggPRWVK736D9U2TdJ6ZI2wkZUikeFK-0h-upvqxxUzVbkCWCAzdciAjN5SZ7u9uMOAbdT0rG18jR3yr5nKFEmzdPI0TANYIEEagMwO1SUpCKx8wfLmgENMCiz6kt1392pvwp134L6gBFggAODg3BE9rjdaENVvwivGg6aJYmXzVrq4my8DitgB1_gFWCDMsapIMmm2kcJ-SkQLY9-7kBxUwyJMk7e3XDf66QSUyAZYIKqFfa-Cpy0UFKyVEJ6F6i1KhX4OIjWnj5btH2bnJppFB1ggPdjHy35st_V8JdmBSq_gL0j7Fb47PmLf-sPQHtIiy30IWCCtJZsVY7JK7RZEL0e6ljPqjjIfNZuBZFd8dPq--3TB5glYILXWZTVQ1fv7QxGo_xcsi3E2MRo9Q1S1wVJgHgjojSKmClggtUOcEZ0LIQ6CtbvARYS3rfE3gLGj74uLOFOJx-2ef-gLWCCvP9-oDcLbfswEmhvbIhxUo5afxkzs1GR2xAjFDLg-3AxYIFKDb9gQMc3ZzmwECnXaGikvGON6J1HN7lFKcyZaHuglDVgg-KEnqTY6dxByvqUpAwwcBKaG5Q1cKjhO-IVI_T6Qg60OWCB3dCVSGmNBeRjAMeSpd_X1OdM9trgZ8UvyTFsZMyqkGQ9YIDZ5ONmIt1RisIZIbkRz8TkKnw9aMaYvfk2CHcmRHtgrEFgghs424JCCvmg_ApkPJi7iDW3AW5dTaof4G-ixfqjbaZhtZGV2aWNlS2V5SW5mb6FpZGV2aWNlS2V5pAECIAEhWCAM1LGDb84f811hneaRXfqhcLuYkF4-sq91s5vuIsoquSJYIHSPnJwaIIUI8igDjebKzTxJQt9m126D_7xOaT5KCQwObHZhbGlkaXR5SW5mb6Nmc2lnbmVkwHgbMjAyNi0wNy0wMVQxOToyODozNy43NTk3NjJaaXZhbGlkRnJvbcB4GzIwMjYtMDctMDFUMTk6Mjg6MzcuNzU5OTMzWmp2YWxpZFVudGlswHgbMjAzNi0wNi0xOFQxOToyODozNy43NTk5MzRaWEDhgZSXLPZ33H9wl5EBjYgDFWBAjYZOnmFfS1xaMndaI3b2Z6u_cqULneeMoxQWA_UXRLZCLkg7NFTqHisDO1Ql",
+        "key": {
+          "type": "SOFTWARE",
+          "publicKey": "123",
+          "privateKey": "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgNb9R9JwVLYikseQA_1omUOVLUE2wQipaPB9ycq0yn_ehRANCAAQM1LGDb84f811hneaRXfqhcLuYkF4-sq91s5vuIsoquXSPnJwaIIUI8igDjebKzTxJQt9m126D_7xOaT5KCQwO"
+        }
+      }
+    ]
+  },
+  {
+    "id": "id1_from_other_provider",
+    "nameSpaces": {
+      "org.iso.18013.5.1": {
+        "family_name": {
+          "value": "Smith",
+          "display": "Family Name",
+          "display_value": "Smith"
+        },
+        "given_name": {
+          "value": "Jon",
+          "display": "Given Name",
+          "display_value": "Jon"
+        },
+        "age_over_21": {
+          "value": true,
+          "display": "Age Over 21",
+          "display_value": "True"
+        },
+        "age_over_18": {
+          "value": true,
+          "display": "Age Over 18",
+          "display_value": "True"
+        },
+        "birth_date": {
+          "value": "1988-09-01",
+          "display": "Date of birth",
+          "display_value": "1988-09-01"
+        },
+        "issue_date": {
+          "value": "2022-01-01",
+          "display": "Date of issue",
+          "display_value": "2022-01-01"
+        },
+        "expiry_date": {
+          "value": "2026-01-01",
+          "display": "Date of expiry",
+          "display_value": "2026-01-01"
+        },
+        "issuing_country": {
+          "value": "US",
+          "display": "Issuing country",
+          "display_value": "US"
+        },
+        "issuing_authority": {
+          "value": "Gotham City DMV",
+          "display": "Issuing  authority",
+          "display_value": "Gotham City DMV"
+        },
+        "document_number": {
+          "value": "90001234",
+          "display": "License number",
+          "display_value": "90001234"
+        },
+        "resident_address": {
+          "value": "123 St, Gotham City",
+          "display": "Resident address",
+          "display_value": "123 St, Gotham City"
+        },
+        "resident_city": {
+          "value": "Gotham City",
+          "display": "Resident city",
+          "display_value": "Gotham City"
+        },
+        "resident_state": {
+          "value": "Gotham District",
+          "display": "Resident state",
+          "display_value": "Gotham District"
+        },
+        "resident_postal_code": {
+          "value": "94043",
+          "display": "Resident postal code",
+          "display_value": "94043"
+        },
+        "portrait": {
+          "value": "_9j_4AAQSkZJRgABAQAAAQABAAD_2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH_2wBDAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQH_wAARCAABAAEDASIAAhEBAxEB_8QAHwAAAQUBAQEBAQEAAAAAAAAAAQIDBAUGBwgJCgv_xACMQACAQMDAgYiAgAAAAAAAABgQCAwUDBAcBAgQICQoRFRYf_xAAgEQACAQIEBgEBAAAAAAAAAAABAgMRBAAhBRIgQVFh_xAAiEQACAgIBAwQCAAAAAAAAAAABEQIDABIhMQVBUSNhcf_aAAwDAQACEQMRAD8A_cn+A_iP8OI_+v1f+gH_AD0r_9k===",
+          "display": "Portrait",
+          "display_value": "Portrait"
+        },
+        "driving_privileges": {
+          "value": [
+            {
+              "vehicle_category_code": "A",
+              "issue_date": "2020-10-10",
+              "expiry_date": "2028-10-10"
+            }
+          ],
+          "display": "Vehicle category",
+          "display_value": "A"
+        },
+        "un_distinguishing_sign": {
+          "value": "USA",
+          "display": "UN distinguishing sign",
+          "display_value": "USA"
+        }
+      }
+    },
+    "config": {
+      "format": "mso_mdoc",
+      "doctype": "org.iso.18013.5.1.mDL",
+      "cryptographic_binding_methods_supported": [
+        "cose_key"
+      ],
+      "credential_signing_alg_values_supported": [
+        "ES256"
+      ],
+      "display": [
+        {
+          "name": "Driver's License",
+          "locale": "en-US",
+          "description": "Mobile Driving License"
+        }
+      ],
+      "credential_metadata": {
+        "claims": [
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "family_name"
+            ],
+            "display": [
+              {
+                "name": "Family Name",
+                "locale": "en-US"
+              }
+            ]
+          },
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "given_name"
+            ],
+            "display": [
+              {
+                "name": "Given Name",
+                "locale": "en-US"
+              }
+            ]
+          },
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "age_over_21"
+            ],
+            "display": [
+              {
+                "name": "Age Over 21",
+                "locale": "en-US"
+              }
+            ]
+          },
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "age_over_18"
+            ],
+            "display": [
+              {
+                "name": "Age Over 18",
+                "locale": "en-US"
+              }
+            ]
+          },
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "birth_date"
+            ],
+            "display": [
+              {
+                "name": "Date of birth",
+                "locale": "en-US"
+              }
+            ]
+          },
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "issue_date"
+            ],
+            "display": [
+              {
+                "name": "Date of issue",
+                "locale": "en-US"
+              }
+            ]
+          },
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "expiry_date"
+            ],
+            "display": [
+              {
+                "name": "Date of expiry",
+                "locale": "en-US"
+              }
+            ]
+          },
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "issuing_country"
+            ],
+            "display": [
+              {
+                "name": "Issuing country",
+                "locale": "en-US"
+              }
+            ]
+          },
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "issuing_authority"
+            ],
+            "display": [
+              {
+                "name": "Issuing  authority",
+                "locale": "en-US"
+              }
+            ]
+          },
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "document_number"
+            ],
+            "display": [
+              {
+                "name": "License number",
+                "locale": "en-US"
+              }
+            ]
+          },
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "resident_address"
+            ],
+            "display": [
+              {
+                "name": "Resident address",
+                "locale": "en-US"
+              }
+            ]
+          },
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "resident_city"
+            ],
+            "display": [
+              {
+                "name": "Resident city",
+                "locale": "en-US"
+              }
+            ]
+          },
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "resident_state"
+            ],
+            "display": [
+              {
+                "name": "Resident state",
+                "locale": "en-US"
+              }
+            ]
+          },
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "resident_postal_code"
+            ],
+            "display": [
+              {
+                "name": "Resident postal code",
+                "locale": "en-US"
+              }
+            ]
+          },
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "portrait"
+            ],
+            "display": [
+              {
+                "name": "Portrait",
+                "locale": "en-US"
+              }
+            ]
+          },
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "driving_privileges"
+            ],
+            "display": [
+              {
+                "name": "Vehicle category",
+                "locale": "en-US"
+              }
+            ]
+          },
+          {
+            "path": [
+              "org.iso.18013.5.1",
+              "un_distinguishing_sign"
+            ],
+            "display": [
+              {
+                "name": "UN distinguishing sign",
+                "locale": "en-US"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "displayData": {
+      "title": "Jon's Driving License (from other provider)",
+      "subtitle": "Utopia DMV",
+      "dedupId": "mDL1",
+      "rank": 10
     },
     "credentials": [
       {

@@ -117,6 +117,8 @@ cJSON* MatchCredential(cJSON* credential, cJSON* credential_store) {
         cJSON_ArrayForEach(candidate, candidates) {
             cJSON* matched_credential = cJSON_CreateObject();
             cJSON_AddItemReferenceToObject(matched_credential, "id", cJSON_GetObjectItemCaseSensitive(candidate, "id"));
+            cJSON_AddItemReferenceToObject(matched_credential, "dedupId", cJSON_GetObjectItemCaseSensitive(candidate, "dedupId"));
+            cJSON_AddItemReferenceToObject(matched_credential, "rank", cJSON_GetObjectItemCaseSensitive(candidate, "rank"));
             cJSON_AddItemReferenceToObject(matched_credential, "display", cJSON_GetObjectItemCaseSensitive(candidate, "display"));
             cJSON* matched_claim_names = cJSON_CreateArray();
             cJSON* matched_claim_metadata = cJSON_CreateArray();
@@ -132,6 +134,8 @@ cJSON* MatchCredential(cJSON* credential, cJSON* credential_store) {
             cJSON_ArrayForEach(candidate, candidates) {
                 cJSON* matched_credential = cJSON_CreateObject();
                 cJSON_AddItemReferenceToObject(matched_credential, "id", cJSON_GetObjectItemCaseSensitive(candidate, "id"));
+                cJSON_AddItemReferenceToObject(matched_credential, "dedupId", cJSON_GetObjectItemCaseSensitive(candidate, "dedupId"));
+                cJSON_AddItemReferenceToObject(matched_credential, "rank", cJSON_GetObjectItemCaseSensitive(candidate, "rank"));
                 cJSON_AddItemReferenceToObject(matched_credential, "display", cJSON_GetObjectItemCaseSensitive(candidate, "display"));
                 cJSON* matched_claim_names = cJSON_CreateArray();
                 cJSON* matched_claim_metadata = cJSON_CreateArray();
@@ -180,6 +184,8 @@ cJSON* MatchCredential(cJSON* credential, cJSON* credential_store) {
             cJSON_ArrayForEach(candidate, candidates) {
                 cJSON* matched_credential = cJSON_CreateObject();
                 cJSON_AddItemReferenceToObject(matched_credential, "id", cJSON_GetObjectItemCaseSensitive(candidate, "id"));
+                cJSON_AddItemReferenceToObject(matched_credential, "dedupId", cJSON_GetObjectItemCaseSensitive(candidate, "dedupId"));
+                cJSON_AddItemReferenceToObject(matched_credential, "rank", cJSON_GetObjectItemCaseSensitive(candidate, "rank"));
                 cJSON_AddItemReferenceToObject(matched_credential, "display", cJSON_GetObjectItemCaseSensitive(candidate, "display"));
                 cJSON* matched_claim_ids = cJSON_CreateObject();
 
