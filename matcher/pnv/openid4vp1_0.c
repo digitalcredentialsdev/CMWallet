@@ -190,12 +190,12 @@ void report_matched_credential(uint32_t wasm_version, cJSON* matched_doc, cJSON*
         //             char *subtitle = cJSON_GetStringValue(cJSON_GetObjectItem(c_display, "subtitle"));
         //             cJSON *icon = cJSON_GetObjectItem(c_display, "icon");
         //             printf("transaction cred ids %s\n", cJSON_Print(transaction_credential_ids));
-        // 
+        //
         //             double icon_start = (cJSON_GetNumberValue(cJSON_GetObjectItem(icon, "start")));
         //             int icon_start_int = icon_start;
         //             printf("icon_start int %d, double %f\n", icon_start_int, icon_start);
         //             int icon_len = (int)(cJSON_GetNumberValue(cJSON_GetObjectItem(icon, "length")));
-        // 
+        //
         //             if (wasm_version >= 3)
         //             {
         //                 AddPaymentEntryToSetV2(matched_id, merchant_name, title, subtitle, creds_blob + icon_start_int, icon_len, transaction_amount, NULL, 0, NULL, 0, additional_info, metadata, set_id, doc_idx);
@@ -240,6 +240,7 @@ void report_matched_credential(uint32_t wasm_version, cJSON* matched_doc, cJSON*
                     icon_len = (int)(cJSON_GetNumberValue(length));
                 }
             }
+
             printf("Adding entry with id: %s\n", matched_id);
             AddEntryToSet(matched_id, creds_blob + icon_start_int, icon_len, title, subtitle, disclaimer, NULL, metadata, set_id, doc_idx);
             cJSON *del_type_item = cJSON_GetObjectItemCaseSensitive(c, "delegation_type");
@@ -249,7 +250,12 @@ void report_matched_credential(uint32_t wasm_version, cJSON* matched_doc, cJSON*
             if (wasm_version >= 7 && effective_del_type == 1) {
                 SetDelegationTypeForEntryInSet(matched_id, 1, set_id, doc_idx);
             }
-
+            char *dedup_id = cJSON_GetStringValue(cJSON_GetObjectItem(c, "dedupId"));
+            cJSON *rank_item = cJSON_GetObjectItem(c, "rank");
+            int rank = rank_item != NULL ? (int)cJSON_GetNumberValue(rank_item) : 0;
+            if (wasm_version >= 10 && (dedup_id != NULL || rank_item != NULL)) {
+                SetDedupIdAndRankForEntryInSet(matched_id, dedup_id, rank, set_id, doc_idx);
+            }
             if (aggregator_consent != NULL && verifier_terms_prefix != NULL)
             {
                 size_t prefix_len = strlen(verifier_terms_prefix);
