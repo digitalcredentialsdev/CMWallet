@@ -169,6 +169,8 @@ MatchCredential(cJSON *credential, cJSON *credential_store)
         {
             cJSON *matched_credential = cJSON_CreateObject();
             cJSON_AddItemReferenceToObject(matched_credential, "id", cJSON_GetObjectItemCaseSensitive(candidate, "id"));
+            cJSON_AddItemReferenceToObject(matched_credential, "dedupId", cJSON_GetObjectItemCaseSensitive(candidate, "dedupId"));
+            cJSON_AddItemReferenceToObject(matched_credential, "rank", cJSON_GetObjectItemCaseSensitive(candidate, "rank"));
             cJSON_AddItemReferenceToObject(matched_credential, "title", cJSON_GetObjectItemCaseSensitive(candidate, "title"));
             cJSON_AddItemReferenceToObject(matched_credential, "subtitle", cJSON_GetObjectItemCaseSensitive(candidate, "subtitle"));
             cJSON_AddItemReferenceToObject(matched_credential, "verifier_terms_prefix", cJSON_GetObjectItemCaseSensitive(candidate, "verifier_terms_prefix"));
@@ -210,6 +212,8 @@ MatchCredential(cJSON *credential, cJSON *credential_store)
             {
                 cJSON *matched_credential = cJSON_CreateObject();
                 cJSON_AddItemReferenceToObject(matched_credential, "id", cJSON_GetObjectItemCaseSensitive(candidate, "id"));
+                cJSON_AddItemReferenceToObject(matched_credential, "dedupId", cJSON_GetObjectItemCaseSensitive(candidate, "dedupId"));
+                cJSON_AddItemReferenceToObject(matched_credential, "rank", cJSON_GetObjectItemCaseSensitive(candidate, "rank"));
                 cJSON_AddItemReferenceToObject(matched_credential, "title", cJSON_GetObjectItemCaseSensitive(candidate, "title"));
                 cJSON_AddItemReferenceToObject(matched_credential, "subtitle", cJSON_GetObjectItemCaseSensitive(candidate, "subtitle"));
                 cJSON_AddItemReferenceToObject(matched_credential, "verifier_terms_prefix", cJSON_GetObjectItemCaseSensitive(candidate, "verifier_terms_prefix"));
