@@ -410,19 +410,40 @@ cJSON *dcql_query(cJSON *query, cJSON *credential_store)
     }
 
     if (credential_sets == NULL) {
-        if (cJSON_GetArraySize(credentials) == cJSON_GetArraySize(candidate_matched_credentials)) {
-            cJSON* single_matched_credential_set = cJSON_CreateObject();
-            cJSON* matched_cred_ids = cJSON_CreateArray();
-            cJSON* matched_credential;
-            cJSON_ArrayForEach(matched_credential, credentials) {
-                cJSON_AddItemReferenceToArray(matched_cred_ids, cJSON_GetObjectItemCaseSensitive(matched_credential, "id"));
+        // Per DCQL, when no credential_sets are present every requested credential is
+        // required. Treat this as a single implicit set with one option listing all
+        // credential ids so that the same complete/partial match semantics as the
+        // explicit credential_sets branch below apply. Whether a partial match may
+        // actually be reported (FULL delegation, no user verification, wasm >= 7) is
+        // decided by the reporter, see report_option_combination() in openid4vp1_0.c.
+        cJSON* matched_cred_ids = cJSON_CreateArray();
+        cJSON* matched_indices = cJSON_CreateArray();
+        cJSON* requested_credential;
+        int cred_idx = 0;
+        cJSON_ArrayForEach(requested_credential, credentials) {
+            cJSON* cred_id = cJSON_GetObjectItemCaseSensitive(requested_credential, "id");
+            if (cJSON_GetObjectItemCaseSensitive(candidate_matched_credentials, cJSON_GetStringValue(cred_id)) != NULL) {
+                cJSON_AddItemReferenceToArray(matched_cred_ids, cred_id);
+                cJSON_AddItemToArray(matched_indices, cJSON_CreateNumber(cred_idx));
             }
+            ++cred_idx;
+        }
+        int option_length = cJSON_GetArraySize(credentials);
+        int matched_count = cJSON_GetArraySize(matched_cred_ids);
+        if (matched_count > 0) {
+            cJSON* single_matched_credential_set = cJSON_CreateObject();
             cJSON_AddItemReferenceToObject(single_matched_credential_set, "matched_credential_ids", matched_cred_ids);
+            cJSON_AddNumberToObject(single_matched_credential_set, "option_length", option_length);
+            cJSON_AddItemToObject(single_matched_credential_set, "matched_indices", matched_indices);
+            cJSON_AddBoolToObject(single_matched_credential_set, "is_partial", matched_count < option_length);
             cJSON* curr_matched_credential_sets = cJSON_CreateArray(); // For consistency with the credential_sets case
             cJSON_AddItemReferenceToArray(curr_matched_credential_sets, single_matched_credential_set);
             cJSON_AddItemReferenceToArray(matched_credential_sets, curr_matched_credential_sets);
             cJSON_AddItemReferenceToObject(match_result, "matched_credential_sets", matched_credential_sets);
             cJSON_AddItemReferenceToObject(match_result, "matched_credentials", candidate_matched_credentials);
+        } else {
+            cJSON_Delete(matched_cred_ids);
+            cJSON_Delete(matched_indices);
         }
         if (cJSON_GetArraySize(credentials) == cJSON_GetArraySize(candidate_inline_issuance_credentials)) {
             cJSON* inline_issuance_credential;
@@ -434,8 +455,13 @@ cJSON *dcql_query(cJSON *query, cJSON *credential_store)
         }
     } else {
         // TODO: support inline issuance
+        // Every option of every required set is kept, including options this provider holds
+        // no credential of ("vacant" options): another provider may satisfy such an option
+        // while this provider contributes entries to the other sets. The reporter decides per
+        // combination of options what, if anything, to report.
         cJSON* credential_set;
         int matched = 1;
+        int any_credential_matched = 0;
         int set_idx = 0;
         cJSON_ArrayForEach(credential_set, credential_sets) {
             if (cJSON_IsFalse(cJSON_GetObjectItemCaseSensitive(credential_set, "required"))) {
@@ -461,22 +487,20 @@ cJSON *dcql_query(cJSON *query, cJSON *credential_store)
                 int option_length = cJSON_GetArraySize(option);
                 int matched_count = cJSON_GetArraySize(matched_cred_ids);
                 if (matched_count > 0) {
-                    cJSON* cred_set_info = cJSON_CreateObject();
-                    char set_id_buffer[16];
-                    char option_id_buffer[16];
-                    sprintf(set_id_buffer, "%d", set_idx);
-                    sprintf(option_id_buffer, "%d", option_idx);
-                    cJSON_AddStringToObject(cred_set_info, "set_id", set_id_buffer);
-                    cJSON_AddStringToObject(cred_set_info, "option_id", option_id_buffer);
-                    cJSON_AddItemReferenceToObject(cred_set_info, "matched_credential_ids", matched_cred_ids);
-                    cJSON_AddNumberToObject(cred_set_info, "option_length", option_length);
-                    cJSON_AddItemToObject(cred_set_info, "matched_indices", matched_indices);
-                    cJSON_AddBoolToObject(cred_set_info, "is_partial", matched_count < option_length);
-                    cJSON_AddItemReferenceToArray(curr_matched_credential_sets, cred_set_info);
-                } else {
-                    cJSON_Delete(matched_cred_ids);
-                    cJSON_Delete(matched_indices);
+                    any_credential_matched = 1;
                 }
+                cJSON* cred_set_info = cJSON_CreateObject();
+                char set_id_buffer[16];
+                char option_id_buffer[16];
+                sprintf(set_id_buffer, "%d", set_idx);
+                sprintf(option_id_buffer, "%d", option_idx);
+                cJSON_AddStringToObject(cred_set_info, "set_id", set_id_buffer);
+                cJSON_AddStringToObject(cred_set_info, "option_id", option_id_buffer);
+                cJSON_AddItemReferenceToObject(cred_set_info, "matched_credential_ids", matched_cred_ids);
+                cJSON_AddNumberToObject(cred_set_info, "option_length", option_length);
+                cJSON_AddItemToObject(cred_set_info, "matched_indices", matched_indices);
+                cJSON_AddBoolToObject(cred_set_info, "is_partial", matched_count < option_length);
+                cJSON_AddItemReferenceToArray(curr_matched_credential_sets, cred_set_info);
                 ++option_idx;
             }
             if (cJSON_GetArraySize(curr_matched_credential_sets) == 0) {
@@ -487,7 +511,7 @@ cJSON *dcql_query(cJSON *query, cJSON *credential_store)
             }
             ++set_idx;
         }
-        if (matched != 0) {
+        if (matched != 0 && any_credential_matched) {
             cJSON_AddItemReferenceToObject(match_result, "matched_credential_sets", matched_credential_sets);
             cJSON_AddItemReferenceToObject(match_result, "matched_credentials", candidate_matched_credentials);
         }

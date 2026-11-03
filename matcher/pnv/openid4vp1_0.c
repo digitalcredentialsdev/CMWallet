@@ -31,23 +31,6 @@ cJSON *GetCredsJson()
     return cJSON_Parse(creds_json);
 }
 
-void report_credential_set_length(char* set_id, int curr_length, int curr_set_idx, cJSON *matched_credential_sets, int credential_sets_length) {
-    if (curr_set_idx == credential_sets_length) {
-        AddEntrySet(set_id, curr_length);
-    } else if (curr_set_idx < credential_sets_length) {
-        cJSON *matched_credential_set = cJSON_GetArrayItem(matched_credential_sets, curr_set_idx);
-        cJSON *matched_option;
-        cJSON_ArrayForEach(matched_option, matched_credential_set) {
-            int option_size = cJSON_HasObjectItem(matched_option, "option_length") ?
-                cJSON_GetObjectItem(matched_option, "option_length")->valueint :
-                cJSON_GetArraySize(cJSON_GetObjectItemCaseSensitive(matched_option, "matched_credential_ids"));
-            report_credential_set_length(set_id, option_size + curr_length, curr_set_idx + 1, matched_credential_sets, credential_sets_length);
-        }
-    } else {
-        printf("Unexpected curr_set_idx %d\n", curr_set_idx);
-    }
-}
-
 static int is_user_verification_requested(cJSON *data_json, cJSON *query, cJSON *matched_credential_id) {
     if (data_json != NULL) {
         cJSON *uv = cJSON_GetObjectItemCaseSensitive(data_json, "user_verification");
@@ -114,48 +97,42 @@ static int is_user_verification_requested(cJSON *data_json, cJSON *query, cJSON 
     return 0;
 }
 
-static int is_option_suppressed(cJSON *matched_option, cJSON *data_json, cJSON *query, uint32_t wasm_version, cJSON *matched_docs) {
-    int is_partial = cJSON_HasObjectItem(matched_option, "is_partial") &&
-        cJSON_IsTrue(cJSON_GetObjectItem(matched_option, "is_partial"));
-    if (!is_partial) {
+// Effective delegation type of a matched registry credential: FULL only if the runtime supports
+// delegation (wasm >= 7), the credential was registered with delegation_type FULL (1) and the
+// verifier did not request user verification (which forces the provider UI).
+static int is_entry_fully_delegated(cJSON *c, uint32_t wasm_version, cJSON *data_json, cJSON *query, cJSON *matched_credential_id) {
+    if (wasm_version < 7) {
         return 0;
     }
-    // Partial matches must be suppressed if delegation is not supported (< v7),
-    // or if user verification is requested (delegation type would be NONE),
-    // or if any matched candidate's delegation type is not FULL (1).
-    if (wasm_version < 7) {
-        return 1;
+    cJSON *del_type_item = cJSON_GetObjectItemCaseSensitive(c, "delegation_type");
+    int entry_del_type = (del_type_item != NULL && cJSON_IsNumber(del_type_item)) ? del_type_item->valueint : 0;
+    if (entry_del_type != 1) {
+        return 0;
     }
-    cJSON *matched_cred_ids = cJSON_GetObjectItemCaseSensitive(matched_option, "matched_credential_ids");
-    cJSON *matched_cred_id;
-    cJSON_ArrayForEach(matched_cred_id, matched_cred_ids) {
-        if (is_user_verification_requested(data_json, query, matched_cred_id)) {
-            return 1;
+    return !is_user_verification_requested(data_json, query, matched_credential_id);
+}
+
+// Returns 1 if the option contributes at least one entry to an entry set, given whether only
+// fully delegated entries may be reported.
+static int option_has_reportable_entry(cJSON *matched_option, cJSON *matched_docs, int only_fully_delegated, uint32_t wasm_version, cJSON *data_json, cJSON *query) {
+    cJSON *matched_credential_ids = cJSON_GetObjectItemCaseSensitive(matched_option, "matched_credential_ids");
+    cJSON *matched_credential_id;
+    cJSON_ArrayForEach(matched_credential_id, matched_credential_ids) {
+        cJSON *matched_doc = cJSON_GetObjectItemCaseSensitive(matched_docs, cJSON_GetStringValue(matched_credential_id));
+        if (matched_doc == NULL) {
+            continue;
         }
-        if (matched_docs != NULL) {
-            const char *id_str = cJSON_GetStringValue(matched_cred_id);
-            cJSON *matched_doc = cJSON_GetObjectItemCaseSensitive(matched_docs, id_str);
-            if (matched_doc == NULL) {
+        cJSON *c;
+        cJSON_ArrayForEach(c, cJSON_GetObjectItem(matched_doc, "matched")) {
+            if (!only_fully_delegated || is_entry_fully_delegated(c, wasm_version, data_json, query, matched_credential_id)) {
                 return 1;
-            }
-            cJSON *matched = cJSON_GetObjectItem(matched_doc, "matched");
-            if (matched == NULL || cJSON_GetArraySize(matched) == 0) {
-                return 1;
-            }
-            cJSON *c;
-            cJSON_ArrayForEach(c, matched) {
-                cJSON *del_type = cJSON_GetObjectItemCaseSensitive(c, "delegation_type");
-                int val = (del_type != NULL && cJSON_IsNumber(del_type)) ? del_type->valueint : 0;
-                if (val != 1) {
-                    return 1;
-                }
             }
         }
     }
     return 0;
 }
 
-void report_matched_credential(uint32_t wasm_version, cJSON* matched_doc, cJSON* matched_credential_id, int doc_idx, int request_id, char* set_id, char* dcql_set_idx, char* dcql_option_idx, char *creds_blob, cJSON* transaction_credential_ids, char* merchant_name, char* transaction_amount, char* additional_info, int is_partial, cJSON *data_json, cJSON *query) {
+void report_matched_credential(uint32_t wasm_version, cJSON* matched_doc, cJSON* matched_credential_id, int doc_idx, int request_id, char* set_id, char* dcql_set_idx, char* dcql_option_idx, char *creds_blob, cJSON* transaction_credential_ids, char* merchant_name, char* transaction_amount, char* additional_info, int only_fully_delegated, cJSON *data_json, cJSON *query) {
     if (matched_doc == NULL) {
         return;
     }
@@ -164,8 +141,15 @@ void report_matched_credential(uint32_t wasm_version, cJSON* matched_doc, cJSON*
     cJSON_ArrayForEach(c, matched_credential)
     {
         printf("cred %s\n", cJSON_Print(c));
-        cJSON *metadata_object = cJSON_CreateObject();
         char *matched_id = cJSON_GetStringValue(cJSON_GetObjectItem(c, "id"));
+        int fully_delegated = is_entry_fully_delegated(c, wasm_version, data_json, query, matched_credential_id);
+        if (only_fully_delegated && !fully_delegated) {
+            // The entry set is partial: this entry could only be fulfilled through our own UI,
+            // which Credential Manager cannot combine with other providers' entries.
+            printf("Skipping entry %s: not fully delegated and the entry set is partial\n", matched_id);
+            continue;
+        }
+        cJSON *metadata_object = cJSON_CreateObject();
 
         cJSON_AddItemReferenceToObject(metadata_object, "claims", cJSON_GetObjectItem(c, "matched_claim_metadata"));
         cJSON_AddItemReferenceToObject(metadata_object, "dc_request_index", cJSON_CreateNumber(request_id));
@@ -243,11 +227,7 @@ void report_matched_credential(uint32_t wasm_version, cJSON* matched_doc, cJSON*
 
             printf("Adding entry with id: %s\n", matched_id);
             AddEntryToSet(matched_id, creds_blob + icon_start_int, icon_len, title, subtitle, disclaimer, NULL, metadata, set_id, doc_idx);
-            cJSON *del_type_item = cJSON_GetObjectItemCaseSensitive(c, "delegation_type");
-            int entry_del_type = (del_type_item != NULL && cJSON_IsNumber(del_type_item)) ? del_type_item->valueint : 0;
-            int uv_requested = is_user_verification_requested(data_json, query, matched_credential_id);
-            int effective_del_type = uv_requested ? 0 : entry_del_type;
-            if (wasm_version >= 7 && effective_del_type == 1) {
+            if (fully_delegated) {
                 SetDelegationTypeForEntryInSet(matched_id, 1, set_id, doc_idx);
             }
             char *dedup_id = cJSON_GetStringValue(cJSON_GetObjectItem(c, "dedupId"));
@@ -281,34 +261,98 @@ void report_matched_credential(uint32_t wasm_version, cJSON* matched_doc, cJSON*
     }
 }
 
-void report_matched_credential_set(char* set_id, int curr_set_idx, cJSON *matched_credential_sets, int curr_doc_idx, int credential_sets_length, uint32_t wasm_version, cJSON* matched_docs, int request_id, char *creds_blob, cJSON* transaction_credential_ids, char* merchant_name, char* transaction_amount, char* additional_info, cJSON *data_json, cJSON *query) {
-    if (curr_set_idx < credential_sets_length) {
-        cJSON *matched_credential_set = cJSON_GetArrayItem(matched_credential_sets, curr_set_idx);
-        cJSON *matched_option;
-        cJSON_ArrayForEach(matched_option, matched_credential_set) {
-            cJSON *curr_matched_credential_ids = cJSON_GetObjectItemCaseSensitive(matched_option, "matched_credential_ids");
-            char *dcql_set_idx = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(matched_option, "set_id")); // TODO
-            char *dcql_option_idx = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(matched_option, "option_id"));
-            int is_partial = cJSON_HasObjectItem(matched_option, "is_partial") &&
-                cJSON_IsTrue(cJSON_GetObjectItem(matched_option, "is_partial"));
-            cJSON *matched_indices = cJSON_GetObjectItem(matched_option, "matched_indices");
-            cJSON *matched_doc;
-            cJSON *matched_credential_id;
-            int k = 0;
-            cJSON_ArrayForEach(matched_credential_id, curr_matched_credential_ids)
-            {
-                int doc_idx = curr_doc_idx + (matched_indices ? cJSON_GetArrayItem(matched_indices, k)->valueint : k);
-                printf("matched_credential_id %s\n", cJSON_GetStringValue(matched_credential_id));
-                matched_doc = cJSON_GetObjectItemCaseSensitive(matched_docs, cJSON_GetStringValue(matched_credential_id));
-                report_matched_credential(wasm_version, matched_doc, matched_credential_id, doc_idx, request_id, set_id, dcql_set_idx, dcql_option_idx, creds_blob, transaction_credential_ids, merchant_name, transaction_amount, additional_info, is_partial, data_json, query);
-                ++k;
-            }
+#define MAX_CREDENTIAL_SETS 16
 
-            int option_length = cJSON_HasObjectItem(matched_option, "option_length") ?
-                cJSON_GetObjectItem(matched_option, "option_length")->valueint : cJSON_GetArraySize(curr_matched_credential_ids);
-            int new_doc_idx = curr_doc_idx + option_length;
-            report_matched_credential_set(set_id, curr_set_idx + 1, matched_credential_sets, new_doc_idx, credential_sets_length, wasm_version, matched_docs, request_id, creds_blob, transaction_credential_ids, merchant_name, transaction_amount, additional_info, data_json, query);
+static int get_option_length(cJSON *matched_option) {
+    return cJSON_HasObjectItem(matched_option, "option_length") ?
+        cJSON_GetObjectItem(matched_option, "option_length")->valueint :
+        cJSON_GetArraySize(cJSON_GetObjectItemCaseSensitive(matched_option, "matched_credential_ids"));
+}
+
+// Reports one combination of options (one option per matched credential set) as a single entry
+// set. The set is declared with the sum of the verifier's option lengths and every credential is
+// placed at its requested index, so that a partial match leaves gaps for other providers.
+//
+// If this provider matched every credential of the combination, the entry set is complete and all
+// entries are reported, regardless of delegation type. Otherwise only fully delegated entries are
+// reported: the missing slots can only be filled by other providers, which Credential Manager does
+// exclusively for fully delegated entries, so this provider's non-delegated entries (which would
+// need its own UI) could never be combined with them. If nothing remains, the entry set is not
+// declared at all.
+static void report_option_combination(int request_id, cJSON **selected_options, int num_sets, uint32_t wasm_version, cJSON *matched_docs, char *creds_blob, cJSON *transaction_credential_ids, char *merchant_name, char *transaction_amount, char *additional_info, cJSON *data_json, cJSON *query) {
+    char set_id_buffer[256];
+    int pos = snprintf(set_id_buffer, sizeof(set_id_buffer), "req:%d", request_id);
+    int has_explicit_set = 0;
+    int is_partial = 0;
+    int total_length = 0;
+    for (int s = 0; s < num_sets; ++s) {
+        cJSON *matched_option = selected_options[s];
+        if (cJSON_HasObjectItem(matched_option, "set_id")) {
+            has_explicit_set = 1;
+            pos += snprintf(set_id_buffer + pos, sizeof(set_id_buffer) - pos, ";set:%s;option:%s",
+                cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(matched_option, "set_id")),
+                cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(matched_option, "option_id")));
+            if (pos >= (int)sizeof(set_id_buffer)) {
+                printf("Credential set id too long, skipping combination\n");
+                return;
+            }
         }
+        if (cJSON_IsTrue(cJSON_GetObjectItem(matched_option, "is_partial"))) {
+            is_partial = 1;
+        }
+        total_length += get_option_length(matched_option);
+    }
+    if (!has_explicit_set) { // No credential_sets present in dcql
+        snprintf(set_id_buffer + pos, sizeof(set_id_buffer) - pos, ";null");
+    }
+
+    int only_fully_delegated = is_partial;
+    int reportable = 0;
+    for (int s = 0; s < num_sets && !reportable; ++s) {
+        reportable = option_has_reportable_entry(selected_options[s], matched_docs, only_fully_delegated, wasm_version, data_json, query);
+    }
+    if (!reportable) {
+        printf("Skipping partial entry set %s: no fully delegated entries\n", set_id_buffer);
+        return;
+    }
+
+    if (wasm_version > 1) { // Report set length
+        AddEntrySet(set_id_buffer, total_length);
+    }
+
+    int option_offset = 0;
+    for (int s = 0; s < num_sets; ++s) {
+        cJSON *matched_option = selected_options[s];
+        cJSON *matched_credential_ids = cJSON_GetObjectItemCaseSensitive(matched_option, "matched_credential_ids");
+        cJSON *matched_indices = cJSON_GetObjectItem(matched_option, "matched_indices");
+        char *dcql_set_idx = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(matched_option, "set_id"));
+        char *dcql_option_idx = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(matched_option, "option_id"));
+        cJSON *matched_credential_id;
+        int k = 0;
+        cJSON_ArrayForEach(matched_credential_id, matched_credential_ids)
+        {
+            int doc_idx = option_offset + (matched_indices ? cJSON_GetArrayItem(matched_indices, k)->valueint : k);
+            printf("matched_credential_id %s\n", cJSON_GetStringValue(matched_credential_id));
+            cJSON *matched_doc = cJSON_GetObjectItemCaseSensitive(matched_docs, cJSON_GetStringValue(matched_credential_id));
+            report_matched_credential(wasm_version, matched_doc, matched_credential_id, doc_idx, request_id, set_id_buffer, dcql_set_idx, dcql_option_idx, creds_blob, transaction_credential_ids, merchant_name, transaction_amount, additional_info, only_fully_delegated, data_json, query);
+            ++k;
+        }
+        option_offset += get_option_length(matched_option);
+    }
+}
+
+// Enumerates the Cartesian product of the matched options across all credential sets and reports
+// each combination as its own entry set.
+static void report_option_combinations(int request_id, cJSON *matched_credential_sets, int num_sets, int set_idx, cJSON **selected_options, uint32_t wasm_version, cJSON *matched_docs, char *creds_blob, cJSON *transaction_credential_ids, char *merchant_name, char *transaction_amount, char *additional_info, cJSON *data_json, cJSON *query) {
+    if (set_idx == num_sets) {
+        report_option_combination(request_id, selected_options, num_sets, wasm_version, matched_docs, creds_blob, transaction_credential_ids, merchant_name, transaction_amount, additional_info, data_json, query);
+        return;
+    }
+    cJSON *matched_credential_set = cJSON_GetArrayItem(matched_credential_sets, set_idx);
+    cJSON *matched_option;
+    cJSON_ArrayForEach(matched_option, matched_credential_set) {
+        selected_options[set_idx] = matched_option;
+        report_option_combinations(request_id, matched_credential_sets, num_sets, set_idx + 1, selected_options, wasm_version, matched_docs, creds_blob, transaction_credential_ids, merchant_name, transaction_amount, additional_info, data_json, query);
     }
 }
 
@@ -450,86 +494,12 @@ int openid_main()
             // printf("matched_creds %d\n", cJSON_GetArraySize(matched_creds));
             //            printf("matched_creds %s\n", cJSON_Print(cJSON_GetArrayItem(matched_creds,0)));
 
-            cJSON *filtered_credential_sets = NULL;
-            if (matched_credential_sets != NULL) {
-                filtered_credential_sets = cJSON_CreateArray();
-                int all_sets_matched = 1;
-                cJSON *matched_credential_set;
-                cJSON_ArrayForEach(matched_credential_set, matched_credential_sets) {
-                    cJSON *filtered_set = cJSON_CreateArray();
-                    cJSON *matched_option;
-                    cJSON_ArrayForEach(matched_option, matched_credential_set) {
-                        if (!is_option_suppressed(matched_option, data_json, query, wasm_version, matched_docs)) {
-                            cJSON_AddItemReferenceToArray(filtered_set, matched_option);
-                        }
-                    }
-                    if (cJSON_GetArraySize(filtered_set) == 0) {
-                        all_sets_matched = 0;
-                        cJSON_Delete(filtered_set);
-                        break;
-                    }
-                    cJSON_AddItemToArray(filtered_credential_sets, filtered_set);
-                }
-                if (!all_sets_matched) {
-                    cJSON_Delete(filtered_credential_sets);
-                    filtered_credential_sets = NULL;
-                }
-            }
-
-            int matched_credential_sets_size = cJSON_GetArraySize(filtered_credential_sets);
-            if (matched_credential_sets_size > 0) { // Some credential(s) matched
-                cJSON *first_matched_credential_set = cJSON_GetArrayItem(filtered_credential_sets, 0);
-                cJSON *matched_option;
-                cJSON_ArrayForEach(matched_option, first_matched_credential_set) {
-                    cJSON *matched_credential_ids = cJSON_GetObjectItemCaseSensitive(matched_option, "matched_credential_ids");
-                    int credential_set_size = cJSON_GetArraySize(matched_credential_ids);
-                    int option_length = cJSON_HasObjectItem(matched_option, "option_length") ?
-                        cJSON_GetObjectItem(matched_option, "option_length")->valueint : credential_set_size;
-                    int is_partial = cJSON_HasObjectItem(matched_option, "is_partial") &&
-                        cJSON_IsTrue(cJSON_GetObjectItem(matched_option, "is_partial"));
-                    cJSON *matched_indices = cJSON_GetObjectItem(matched_option, "matched_indices");
-                    char set_id_buffer[64];
-                    
-                    if (cJSON_HasObjectItem(matched_option, "set_id")) {
-                        char *set_idx = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(matched_option, "set_id"));
-                        char *option_idx = cJSON_GetStringValue(cJSON_GetObjectItemCaseSensitive(matched_option, "option_id"));
-                        int chars_written = sprintf(set_id_buffer, "req:%d;set:%s;option:%s", i, set_idx, option_idx);
-                        if (wasm_version > 1) { // Report set length
-                            report_credential_set_length(set_id_buffer, option_length, 1, filtered_credential_sets, matched_credential_sets_size);
-                        }
-                        cJSON *matched_doc;
-                        cJSON *matched_credential_id;
-                        int k = 0;
-                        cJSON_ArrayForEach(matched_credential_id, matched_credential_ids)
-                        {
-                            int doc_idx = matched_indices ? cJSON_GetArrayItem(matched_indices, k)->valueint : k;
-                            printf("matched_credential_id %s\n", cJSON_GetStringValue(matched_credential_id));
-                            matched_doc = cJSON_GetObjectItemCaseSensitive(matched_docs, cJSON_GetStringValue(matched_credential_id));
-                            report_matched_credential(wasm_version, matched_doc, matched_credential_id, doc_idx, i, set_id_buffer, set_idx, option_idx, creds_blob, transaction_credential_ids, merchant_name, transaction_amount, additional_info, is_partial, data_json, query);
-                            ++k;
-                        }
-                        report_matched_credential_set(set_id_buffer, 1, filtered_credential_sets, option_length, matched_credential_sets_size, wasm_version, matched_docs, i, creds_blob, transaction_credential_ids, merchant_name, transaction_amount, additional_info, data_json, query);
-                    } else { // No credential_sets present in dcql
-                        int chars_written = sprintf(set_id_buffer, "req:%d;null", i);
-                        if (wasm_version > 1) { // Report set length
-                            AddEntrySet(set_id_buffer, credential_set_size);
-                        }
-
-                        cJSON *matched_doc;
-                        cJSON *matched_credential_id;
-                        int doc_idx = 0;
-                        cJSON_ArrayForEach(matched_credential_id, matched_credential_ids)
-                        {
-                            printf("matched_credential_id %s\n", cJSON_GetStringValue(matched_credential_id));
-                            matched_doc = cJSON_GetObjectItemCaseSensitive(matched_docs, cJSON_GetStringValue(matched_credential_id));
-                            report_matched_credential(wasm_version, matched_doc, matched_credential_id, doc_idx, i, set_id_buffer, NULL, NULL, creds_blob, transaction_credential_ids, merchant_name, transaction_amount, additional_info, 0, data_json, query);
-                            ++doc_idx;
-                        }
-                    }
-                }
-            }
-            if (filtered_credential_sets != NULL) {
-                cJSON_Delete(filtered_credential_sets);
+            int num_sets = cJSON_GetArraySize(matched_credential_sets);
+            if (num_sets > MAX_CREDENTIAL_SETS) {
+                printf("Too many credential sets (%d), skipping request\n", num_sets);
+            } else if (num_sets > 0) { // Some credential(s) matched
+                cJSON *selected_options[MAX_CREDENTIAL_SETS];
+                report_option_combinations(i, matched_credential_sets, num_sets, 0, selected_options, wasm_version, matched_docs, creds_blob, transaction_credential_ids, merchant_name, transaction_amount, additional_info, data_json, query);
             }
         }
     }
